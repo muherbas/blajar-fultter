@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const MenuUtamaPage(), // Langsung buka menu utama tanpa splash eksternal
+      home: const MenuUtamaPage(),
     );
   }
 }
@@ -58,7 +58,7 @@ class MenuUtamaPage extends StatelessWidget {
               },
             ),
             
-            const SizedBox(height: 20), // Jarak antar tombol
+            const SizedBox(height: 20),
             
             // Tombol 2: Untuk membuka Radar Chart
             ElevatedButton.icon(
@@ -210,7 +210,7 @@ class _RadarChartPageState extends State<RadarChartPage> {
                     dataSource: _dataFisik,
                     xValueMapper: (DataRadar data, _) => data.jenisLatihan,
                     yValueMapper: (DataRadar data, _) => data.nilaiSiswaA,
-                    drawType: PolarAreaType.filledRadar,
+                    drawType: PolarAreaType.filledRadar, // Sudah fix pakai TITIK (.)
                     color: Colors.red.withOpacity(0.2),
                     borderColor: Colors.red,
                     borderWidth: 2,
@@ -221,7 +221,7 @@ class _RadarChartPageState extends State<RadarChartPage> {
                     dataSource: _dataFisik,
                     xValueMapper: (DataRadar data, _) => data.jenisLatihan,
                     yValueMapper: (DataRadar data, _) => data.nilaiSiswaB,
-                    drawType: PolarAreaType.filledRadar,
+                    drawType: PolarAreaType.filledRadar, // Sudah fix pakai TITIK (.)
                     color: Colors.green.withOpacity(0.2),
                     borderColor: Colors.green,
                     borderWidth: 2,
@@ -232,7 +232,7 @@ class _RadarChartPageState extends State<RadarChartPage> {
                     dataSource: _dataFisik,
                     xValueMapper: (DataRadar data, _) => data.jenisLatihan,
                     yValueMapper: (DataRadar data, _) => data.nilaiSiswaC,
-                    drawType: PolarAreaType.filledRadar,
+                    drawType: PolarAreaType.filledRadar, // Sudah fix pakai TITIK (.)
                     color: Colors.blue.withOpacity(0.2),
                     borderColor: Colors.blue,
                     borderWidth: 2,
