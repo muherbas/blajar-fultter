@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart' as sf; // Untuk Boxplot
-import 'radar_chart.dart'; // <--- IMPORT FILE KUSTOM LOKAL KITA, BOS!
+import 'radar_chart.dart'; // <--- INI DIA! Import lokal, bukan pakai 'package:flutter_radar_chart/...'
 
 void main() {
   runApp(const MyApp());
@@ -61,7 +61,7 @@ class MenuUtamaPage extends StatelessWidget {
             
             const SizedBox(height: 20),
             
-            // Tombol 2: Radar Chart Asli Lokal
+            // Tombol 2: Radar Chart Jaring Laba-Laba Lokal
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -201,7 +201,7 @@ class RadarChartPage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             
-            // Menampilkan RadarChart yang diambil langsung dari radar_chart.dart
+            // Menampilkan RadarChart yang diambil langsung dari radar_chart.dart lokal
             Expanded(
               child: RadarChart(
                 ticks: penandaNilai,
