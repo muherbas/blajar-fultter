@@ -60,14 +60,14 @@ class MenuUtamaPage extends StatelessWidget {
             
             const SizedBox(height: 20),
             
-            // Tombol 2: Radar Chart
+            // Tombol 2: Radar Chart (Sudah Diperbaiki Ikonnya)
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 backgroundColor: Colors.teal,
                 foregroundColor: Colors.white,
               ),
-              icon: const Icon(Icons.pie_chart_outlined),
+              icon: const Icon(Icons.pie_chart_outline), // <-- Koreksi di sini: outline, bukan outlined
               label: const Text('Lihat Grafik Radar', style: TextStyle(fontSize: 18)),
               onPressed: () {
                 Navigator.push(
@@ -154,7 +154,7 @@ class _BoxPlotPageState extends State<BoxPlotPage> {
 }
 
 // ==========================================================
-// HALAMAN GRAFIK RADAR (MENGGUNAKAN LINE/SPlINE MAKSIMAL AMAN)
+// HALAMAN GRAFIK RADAR (LINE SERI AMAN)
 // ==========================================================
 class RadarChartPage extends StatefulWidget {
   const RadarChartPage({super.key});
@@ -191,14 +191,12 @@ class _RadarChartPageState extends State<RadarChartPage> {
         child: Column(
           children: [
             Expanded(
-              // Diubah ke SfCartesianChart agar 100% lolos build di semua versi Syncfusion
               child: SfCartesianChart(
                 title: const ChartTitle(text: 'Perbandingan Biomotorik Siswa'),
                 legend: const Legend(isVisible: true, position: LegendPosition.bottom),
                 primaryXAxis: const CategoryAxis(),
                 primaryYAxis: const NumericAxis(minimum: 0, maximum: 100, interval: 20),
                 series: <CartesianSeries<DataRadar, String>>[
-                  // Grafik Baris Siswa A
                   LineSeries<DataRadar, String>(
                     name: 'Siswa A',
                     dataSource: _dataFisik,
@@ -207,7 +205,6 @@ class _RadarChartPageState extends State<RadarChartPage> {
                     markerSettings: const MarkerSettings(isVisible: true),
                     color: Colors.red,
                   ),
-                  // Grafik Baris Siswa B
                   LineSeries<DataRadar, String>(
                     name: 'Siswa B',
                     dataSource: _dataFisik,
@@ -216,7 +213,6 @@ class _RadarChartPageState extends State<RadarChartPage> {
                     markerSettings: const MarkerSettings(isVisible: true),
                     color: Colors.green,
                   ),
-                  // Grafik Baris Siswa C
                   LineSeries<DataRadar, String>(
                     name: 'Siswa C',
                     dataSource: _dataFisik,
