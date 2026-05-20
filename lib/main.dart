@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
-// Memanggil berkas overlay yang sudah kita pisah
-import 'splash_overlay.dart';
-
 void main() {
   runApp(const MyApp());
 }
@@ -19,9 +16,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const MemuatHalaman(
-        halamanTujuan: MenuUtamaPage(),
-      ),
+      home: const MenuUtamaPage(), // Langsung buka menu utama tanpa splash eksternal
     );
   }
 }
@@ -57,10 +52,7 @@ class MenuUtamaPage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const MemuatHalaman(
-                      halamanTujuan: BoxPlotPage(),
-                      pesanLoading: 'Menyiapkan Grafik Boxplot...',
-                    ),
+                    builder: (context) => const BoxPlotPage(),
                   ),
                 );
               },
@@ -81,10 +73,7 @@ class MenuUtamaPage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const MemuatHalaman(
-                      halamanTujuan: RadarChartPage(),
-                      pesanLoading: 'Menghitung Jaring Radar...',
-                    ),
+                    builder: (context) => const RadarChartPage(),
                   ),
                 );
               },
@@ -153,15 +142,7 @@ class _BoxPlotPageState extends State<BoxPlotPage> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const MemuatHalaman(
-                      halamanTujuan: MenuUtamaPage(),
-                      pesanLoading: 'Kembali ke Dashboard...',
-                    ),
-                  ),
-                );
+                Navigator.pop(context);
               },
               child: const Text('Kembali ke Menu Utama'),
             ),
@@ -262,15 +243,7 @@ class _RadarChartPageState extends State<RadarChartPage> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const MemuatHalaman(
-                      halamanTujuan: MenuUtamaPage(),
-                      pesanLoading: 'Kembali ke Dashboard...',
-                    ),
-                  ),
-                );
+                Navigator.pop(context);
               },
               child: const Text('Kembali ke Menu Utama'),
             ),
@@ -282,7 +255,7 @@ class _RadarChartPageState extends State<RadarChartPage> {
 }
 
 // ==========================================================
-// MODEL DATA CLASSE
+// MODEL DATA
 // ==========================================================
 class DataKategori {
   DataKategori(this.namaKelas, this.kumpulanNilai);
