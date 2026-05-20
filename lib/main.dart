@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/charts.dart' as sf; // Tetap simpan untuk Boxplot Anda
-import 'package:flutter_radar_chart/flutter_radar_chart.dart'; // <--- Library asli bawaan project Anda!
+import 'package:syncfusion_flutter_charts/charts.dart' as sf; // Untuk halaman Boxplot
+import 'package:flutter_radar_chart/flutter_radar_chart.dart'; // <--- Library Radar Asli Anda
 
 void main() {
   runApp(const MyApp());
@@ -61,7 +61,7 @@ class MenuUtamaPage extends StatelessWidget {
             
             const SizedBox(height: 20),
             
-            // Tombol 2: Radar Chart Asli (Jaring Laba-Laba)
+            // Tombol 2: Radar Chart Jaring Laba-Laba
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -128,7 +128,7 @@ class _BoxPlotPageState extends State<BoxPlotPage> {
                 primaryXAxis: const sf.CategoryAxis(majorGridLines: sf.MajorGridLines(width: 0)),
                 primaryYAxis: const sf.NumericAxis(minimum: 0, maximum: 100, interval: 10),
                 series: <sf.BoxAndWhiskerSeries<DataKategori, String>>[
-                  sf.BoxAndWhiskerSeries<DataKategori, String>(
+                  sf.SfBoxAndWhiskerSeries<DataKategori, String>(
                     name: 'Rentang Nilai',
                     dataSource: _dataNilai,
                     xValueMapper: (DataKategori data, _) => data.namaKelas,
@@ -162,13 +162,13 @@ class RadarChartPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Definisikan label di setiap sudut jaring (Features)
+    // 1. Label di setiap sudut jaring laba-laba
     const namaLatihan = ['Push Up', 'Sit Up', 'Back Up', 'Pull Up', 'Squat'];
 
-    // 2. Garis penanda nilai dari dalam ke luar (Ticks)
+    // 2. Garis penanda nilai dari dalam ke luar
     const penandaNilai = [20, 40, 60, 80, 100];
 
-    // 3. Data nilai fisik Siswa A, Siswa B, dan Siswa C
+    // 3. Data nilai fisik Siswa A, Siswa B, dan Siswa C (tipe num)
     const dataFisikSiswa = [
       [80, 70, 85, 60, 90], // Nilai Siswa A
       [60, 85, 70, 75, 65], // Nilai Siswa B
@@ -188,7 +188,7 @@ class RadarChartPage extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            // Legenda Manual biar gampang dibaca
+            // Indikator Legenda Manual
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -201,7 +201,7 @@ class RadarChartPage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             
-            // Tampilkan RadarChart asli bawaan library Anda
+            // Menampilkan RadarChart bawaan asli library Anda
             Expanded(
               child: RadarChart(
                 ticks: penandaNilai,
@@ -228,7 +228,6 @@ class RadarChartPage extends StatelessWidget {
     );
   }
 
-  // Widget pembantu untuk membuat kotak warna legenda
   Widget _buildIndicator(Color color, String text) {
     return Row(
       children: [
