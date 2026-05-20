@@ -26,14 +26,12 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
-      # Membuat hasil build web dengan nama repositori yang benar
+      # Di sini tanda kutipnya sudah dirapikan dan ditambahkan renderer html langsung
       - name: Build Web
-        run: flutter build web --release --base-href "/blajar-fultter/ --web-renderer html
+        run: flutter build web --release --base-href "/blajar-fultter/" --web-renderer html
 
-
-      # TRICK: Mengirim hasil build langsung ke branch gh-pages
       - name: Deploy ke Branch gh-pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: build/web
-          branch: gh-pages # Hasil web ditaruh di sini
+          branch: gh-pages
