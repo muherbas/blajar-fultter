@@ -65,6 +65,32 @@ class MenuUtamaPage extends StatelessWidget {
                 ),
               );
             },
+          const SizedBox(height: 20), // Jarak antar tombol
+          
+          // Tombol 2: Untuk membuka Radar Chart
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              backgroundColor: Colors.teal,
+              foregroundColor: Colors.white,
+            ),
+            icon: const Icon(Icons.pie_chart_outlined),
+            label: const Text('Lihat Grafik Radar', style: TextStyle(fontSize: 18)),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MemuatHalaman(
+                    halamanTujuan: RadarChartPage(),
+                    pesanLoading: 'Menghitung Jaring Radar...',
+                  ),
+                ),
+              );
+            },
+          ),
+        ], // Penutup children milik Column
+      ), // Penutup Column
+    ), // Penutup Center
           ),
           
           const SizedBox(height: 20), // Jarak aman antar tombol biar tidak nempel
