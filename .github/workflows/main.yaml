@@ -28,7 +28,8 @@ jobs:
 
       # Membuat hasil build web dengan nama repositori yang benar
       - name: Build Web
-        run: flutter build web --release --base-href "/blajar-fultter/"
+        run: flutter build web --release --base-href "/blajar-fultter/ --web-renderer html
+
 
       # TRICK: Mengirim hasil build langsung ke branch gh-pages
       - name: Deploy ke Branch gh-pages
