@@ -12,6 +12,7 @@ dependencies:
   # Menambahkan package pembuat grafik
   syncfusion_flutter_charts: ^24.2.7
   syncfusion_flutter_gauges: ^24.2.7
+  fl_chart: ^0.66.0
 
 
 dev_dependencies:
