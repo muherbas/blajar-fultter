@@ -8,7 +8,7 @@ const RESOURCES = {"assets/shaders/ink_sparkle.frag": "ecc85a2e95f5e9f53123dcaf8
 "assets/AssetManifest.bin": "0b0a3415aad49b6e9bf965ff578614f9",
 "assets/FontManifest.json": "7b2a36307916a9721811788013e65289",
 "assets/AssetManifest.bin.json": "a1fee2517bf598633e2f67fcf3e26c94",
-"assets/NOTICES": "e4e7cdcab44c927e291b6b32355f84be",
+"assets/NOTICES": "7d50bc24485b79a786b30be4a3b73069",
 "assets/AssetManifest.json": "99914b932bd37a50b983c5e7c90ae93b",
 "version.json": "0ccd26c65c399b3012057aee44bc6116",
 "index.html": "66c9212ef6a7a2933e280bc6e401173b",
