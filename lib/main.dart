@@ -12,7 +12,7 @@ class AplikasiBoxplot extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Grafik Boxplot',
+      title: 'Grafik Boxplot!',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: const HalamanBoxplot(),
     );
