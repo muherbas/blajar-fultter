@@ -210,12 +210,11 @@ class _RadarChartPageState extends State<RadarChartPage> {
         child: Column(
           children: [
             Expanded(
-              // Menggunakan SfPolarChart agar jaring laba-laba terbaca di library Syncfusion
               child: SfPolarChart(
                 title: const ChartTitle(text: 'Perbandingan Biomotorik Siswa'),
                 legend: const Legend(isVisible: true, position: LegendPosition.bottom),
                 primaryXAxis: const CategoryAxis(
-                  gridLineType: GridLineType.polygon, // Membuat garis jaring berbentuk segi lima
+                  gridLineType: GridLineType.polygon,
                 ),
                 primaryYAxis: const NumericAxis(
                   minimum: 0,
@@ -224,35 +223,35 @@ class _RadarChartPageState extends State<RadarChartPage> {
                   gridLineType: GridLineType.polygon,
                 ),
                 series: <PolarSeries<DataRadar, String>>[
-                  // Jaring Siswa A
+                  // Jaring Data Siswa A
                   PolarSeries<DataRadar, String>(
                     name: 'Siswa A',
                     dataSource: _dataFisik,
                     xValueMapper: (DataRadar data, _) => data.jenisLatihan,
                     yValueMapper: (DataRadar data, _) => data.nilaiSiswaA,
-                    drawType: PolarAreaType_filledRadar,
+                    drawType: PolarAreaType.filledRadar,
                     color: Colors.red.withOpacity(0.2),
                     borderColor: Colors.red,
                     borderWidth: 2,
                   ),
-                  // Jaring Siswa B
+                  // Jaring Data Siswa B
                   PolarSeries<DataRadar, String>(
                     name: 'Siswa B',
                     dataSource: _dataFisik,
                     xValueMapper: (DataRadar data, _) => data.jenisLatihan,
                     yValueMapper: (DataRadar data, _) => data.nilaiSiswaB,
-                    drawType: PolarAreaType_filledRadar,
+                    drawType: PolarAreaType.filledRadar,
                     color: Colors.green.withOpacity(0.2),
                     borderColor: Colors.green,
                     borderWidth: 2,
                   ),
-                  // Jaring Siswa C
+                  // Jaring Data Siswa C
                   PolarSeries<DataRadar, String>(
                     name: 'Siswa C',
                     dataSource: _dataFisik,
                     xValueMapper: (DataRadar data, _) => data.jenisLatihan,
                     yValueMapper: (DataRadar data, _) => data.nilaiSiswaC,
-                    drawType: PolarAreaType_filledRadar,
+                    drawType: PolarAreaType.filledRadar,
                     color: Colors.blue.withOpacity(0.2),
                     borderColor: Colors.blue,
                     borderWidth: 2,
@@ -283,7 +282,7 @@ class _RadarChartPageState extends State<RadarChartPage> {
 }
 
 // ==========================================================
-// MODEL DATA
+// MODEL DATA CLASSE
 // ==========================================================
 class DataKategori {
   DataKategori(this.namaKelas, this.kumpulanNilai);
