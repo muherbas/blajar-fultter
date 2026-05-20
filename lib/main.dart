@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
-// Memanggil berkas overlay yang sudah kita pisah tadi
+// Memanggil berkas overlay yang sudah kita pisah
 import 'splash_overlay.dart';
 
 void main() {
@@ -14,12 +14,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Belajar Boxplot',
+      title: 'Belajar Grafika',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      // Layar pertama aplikasi langsung dibungkus MemuatHalaman agar loading 6 detik bekerja
       home: const MemuatHalaman(
         halamanTujuan: MenuUtamaPage(),
       ),
@@ -28,7 +27,7 @@ class MyApp extends StatelessWidget {
 }
 
 // ==========================================================
-// HALAMAN MENU UTAMA
+// HALAMAN MENU UTAMA (DASHBOARD) WITH 2 BUTTONS
 // ==========================================================
 class MenuUtamaPage extends StatelessWidget {
   const MenuUtamaPage({super.key});
@@ -41,58 +40,57 @@ class MenuUtamaPage extends StatelessWidget {
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
-        body: Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Tombol 1: Untuk membuka Boxplot (Tombol lama Anda)
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-            ),
-            icon: const Icon(Icons.bar_chart),
-            label: const Text('Lihat Grafik Boxplot', style: TextStyle(fontSize: 18)),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const MemuatHalaman(
-                    halamanTujuan: BoxPlotPage(),
-                    pesanLoading: 'Menyiapkan Grafik Boxplot...',
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Tombol 1: Untuk membuka Boxplot
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+              ),
+              icon: const Icon(Icons.bar_chart),
+              label: const Text('Lihat Grafik Boxplot', style: TextStyle(fontSize: 18)),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MemuatHalaman(
+                      halamanTujuan: BoxPlotPage(),
+                      pesanLoading: 'Menyiapkan Grafik Boxplot...',
+                    ),
                   ),
-                ),
-              );
-            }, 
-          ),
-          
-          const SizedBox(height: 20), // Jarak aman antar tombol biar tidak nempel
-          
-          // Tombol 2: Untuk membuka Radar Chart (Tombol Baru)
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              backgroundColor: Colors.teal,
-              foregroundColor: Colors.white,
+                );
+              },
             ),
-            icon: const Icon(Icons.pie_chart_outlined),
-            label: const Text('Lihat Grafik Radar', style: TextStyle(fontSize: 18)),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const MemuatHalaman(
-                    halamanTujuan: RadarChartPage(),
-                    pesanLoading: 'Menghitung Jaring Radar...',
+            
+            const SizedBox(height: 20), // Jarak antar tombol
+            
+            // Tombol 2: Untuk membuka Radar Chart
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                backgroundColor: Colors.teal,
+                foregroundColor: Colors.white,
+              ),
+              icon: const Icon(Icons.pie_chart_outlined),
+              label: const Text('Lihat Grafik Radar', style: TextStyle(fontSize: 18)),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MemuatHalaman(
+                      halamanTujuan: RadarChartPage(),
+                      pesanLoading: 'Menghitung Jaring Radar...',
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -128,7 +126,7 @@ class _BoxPlotPageState extends State<BoxPlotPage> {
         title: const Text('Analisis Nilai - Boxplot Diagram'),
         backgroundColor: Colors.blueAccent,
         foregroundColor: Colors.white,
-      ), // Di sini tanda kurung dan koma sudah dikoreksi total!
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -174,12 +172,9 @@ class _BoxPlotPageState extends State<BoxPlotPage> {
   }
 }
 
-class DataKategori {
-  DataKategori(this.namaKelas, this.kumpulanNilai);
-  final String namaKelas;
-  final List<num> kumpulanNilai;
-}
-
+// ==========================================================
+// HALAMAN GRAFIK RADAR
+// ==========================================================
 class RadarChartPage extends StatefulWidget {
   const RadarChartPage({super.key});
 
@@ -193,7 +188,6 @@ class _RadarChartPageState extends State<RadarChartPage> {
   @override
   void initState() {
     super.initState();
-    // Isi data sampel nilai fisik biomotorik untuk 3 siswa
     _dataFisik = [
       DataRadar('Push Up', 80, 60, 90),
       DataRadar('Sit Up', 70, 85, 65),
@@ -216,21 +210,11 @@ class _RadarChartPageState extends State<RadarChartPage> {
         child: Column(
           children: [
             Expanded(
-              // SfradarChart adalah komponen utama pembuat jaring laba-laba
               child: SfRadarChart(
                 title: const ChartTitle(text: 'Perbandingan Biomotorik Siswa'),
                 legend: const Legend(isVisible: true, position: LegendPosition.bottom),
-                
-                // Mengatur garis melingkar pembatas nilai (0 - 100)
-                primaryYAxis: const NumericAxis(
-                  minimum: 0,
-                  maximum: 100,
-                  interval: 20,
-                ),
-                
-                // Menaruh garis jaring untuk masing-masing siswa
+                primaryYAxis: const NumericAxis(minimum: 0, maximum: 100, interval: 20),
                 series: <RadarSeries<DataRadar, String>>[
-                  // Jaring Siswa A (Warna Merah transparan)
                   RadarSeries<DataRadar, String>(
                     name: 'Siswa A',
                     dataSource: _dataFisik,
@@ -240,7 +224,6 @@ class _RadarChartPageState extends State<RadarChartPage> {
                     borderColor: Colors.red,
                     borderWidth: 2,
                   ),
-                  // Jaring Siswa B (Warna Hijau transparan)
                   RadarSeries<DataRadar, String>(
                     name: 'Siswa B',
                     dataSource: _dataFisik,
@@ -250,7 +233,6 @@ class _RadarChartPageState extends State<RadarChartPage> {
                     borderColor: Colors.green,
                     borderWidth: 2,
                   ),
-                  // Jaring Siswa C (Warna Biru transparan)
                   RadarSeries<DataRadar, String>(
                     name: 'Siswa C',
                     dataSource: _dataFisik,
@@ -264,7 +246,6 @@ class _RadarChartPageState extends State<RadarChartPage> {
               ),
             ),
             const SizedBox(height: 20),
-            // Tombol kembali ke dashboard utama
             ElevatedButton(
               onPressed: () {
                 Navigator.pushReplacement(
@@ -286,14 +267,19 @@ class _RadarChartPageState extends State<RadarChartPage> {
   }
 }
 
-
-// Cetakan data khusus untuk Grafik Radar Fitur Fisik Siswa
-class DataRadar {
-  DataRadar(this.jenisLatihan, this.nilaiSiswaA, this.nilaiSiswaB, this.nilaiSiswaC);
-  
-  final String jenisLatihan; // Contoh: 'Push Up'
-  final double nilaiSiswaA;  // Nilai siswa pertama
-  final double nilaiSiswaB;  // Nilai siswa kedua
-  final double nilaiSiswaC;  // Nilai siswa ketiga
+// ==========================================================
+// MODEL CETAKAN DATA (MODEL DATA CLASSE)
+// ==========================================================
+class DataKategori {
+  DataKategori(this.namaKelas, this.kumpulanNilai);
+  final String namaKelas;
+  final List<num> kumpulanNilai;
 }
 
+class DataRadar {
+  DataRadar(this.jenisLatihan, this.nilaiSiswaA, this.nilaiSiswaB, this.nilaiSiswaC);
+  final String jenisLatihan;
+  final double nilaiSiswaA;
+  final double nilaiSiswaB;
+  final double nilaiSiswaC;
+}
