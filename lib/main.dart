@@ -87,7 +87,7 @@ class MenuUtamaPage extends StatelessWidget {
 }
 
 // ==========================================================
-// HALAMAN GRAFIK BOXPLOT (SUDAH DIJINAKKAN)
+// HALAMAN GRAFIK BOXPLOT (MENGGUNAKAN SYNCFUSION)
 // ==========================================================
 class BoxPlotPage extends StatefulWidget {
   const BoxPlotPage({super.key});
@@ -102,7 +102,7 @@ class _BoxPlotPageState extends State<BoxPlotPage> {
   @override
   void initState() {
     super.initState();
-    // Data diubah ke double (ditambah .0) agar Syncfusion tidak mengamuk
+    // Isian data wajib pakai .0 agar terbaca sebagai num desimal yang sah
     _dataNilai = [
       DataKategori('Kelas A', [20.0, 55.0, 60.0, 62.0, 65.0, 68.0, 70.0, 72.0, 98.0]),
       DataKategori('Kelas B', [45.0, 48.0, 50.0, 53.0, 56.0, 58.0, 60.0, 62.0, 65.0]),
@@ -133,7 +133,7 @@ class _BoxPlotPageState extends State<BoxPlotPage> {
                     name: 'Rentang Nilai',
                     dataSource: _dataNilai,
                     xValueMapper: (DataKategori data, _) => data.namaKelas,
-                    yValueMapper: (DataKategori data, _) => data.kumpulanNilai, // Sekarang tipenya sudah klop List<double>
+                    yValueMapper: (DataKategori data, _) => data.kumpulanNilai, // Klop dengan List<num>?
                     showMean: true,
                     boxPlotMode: sf.BoxPlotMode.normal,
                     color: Colors.blueAccent.withOpacity(0.7),
@@ -232,10 +232,10 @@ class RadarChartPage extends StatelessWidget {
 }
 
 // ==========================================================
-// MODEL DATA BOXPLOT (SUDAH FIX MEMAKAI DOUBLE)
+// MODEL DATA BOXPLOT (KEMBALI KE NUM YANG SAH)
 // ==========================================================
 class DataKategori {
   DataKategori(this.namaKelas, this.kumpulanNilai);
   final String namaKelas;
-  final List<double> kumpulanNilai; // <--- Sembuh pakai ini!
+  final List<num> kumpulanNilai; // <--- Kembali ke num sesuai titah Syncfusion
 }
