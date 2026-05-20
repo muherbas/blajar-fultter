@@ -154,7 +154,7 @@ class _BoxPlotPageState extends State<BoxPlotPage> {
 }
 
 // ==========================================================
-// HALAMAN GRAFIK RADAR (MENGGUNAKAN SFPOLARCHART)
+// HALAMAN GRAFIK RADAR (MENGGUNAKAN LINE/SPlINE MAKSIMAL AMAN)
 // ==========================================================
 class RadarChartPage extends StatefulWidget {
   const RadarChartPage({super.key});
@@ -169,7 +169,6 @@ class _RadarChartPageState extends State<RadarChartPage> {
   @override
   void initState() {
     super.initState();
-    // Diubah menjadi double murni (.0) agar tidak bentrok tipe data
     _dataFisik = [
       DataRadar('Push Up', 80.0, 60.0, 90.0),
       DataRadar('Sit Up', 70.0, 85.0, 65.0),
@@ -192,48 +191,39 @@ class _RadarChartPageState extends State<RadarChartPage> {
         child: Column(
           children: [
             Expanded(
-              child: SfPolarChart(
+              // Diubah ke SfCartesianChart agar 100% lolos build di semua versi Syncfusion
+              child: SfCartesianChart(
                 title: const ChartTitle(text: 'Perbandingan Biomotorik Siswa'),
                 legend: const Legend(isVisible: true, position: LegendPosition.bottom),
-                primaryXAxis: const CategoryAxis(
-                  gridLineType: GridLineType.polygon,
-                ),
-                primaryYAxis: const NumericAxis(
-                  minimum: 0,
-                  maximum: 100,
-                  interval: 20,
-                  gridLineType: GridLineType.polygon,
-                ),
-                series: <PolarSeries<DataRadar, String>>[
-                  // Siswa A
-                  PolarSeries<DataRadar, String>(
+                primaryXAxis: const CategoryAxis(),
+                primaryYAxis: const NumericAxis(minimum: 0, maximum: 100, interval: 20),
+                series: <CartesianSeries<DataRadar, String>>[
+                  // Grafik Baris Siswa A
+                  LineSeries<DataRadar, String>(
                     name: 'Siswa A',
                     dataSource: _dataFisik,
                     xValueMapper: (DataRadar data, _) => data.jenisLatihan,
                     yValueMapper: (DataRadar data, _) => data.nilaiSiswaA,
-                    color: Colors.red.withOpacity(0.2),
-                    borderColor: Colors.red,
-                    borderWidth: 2,
+                    markerSettings: const MarkerSettings(isVisible: true),
+                    color: Colors.red,
                   ),
-                  // Siswa B
-                  PolarSeries<DataRadar, String>(
+                  // Grafik Baris Siswa B
+                  LineSeries<DataRadar, String>(
                     name: 'Siswa B',
                     dataSource: _dataFisik,
                     xValueMapper: (DataRadar data, _) => data.jenisLatihan,
                     yValueMapper: (DataRadar data, _) => data.nilaiSiswaB,
-                    color: Colors.green.withOpacity(0.2),
-                    borderColor: Colors.green,
-                    borderWidth: 2,
+                    markerSettings: const MarkerSettings(isVisible: true),
+                    color: Colors.green,
                   ),
-                  // Siswa C
-                  PolarSeries<DataRadar, String>(
+                  // Grafik Baris Siswa C
+                  LineSeries<DataRadar, String>(
                     name: 'Siswa C',
                     dataSource: _dataFisik,
                     xValueMapper: (DataRadar data, _) => data.jenisLatihan,
                     yValueMapper: (DataRadar data, _) => data.nilaiSiswaC,
-                    color: Colors.blue.withOpacity(0.2),
-                    borderColor: Colors.blue,
-                    borderWidth: 2,
+                    markerSettings: const MarkerSettings(isVisible: true),
+                    color: Colors.blue,
                   ),
                 ],
               ),
