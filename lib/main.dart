@@ -149,3 +149,14 @@ class DataKategori {
   final String namaKelas;
   final List<num> kumpulanNilai;
 }
+
+// Cetakan data khusus untuk Grafik Radar Fitur Fisik Siswa
+class DataRadar {
+  DataRadar(this.jenisLatihan, this.nilaiSiswaA, this.nilaiSiswaB, this.nilaiSiswaC);
+  
+  final String jenisLatihan; // Contoh: 'Push Up'
+  final double nilaiSiswaA;  // Nilai siswa pertama
+  final double nilaiSiswaB;  // Nilai siswa kedua
+  final double nilaiSiswaC;  // Nilai siswa ketiga
+}
+
