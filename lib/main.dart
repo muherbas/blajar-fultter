@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:syncfusion_flutter_charts/charts.dart' as sf; // Tetap simpan untuk Boxplot Anda
+import 'package:flutter_radar_chart/flutter_radar_chart.dart'; // <--- Library asli bawaan project Anda!
 
 void main() {
   runApp(const MyApp());
@@ -60,15 +61,15 @@ class MenuUtamaPage extends StatelessWidget {
             
             const SizedBox(height: 20),
             
-            // Tombol 2: Grafik Fisik Siswa (Bar Chart Aman)
+            // Tombol 2: Radar Chart Asli (Jaring Laba-Laba)
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 backgroundColor: Colors.teal,
                 foregroundColor: Colors.white,
               ),
-              icon: const Icon(Icons.equalizer),
-              label: const Text('Lihat Analisis Fisik', style: TextStyle(fontSize: 18)),
+              icon: const Icon(Icons.pie_chart_outline),
+              label: const Text('Lihat Grafik Radar', style: TextStyle(fontSize: 18)),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -86,7 +87,7 @@ class MenuUtamaPage extends StatelessWidget {
 }
 
 // ==========================================================
-// HALAMAN GRAFIK BOXPLOT
+// HALAMAN GRAFIK BOXPLOT (MENGGUNAKAN SYNCFUSION)
 // ==========================================================
 class BoxPlotPage extends StatefulWidget {
   const BoxPlotPage({super.key});
@@ -121,19 +122,19 @@ class _BoxPlotPageState extends State<BoxPlotPage> {
         child: Column(
           children: [
             Expanded(
-              child: SfCartesianChart(
-                title: const ChartTitle(text: 'Sebaran Nilai Ujian per Kelas'),
-                legend: const Legend(isVisible: true, position: LegendPosition.bottom),
-                primaryXAxis: const CategoryAxis(majorGridLines: MajorGridLines(width: 0)),
-                primaryYAxis: const NumericAxis(minimum: 0, maximum: 100, interval: 10),
-                series: <BoxAndWhiskerSeries<DataKategori, String>>[
-                  BoxAndWhiskerSeries<DataKategori, String>(
+              child: sf.SfCartesianChart(
+                title: const sf.ChartTitle(text: 'Sebaran Nilai Ujian per Kelas'),
+                legend: const sf.Legend(isVisible: true, position: sf.LegendPosition.bottom),
+                primaryXAxis: const sf.CategoryAxis(majorGridLines: sf.MajorGridLines(width: 0)),
+                primaryYAxis: const sf.NumericAxis(minimum: 0, maximum: 100, interval: 10),
+                series: <sf.BoxAndWhiskerSeries<DataKategori, String>>[
+                  sf.BoxAndWhiskerSeries<DataKategori, String>(
                     name: 'Rentang Nilai',
                     dataSource: _dataNilai,
                     xValueMapper: (DataKategori data, _) => data.namaKelas,
                     yValueMapper: (DataKategori data, _) => data.kumpulanNilai,
                     showMean: true,
-                    boxPlotMode: BoxPlotMode.normal,
+                    boxPlotMode: sf.BoxPlotMode.normal,
                     color: Colors.blueAccent.withOpacity(0.7),
                   )
                 ],
@@ -154,46 +155,96 @@ class _BoxPlotPageState extends State<BoxPlotPage> {
 }
 
 // ==========================================================
-// HALAMAN GRAFIK ANALISIS FISIK (BAR CHART - 100% AMAN PABRIK)
+// HALAMAN GRAFIK RADAR ASLI (MENGGUNAKAN FLUTTER_RADAR_CHART)
 // ==========================================================
-class RadarChartPage extends StatefulWidget {
+class RadarChartPage extends StatelessWidget {
   const RadarChartPage({super.key});
 
   @override
-  State<RadarChartPage> createState() => _RadarChartPageState();
-}
-
-class _RadarChartPageState extends State<RadarChartPage> {
-  late List<DataRadar> _dataFisik;
-
-  @override
-  void initState() {
-    super.initState();
-    _dataFisik = [
-      DataRadar('Push Up', 80.0, 60.0, 90.0),
-      DataRadar('Sit Up', 70.0, 85.0, 65.0),
-      DataRadar('Back Up', 85.0, 70.0, 75.0),
-      DataRadar('Pull Up', 60.0, 75.0, 80.0),
-      DataRadar('Squat', 90.0, 65.0, 85.0),
-    ];
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // 1. Definisikan label di setiap sudut jaring (Features)
+    const namaLatihan = ['Push Up', 'Sit Up', 'Back Up', 'Pull Up', 'Squat'];
+
+    // 2. Garis penanda nilai dari dalam ke luar (Ticks)
+    const penandaNilai = [20, 40, 60, 80, 100];
+
+    // 3. Data nilai fisik Siswa A, Siswa B, dan Siswa C
+    const dataFisikSiswa = [
+      [80, 70, 85, 60, 90], // Nilai Siswa A
+      [60, 85, 70, 75, 65], // Nilai Siswa B
+      [90, 65, 75, 80, 85], // Nilai Siswa C
+    ];
+
+    // 4. Warna untuk masing-masing jaring siswa
+    const warnaJaring = [Colors.red, Colors.green, Colors.blue];
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Analisis Fisik Siswa'),
+        title: const Text('Analisis Fisik - Radar Chart Asli'),
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
+            // Legenda Manual biar gampang dibaca
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildIndicator(Colors.red, 'Siswa A'),
+                const SizedBox(width: 15),
+                _buildIndicator(Colors.green, 'Siswa B'),
+                const SizedBox(width: 15),
+                _buildIndicator(Colors.blue, 'Siswa C'),
+              ],
+            ),
+            const SizedBox(height: 20),
+            
+            // Tampilkan RadarChart asli bawaan library Anda
             Expanded(
-              // Pakai Cartesian standar tanpa aneh-aneh agar lulus sensor GitHub
-              child: SfCartesianChart(
-                title: const ChartTitle(text: 'Perbandingan Kemampuan Biomotorik'),
-                legend: const Legend(isVisible: true, position: LegendPosition.bottom),
-                primaryXAxis: const CategoryAxis(),
-                primaryYAxis: const NumericAxis(minimum: 0, maximum: 100, interval: 20),
+              child: RadarChart(
+                ticks: penandaNilai,
+                features: namaLatihan,
+                data: dataFisikSiswa,
+                graphColors: warnaJaring,
+                outlineColor: Colors.grey,
+                axisColor: Colors.grey.shade400,
+                featuresTextStyle: const TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.bold),
+                ticksTextStyle: const TextStyle(color: Colors.grey, fontSize: 10),
+              ),
+            ),
+            
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Kembali ke Menu Utama'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Widget pembantu untuk membuat kotak warna legenda
+  Widget _buildIndicator(Color color, String text) {
+    return Row(
+      children: [
+        Container(width: 12, height: 12, color: color),
+        const SizedBox(width: 5),
+        Text(text, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+      ],
+    );
+  }
+}
+
+// ==========================================================
+// MODEL DATA BOXPLOT
+// ==========================================================
+class DataKategori {
+  DataKategori(this.namaKelas, this.kumpulanNilai);
+  final String namaKelas;
+  final List<num> kumpulanNilai;
+}
