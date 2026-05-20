@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
 }
 
 // ==========================================================
-// HALAMAN MENU UTAMA (DASHBOARD) WITH 2 BUTTONS
+// HALAMAN MENU UTAMA (DASHBOARD)
 // ==========================================================
 class MenuUtamaPage extends StatelessWidget {
   const MenuUtamaPage({super.key});
@@ -173,7 +173,7 @@ class _BoxPlotPageState extends State<BoxPlotPage> {
 }
 
 // ==========================================================
-// HALAMAN GRAFIK RADAR
+// HALAMAN GRAFIK RADAR (MENGGUNAKAN SFPOLARCHART)
 // ==========================================================
 class RadarChartPage extends StatefulWidget {
   const RadarChartPage({super.key});
@@ -210,35 +210,50 @@ class _RadarChartPageState extends State<RadarChartPage> {
         child: Column(
           children: [
             Expanded(
-              child: SfRadarChart(
+              // Menggunakan SfPolarChart agar jaring laba-laba terbaca di library Syncfusion
+              child: SfPolarChart(
                 title: const ChartTitle(text: 'Perbandingan Biomotorik Siswa'),
                 legend: const Legend(isVisible: true, position: LegendPosition.bottom),
-                primaryYAxis: const NumericAxis(minimum: 0, maximum: 100, interval: 20),
-                series: <RadarSeries<DataRadar, String>>[
-                  RadarSeries<DataRadar, String>(
+                primaryXAxis: const CategoryAxis(
+                  gridLineType: GridLineType.polygon, // Membuat garis jaring berbentuk segi lima
+                ),
+                primaryYAxis: const NumericAxis(
+                  minimum: 0,
+                  maximum: 100,
+                  interval: 20,
+                  gridLineType: GridLineType.polygon,
+                ),
+                series: <PolarSeries<DataRadar, String>>[
+                  // Jaring Siswa A
+                  PolarSeries<DataRadar, String>(
                     name: 'Siswa A',
                     dataSource: _dataFisik,
                     xValueMapper: (DataRadar data, _) => data.jenisLatihan,
                     yValueMapper: (DataRadar data, _) => data.nilaiSiswaA,
-                    color: Colors.red.withOpacity(0.3),
+                    drawType: PolarAreaType_filledRadar,
+                    color: Colors.red.withOpacity(0.2),
                     borderColor: Colors.red,
                     borderWidth: 2,
                   ),
-                  RadarSeries<DataRadar, String>(
+                  // Jaring Siswa B
+                  PolarSeries<DataRadar, String>(
                     name: 'Siswa B',
                     dataSource: _dataFisik,
                     xValueMapper: (DataRadar data, _) => data.jenisLatihan,
                     yValueMapper: (DataRadar data, _) => data.nilaiSiswaB,
-                    color: Colors.green.withOpacity(0.3),
+                    drawType: PolarAreaType_filledRadar,
+                    color: Colors.green.withOpacity(0.2),
                     borderColor: Colors.green,
                     borderWidth: 2,
                   ),
-                  RadarSeries<DataRadar, String>(
+                  // Jaring Siswa C
+                  PolarSeries<DataRadar, String>(
                     name: 'Siswa C',
                     dataSource: _dataFisik,
                     xValueMapper: (DataRadar data, _) => data.jenisLatihan,
                     yValueMapper: (DataRadar data, _) => data.nilaiSiswaC,
-                    color: Colors.blue.withOpacity(0.3),
+                    drawType: PolarAreaType_filledRadar,
+                    color: Colors.blue.withOpacity(0.2),
                     borderColor: Colors.blue,
                     borderWidth: 2,
                   ),
@@ -268,7 +283,7 @@ class _RadarChartPageState extends State<RadarChartPage> {
 }
 
 // ==========================================================
-// MODEL CETAKAN DATA (MODEL DATA CLASSE)
+// MODEL DATA
 // ==========================================================
 class DataKategori {
   DataKategori(this.namaKelas, this.kumpulanNilai);
