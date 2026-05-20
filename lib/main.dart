@@ -98,7 +98,7 @@ class _BoxPlotPageState extends State<BoxPlotPage> {
         title: const Text('Analisis Nilai - Boxplot Diagram'),
         backgroundColor: Colors.blueAccent,
         foregroundColor: Colors.white,
-      </td>
+      ), // Di sini tanda kurung dan koma sudah dikoreksi total!
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
