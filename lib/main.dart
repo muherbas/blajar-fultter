@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:syncfusion_flutter_gauges/gauges.dart'; // <-- Tambahan import untuk Radar Chart
+import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 void main() {
   runApp(const MyApp());
@@ -28,7 +28,7 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   int _currentIndex = 0;
 
-  // Data Boxplot
+  // Data Boxplot (Minimum, Kuartil 1, Median, Kuartil 3, Maximum)
   final List<BoxPlotData> _boxData = [
     BoxPlotData('Str', 0.1, 0.2, 0.4, 0.6, 0.8),
     BoxPlotData('End', 0.2, 0.3, 0.5, 0.7, 0.9),
@@ -126,11 +126,11 @@ class _DashboardPageState extends State<DashboardPage> {
                             BoxAndWhiskerSeries<BoxPlotData, String>(
                               dataSource: _boxData,
                               xValueMapper: (BoxPlotData data, _) => data.x,
-                              yValueMapper: (BoxPlotData data, _) => data.yValues, // Memperbaiki passing list data y
+                              yValueMapper: (BoxPlotData data, _) => data.yValues,
                               boxPlotMode: BoxPlotMode.normal,
-                              fillColor: const Color(0xFFD0E3FF),
-                              strokeColor: const Color(0xFF1E70E0),
-                              strokeWidth: 2,
+                              color: const Color(0xFFD0E3FF), // Menggunakan parameter 'color' agar lolos versi v24
+                              borderColor: const Color(0xFF1E70E0),
+                              borderWidth: 2,
                             )
                           ],
                         ),
@@ -277,7 +277,6 @@ class BoxPlotData {
 
   BoxPlotData(this.x, this.min, this.q1, this.median, this.q3, this.max);
 
-  // Getter pembantu untuk mencocokkan format yValueMapper Syncfusion secara presisi
   List<double> get yValues => [min, q1, median, q3, max];
 }
 
