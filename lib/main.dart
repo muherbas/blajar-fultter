@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/charts.dart' as sf; // Untuk halaman Boxplot
-import 'package:flutter_radar_chart/flutter_radar_chart.dart'; // Library Radar asli Anda
+import 'package:syncfusion_flutter_charts/charts.dart' as sf; // Untuk Boxplot
+import 'radar_chart.dart'; // <--- IMPORT FILE KUSTOM LOKAL KITA, BOS!
 
 void main() {
   runApp(const MyApp());
@@ -61,7 +61,7 @@ class MenuUtamaPage extends StatelessWidget {
             
             const SizedBox(height: 20),
             
-            // Tombol 2: Radar Chart Jaring Laba-Laba
+            // Tombol 2: Radar Chart Asli Lokal
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -155,7 +155,7 @@ class _BoxPlotPageState extends State<BoxPlotPage> {
 }
 
 // ==========================================================
-// HALAMAN GRAFIK RADAR ASLI (MENGGUNAKAN FLUTTER_RADAR_CHART)
+// HALAMAN GRAFIK RADAR ASLI (MENGGUNAKAN FILE LOKAL)
 // ==========================================================
 class RadarChartPage extends StatelessWidget {
   const RadarChartPage({super.key});
@@ -180,7 +180,7 @@ class RadarChartPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Analisis Fisik - Radar Chart Asli'),
+        title: const Text('Analisis Fisik - Radar Chart Lokal'),
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
       ),
@@ -201,7 +201,7 @@ class RadarChartPage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             
-            // Menampilkan RadarChart bawaan asli library Anda
+            // Menampilkan RadarChart yang diambil langsung dari radar_chart.dart
             Expanded(
               child: RadarChart(
                 ticks: penandaNilai,
