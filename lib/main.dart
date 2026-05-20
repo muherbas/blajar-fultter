@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/charts.dart' as sf; // Diberi alias agar tidak bentrok
-import 'package:fl_chart/fl_chart.dart'; // Library khusus untuk Radar Chart asli
+import 'package:syncfusion_flutter_charts/charts.dart' as sf; // Alias Syncfusion
+import 'package:fl_chart/fl_chart.dart'; // Library khusus Radar Chart asli
 
 void main() {
   runApp(const MyApp());
@@ -190,22 +190,22 @@ class RadarChartPage extends StatelessWidget {
             ),
             const SizedBox(height: 30),
             Expanded(
-              // Widget RadarChart Asli dari FL Chart
+              // Widget RadarChart Asli
               child: RadarChart(
                 RadarChartData(
-                  radarShape: RadarShape.circle, // Bentuk lingkaran jaring laba-laba
+                  radarShape: RadarShape.circle,
                   dataSets: [
-                    // Jaring Siswa A
+                    // Jaring Siswa A (SUDAH DIPERBAIKI: Pakai RadarEntry)
                     RadarDataSet(
                       fillColor: Colors.red.withOpacity(0.2),
                       borderColor: Colors.red,
                       entryRadius: 3,
                       dataEntries: [
-                        const RadarChartCell(value: 80), // Push Up
-                        const RadarChartCell(value: 70), // Sit Up
-                        const RadarChartCell(value: 85), // Back Up
-                        const RadarChartCell(value: 60), // Pull Up
-                        const RadarChartCell(value: 90), // Squat
+                        const RadarEntry(value: 80), // Push Up
+                        const RadarEntry(value: 70), // Sit Up
+                        const RadarEntry(value: 85), // Back Up
+                        const RadarEntry(value: 60), // Pull Up
+                        const RadarEntry(value: 90), // Squat
                       ],
                     ),
                     // Jaring Siswa B
@@ -214,11 +214,11 @@ class RadarChartPage extends StatelessWidget {
                       borderColor: Colors.green,
                       entryRadius: 3,
                       dataEntries: [
-                        const RadarChartCell(value: 60),
-                        const RadarChartCell(value: 85),
-                        const RadarChartCell(value: 70),
-                        const RadarChartCell(value: 75),
-                        const RadarChartCell(value: 65),
+                        const RadarEntry(value: 60),
+                        const RadarEntry(value: 85),
+                        const RadarEntry(value: 70),
+                        const RadarEntry(value: 75),
+                        const RadarEntry(value: 65),
                       ],
                     ),
                     // Jaring Siswa C
@@ -227,15 +227,14 @@ class RadarChartPage extends StatelessWidget {
                       borderColor: Colors.blue,
                       entryRadius: 3,
                       dataEntries: [
-                        const RadarChartCell(value: 90),
-                        const RadarChartCell(value: 65),
-                        const RadarChartCell(value: 75),
-                        const RadarChartCell(value: 80),
-                        const RadarChartCell(value: 85),
+                        const RadarEntry(value: 90),
+                        const RadarEntry(value: 65),
+                        const RadarEntry(value: 75),
+                        const RadarEntry(value: 80),
+                        const RadarEntry(value: 85),
                       ],
                     ),
                   ],
-                  // Judul latihan di setiap pojok jaring
                   getTitle: (index, angle) {
                     switch (index) {
                       case 0: return const RadarChartTitle(text: 'Push Up');
