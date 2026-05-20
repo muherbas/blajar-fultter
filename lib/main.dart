@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart' as sf; // Untuk Boxplot
-import 'radar_chart.dart'; // <--- INI DIA! Import lokal, bukan pakai 'package:flutter_radar_chart/...'
+import 'radar_chart.dart'; // Import lokal kustom kita
 
 void main() {
   runApp(const MyApp());
@@ -87,7 +87,7 @@ class MenuUtamaPage extends StatelessWidget {
 }
 
 // ==========================================================
-// HALAMAN GRAFIK BOXPLOT (MENGGUNAKAN SYNCFUSION)
+// HALAMAN GRAFIK BOXPLOT (SUDAH DIJINAKKAN)
 // ==========================================================
 class BoxPlotPage extends StatefulWidget {
   const BoxPlotPage({super.key});
@@ -102,10 +102,11 @@ class _BoxPlotPageState extends State<BoxPlotPage> {
   @override
   void initState() {
     super.initState();
+    // Data diubah ke double (ditambah .0) agar Syncfusion tidak mengamuk
     _dataNilai = [
-      DataKategori('Kelas A', [20, 55, 60, 62, 65, 68, 70, 72, 98]),
-      DataKategori('Kelas B', [45, 48, 50, 53, 56, 58, 60, 62, 65]),
-      DataKategori('Kelas C', [70, 72, 75, 78, 80, 83, 85, 88, 90]),
+      DataKategori('Kelas A', [20.0, 55.0, 60.0, 62.0, 65.0, 68.0, 70.0, 72.0, 98.0]),
+      DataKategori('Kelas B', [45.0, 48.0, 50.0, 53.0, 56.0, 58.0, 60.0, 62.0, 65.0]),
+      DataKategori('Kelas C', [70.0, 72.0, 75.0, 78.0, 80.0, 83.0, 85.0, 88.0, 90.0]),
     ];
   }
 
@@ -132,7 +133,7 @@ class _BoxPlotPageState extends State<BoxPlotPage> {
                     name: 'Rentang Nilai',
                     dataSource: _dataNilai,
                     xValueMapper: (DataKategori data, _) => data.namaKelas,
-                    yValueMapper: (DataKategori data, _) => data.kumpulanNilai,
+                    yValueMapper: (DataKategori data, _) => data.kumpulanNilai, // Sekarang tipenya sudah klop List<double>
                     showMean: true,
                     boxPlotMode: sf.BoxPlotMode.normal,
                     color: Colors.blueAccent.withOpacity(0.7),
@@ -162,20 +163,15 @@ class RadarChartPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Label di setiap sudut jaring laba-laba
     const namaLatihan = ['Push Up', 'Sit Up', 'Back Up', 'Pull Up', 'Squat'];
-
-    // 2. Garis penanda nilai dari dalam ke luar
     const penandaNilai = [20, 40, 60, 80, 100];
 
-    // 3. Data nilai fisik Siswa A, Siswa B, dan Siswa C (tipe num)
     const dataFisikSiswa = [
-      [80, 70, 85, 60, 90], // Nilai Siswa A
-      [60, 85, 70, 75, 65], // Nilai Siswa B
-      [90, 65, 75, 80, 85], // Nilai Siswa C
+      [80, 70, 85, 60, 90], 
+      [60, 85, 70, 75, 65], 
+      [90, 65, 75, 80, 85], 
     ];
 
-    // 4. Warna untuk masing-masing jaring siswa
     const warnaJaring = [Colors.red, Colors.green, Colors.blue];
 
     return Scaffold(
@@ -188,7 +184,6 @@ class RadarChartPage extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            // Indikator Legenda Manual
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -200,8 +195,6 @@ class RadarChartPage extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-            
-            // Menampilkan RadarChart yang diambil langsung dari radar_chart.dart lokal
             Expanded(
               child: RadarChart(
                 ticks: penandaNilai,
@@ -214,7 +207,6 @@ class RadarChartPage extends StatelessWidget {
                 ticksTextStyle: const TextStyle(color: Colors.grey, fontSize: 10),
               ),
             ),
-            
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
@@ -240,10 +232,10 @@ class RadarChartPage extends StatelessWidget {
 }
 
 // ==========================================================
-// MODEL DATA BOXPLOT
+// MODEL DATA BOXPLOT (SUDAH FIX MEMAKAI DOUBLE)
 // ==========================================================
 class DataKategori {
   DataKategori(this.namaKelas, this.kumpulanNilai);
   final String namaKelas;
-  final List<num> kumpulanNilai;
+  final List<double> kumpulanNilai; // <--- Sembuh pakai ini!
 }
