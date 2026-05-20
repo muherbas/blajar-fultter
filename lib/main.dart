@@ -41,28 +41,58 @@ class MenuUtamaPage extends StatelessWidget {
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
-      body: Center(
-        child: ElevatedButton.icon(
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            backgroundColor: Colors.blue,
-            foregroundColor: Colors.white,
-          ),
-          icon: const Icon(Icons.bar_chart),
-          label: const Text('Lihat Grafik Boxplot', style: TextStyle(fontSize: 18)),
-          onPressed: () {
-            // Pindah halaman dengan transisi loading 3 detik
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const MemuatHalaman(
-                  halamanTujuan: BoxPlotPage(),
-                  pesanLoading: 'Menyiapkan Grafik Boxplot...',
+        body: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Tombol 1: Untuk membuka Boxplot (Tombol lama Anda)
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              backgroundColor: Colors.blue,
+              foregroundColor: Colors.white,
+            ),
+            icon: const Icon(Icons.bar_chart),
+            label: const Text('Lihat Grafik Boxplot', style: TextStyle(fontSize: 18)),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MemuatHalaman(
+                    halamanTujuan: BoxPlotPage(),
+                    pesanLoading: 'Menyiapkan Grafik Boxplot...',
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
+              );
+            },
+          ),
+          
+          const SizedBox(height: 20), // Jarak aman antar tombol biar tidak nempel
+          
+          // Tombol 2: Untuk membuka Radar Chart (Tombol Baru)
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              backgroundColor: Colors.teal,
+              foregroundColor: Colors.white,
+            ),
+            icon: const Icon(Icons.pie_chart_outlined),
+            label: const Text('Lihat Grafik Radar', style: TextStyle(fontSize: 18)),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MemuatHalaman(
+                    halamanTujuan: RadarChartPage(),
+                    pesanLoading: 'Menghitung Jaring Radar...',
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    ),
       ),
     );
   }
