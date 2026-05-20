@@ -1,6 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: DashboardPage(),
+    );
+  }
+}
+
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
 
@@ -11,8 +27,6 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   int _currentIndex = 0;
 
-  // --- DATA SOURCE MOCKING SIFATNYA PERSIS SEPERTI DI GAMBAR ---
-  
   // Data Boxplot (Minimum, Kuartil 1, Median, Kuartil 3, Maximum)
   final List<BoxPlotData> _boxData = [
     BoxPlotData('Str', 0.1, 0.2, 0.4, 0.6, 0.8),
@@ -24,7 +38,7 @@ class _DashboardPageState extends State<DashboardPage> {
     BoxPlotData('React', 0.25, 0.4, 0.6, 0.8, 0.95),
   ];
 
-  // Data Radar (10 Komponen Turunan sesuai gambar)
+  // Data Radar (10 Komponen Turunan)
   final List<RadarData> _radarData = [
     RadarData('M.Endur', 75),
     RadarData('Power', 80),
@@ -41,7 +55,7 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA), // Background abu-abu tipis khas mobile app
+      backgroundColor: const Color(0xFFF5F7FA),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -60,7 +74,6 @@ class _DashboardPageState extends State<DashboardPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Header Label
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
@@ -77,7 +90,6 @@ class _DashboardPageState extends State<DashboardPage> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      // Legend Manual
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -86,7 +98,7 @@ class _DashboardPageState extends State<DashboardPage> {
                             height: 15,
                             decoration: BoxDecoration(
                               color: const Color(0xFFD0E3FF),
-                              border: Border.solid(color: const Color(0xFF1E70E0), width: 2),
+                              border: Border.all(color: const Color(0xFF1E70E0), width: 2),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -96,19 +108,18 @@ class _DashboardPageState extends State<DashboardPage> {
                           ),
                         ],
                       ),
-                      // Chart Boxplot
                       SizedBox(
                         height: 260,
                         child: SfCartesianChart(
-                          primaryXAxis: CategoryAxis(
-                            labelRotation: -30, // Kemiringan label teks axis X
-                            majorGridLines: const MajorGridLines(width: 0.5),
+                          primaryXAxis: const CategoryAxis(
+                            labelRotation: -30,
+                            majorGridLines: MajorGridLines(width: 0.5),
                           ),
-                          primaryYAxis: NumericAxis(
+                          primaryYAxis: const NumericAxis(
                             minimum: 0,
                             maximum: 1.0,
                             interval: 0.1,
-                            majorGridLines: const MajorGridLines(width: 0.5),
+                            majorGridLines: MajorGridLines(width: 0.5),
                           ),
                           series: <BoxAndWhiskerSeries<BoxPlotData, String>>[
                             BoxAndWhiskerSeries<BoxPlotData, String>(
@@ -149,7 +160,6 @@ class _DashboardPageState extends State<DashboardPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Header Label
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
@@ -166,7 +176,6 @@ class _DashboardPageState extends State<DashboardPage> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      // Legend Manual
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -174,17 +183,7 @@ class _DashboardPageState extends State<DashboardPage> {
                             width: 35,
                             height: 15,
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF3E8FF),
-                              border: Border.solid(color: const Color(0Style.purple), width: 2),
-                            ),
-                            style: const BoxDecoration(
-                              border: Border(bottom: BorderSide(color: Colors.purple, width: 2)),
-                            ),
-                          ),
-                          Container(
-                            width: 30,
-                            height: 12,
-                            decoration: BoxDecoration(
+                              color: Colors.purple.withOpacity(0.1),
                               border: Border.all(color: Colors.purple, width: 2),
                             ),
                           ),
@@ -195,7 +194,6 @@ class _DashboardPageState extends State<DashboardPage> {
                           ),
                         ],
                       ),
-                      // Chart Radar Poligon
                       SizedBox(
                         height: 320,
                         child: SfRadarChart(
@@ -207,7 +205,7 @@ class _DashboardPageState extends State<DashboardPage> {
                             maximum: 100,
                             interval: 20,
                           ),
-                          drawType: RadarDrawType.polygon, // Menjadikan bentuk segi-10 (bukan lingkaran)
+                          drawType: RadarDrawType.polygon,
                           series: <RadarSeries<RadarData, String>>[
                             RadarSeries<RadarData, String>(
                               dataSource: _radarData,
@@ -235,8 +233,6 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ),
       ),
-      
-      // ================= BOTTOM NAVIGATION BAR =================
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -275,8 +271,6 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 }
-
-// --- DATA MODELS ---
 
 class BoxPlotData {
   final String x;
