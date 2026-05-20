@@ -1,4 +1,4 @@
-name: Preview UI via GitHub Pages
+name: PreviewUI via GitHub Pages
 
 on:
   push:
