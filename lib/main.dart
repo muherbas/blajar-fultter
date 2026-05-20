@@ -60,15 +60,15 @@ class MenuUtamaPage extends StatelessWidget {
             
             const SizedBox(height: 20),
             
-            // Tombol 2: Radar Chart (Wujud Modifikasi)
+            // Tombol 2: Grafik Fisik Siswa (Bar Chart Aman)
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 backgroundColor: Colors.teal,
                 foregroundColor: Colors.white,
               ),
-              icon: const Icon(Icons.pie_chart_outline),
-              label: const Text('Lihat Grafik Radar', style: TextStyle(fontSize: 18)),
+              icon: const Icon(Icons.equalizer),
+              label: const Text('Lihat Analisis Fisik', style: TextStyle(fontSize: 18)),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -154,7 +154,7 @@ class _BoxPlotPageState extends State<BoxPlotPage> {
 }
 
 // ==========================================================
-// HALAMAN GRAFIK RADAR (MODIFIKASI AMAN DARI CARTESIAN)
+// HALAMAN GRAFIK ANALISIS FISIK (BAR CHART - 100% AMAN PABRIK)
 // ==========================================================
 class RadarChartPage extends StatefulWidget {
   const RadarChartPage({super.key});
@@ -169,14 +169,12 @@ class _RadarChartPageState extends State<RadarChartPage> {
   @override
   void initState() {
     super.initState();
-    // Kita tambahkan "Push Up" lagi di akhir data agar ujung garisnya menutup melingkar sempurna
     _dataFisik = [
       DataRadar('Push Up', 80.0, 60.0, 90.0),
       DataRadar('Sit Up', 70.0, 85.0, 65.0),
       DataRadar('Back Up', 85.0, 70.0, 75.0),
       DataRadar('Pull Up', 60.0, 75.0, 80.0),
       DataRadar('Squat', 90.0, 65.0, 85.0),
-      DataRadar('Push Up ', 80.0, 60.0, 90.0), // Spasi di nama agar terbaca titik penutup
     ];
   }
 
@@ -184,7 +182,7 @@ class _RadarChartPageState extends State<RadarChartPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Analisis Fisik - Radar Modifikasi'),
+        title: const Text('Analisis Fisik Siswa'),
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
       ),
@@ -193,85 +191,9 @@ class _RadarChartPageState extends State<RadarChartPage> {
         child: Column(
           children: [
             Expanded(
-              // Trik Utama: Menggunakan SfCartesianChart bawaan dasar, tapi sumbunya kita bikin melingkar
+              // Pakai Cartesian standar tanpa aneh-aneh agar lulus sensor GitHub
               child: SfCartesianChart(
-                title: const ChartTitle(text: 'Perbandingan Biomotorik Siswa'),
+                title: const ChartTitle(text: 'Perbandingan Kemampuan Biomotorik'),
                 legend: const Legend(isVisible: true, position: LegendPosition.bottom),
-                
-                // Mengubah tipe grid menjadi polygon (segi lima jaring laba-laba)
-                primaryXAxis: const CategoryAxis(
-                  gridLineType: GridLineType.polygon,
-                  majorGridLines: MajorGridLines(width: 1),
-                ),
-                primaryYAxis: const NumericAxis(
-                  minimum: 0,
-                  maximum: 100,
-                  interval: 20,
-                  gridLineType: GridLineType.polygon,
-                  majorGridLines: MajorGridLines(width: 1),
-                ),
-                
-                series: <CartesianSeries<DataRadar, String>>[
-                  // Siswa A diubah jadi LineSeries tapi memutar
-                  LineSeries<DataRadar, String>(
-                    name: 'Siswa A',
-                    dataSource: _dataFisik,
-                    xValueMapper: (DataRadar data, _) => data.jenisLatihan,
-                    yValueMapper: (DataRadar data, _) => data.nilaiSiswaA,
-                    markerSettings: const MarkerSettings(isVisible: true),
-                    color: Colors.red,
-                    width: 2,
-                  ),
-                  // Siswa B
-                  LineSeries<DataRadar, String>(
-                    name: 'Siswa B',
-                    dataSource: _dataFisik,
-                    xValueMapper: (DataRadar data, _) => data.jenisLatihan,
-                    yValueMapper: (DataRadar data, _) => data.nilaiSiswaB,
-                    markerSettings: const MarkerSettings(isVisible: true),
-                    color: Colors.green,
-                    width: 2,
-                  ),
-                  // Siswa C
-                  LineSeries<DataRadar, String>(
-                    name: 'Siswa C',
-                    dataSource: _dataFisik,
-                    xValueMapper: (DataRadar data, _) => data.jenisLatihan,
-                    yValueMapper: (DataRadar data, _) => data.nilaiSiswaC,
-                    markerSettings: const MarkerSettings(isVisible: true),
-                    color: Colors.blue,
-                    width: 2,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Kembali ke Menu Utama'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ==========================================================
-// MODEL DATA
-// ==========================================================
-class DataKategori {
-  DataKategori(this.namaKelas, this.kumpulanNilai);
-  final String namaKelas;
-  final List<num> kumpulanNilai;
-}
-
-class DataRadar {
-  DataRadar(this.jenisLatihan, this.nilaiSiswaA, this.nilaiSiswaB, this.nilaiSiswaC);
-  final String jenisLatihan;
-  final double nilaiSiswaA;
-  final double nilaiSiswaB;
-  final double nilaiSiswaC;
-}
+                primaryXAxis: const CategoryAxis(),
+                primaryYAxis: const NumericAxis(minimum: 0, maximum: 100, interval: 20),
