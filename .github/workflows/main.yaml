@@ -1,0 +1,51 @@
+name: Preview UI via GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Memberikan izin kepada GitHub untuk mempublikasikan halaman web
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    # Pengaturan lingkungan untuk GitHub Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout Kode
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: 'stable'
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      # Mengubah aplikasi menjadi Web. 
+      # PENTING: Ganti "NAMA_REPOSITORI_ANDA" sesuai dengan nama repositori di GitHub
+      - name: Build Web
+        run: flutter build web --release --base-href "/NAMA_REPOSITORI_ANDA/"
+
+      # Menyiapkan file web untuk diunggah
+      - name: Upload Web Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+      # Mempublikasikan ke tautan URL
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
