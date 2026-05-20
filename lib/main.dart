@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:syncfusion_flutter_charts/charts.dart' as sf; // Diberi alias agar tidak bentrok
+import 'package:fl_chart/fl_chart.dart'; // Library khusus untuk Radar Chart asli
 
 void main() {
   runApp(const MyApp());
@@ -60,14 +61,14 @@ class MenuUtamaPage extends StatelessWidget {
             
             const SizedBox(height: 20),
             
-            // Tombol 2: Radar Chart (Sudah Diperbaiki Ikonnya)
+            // Tombol 2: Radar Chart Asli
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 backgroundColor: Colors.teal,
                 foregroundColor: Colors.white,
               ),
-              icon: const Icon(Icons.pie_chart_outline), // <-- Koreksi di sini: outline, bukan outlined
+              icon: const Icon(Icons.pie_chart_outline),
               label: const Text('Lihat Grafik Radar', style: TextStyle(fontSize: 18)),
               onPressed: () {
                 Navigator.push(
@@ -86,7 +87,7 @@ class MenuUtamaPage extends StatelessWidget {
 }
 
 // ==========================================================
-// HALAMAN GRAFIK BOXPLOT
+// HALAMAN GRAFIK BOXPLOT (MENGGUNAKAN SYNCFUSION)
 // ==========================================================
 class BoxPlotPage extends StatefulWidget {
   const BoxPlotPage({super.key});
@@ -121,19 +122,19 @@ class _BoxPlotPageState extends State<BoxPlotPage> {
         child: Column(
           children: [
             Expanded(
-              child: SfCartesianChart(
-                title: const ChartTitle(text: 'Sebaran Nilai Ujian per Kelas'),
-                legend: const Legend(isVisible: true, position: LegendPosition.bottom),
-                primaryXAxis: const CategoryAxis(majorGridLines: MajorGridLines(width: 0)),
-                primaryYAxis: const NumericAxis(minimum: 0, maximum: 100, interval: 10),
-                series: <BoxAndWhiskerSeries<DataKategori, String>>[
-                  BoxAndWhiskerSeries<DataKategori, String>(
+              child: sf.SfCartesianChart(
+                title: const sf.ChartTitle(text: 'Sebaran Nilai Ujian per Kelas'),
+                legend: const sf.Legend(isVisible: true, position: sf.LegendPosition.bottom),
+                primaryXAxis: const sf.CategoryAxis(majorGridLines: sf.MajorGridLines(width: 0)),
+                primaryYAxis: const sf.NumericAxis(minimum: 0, maximum: 100, interval: 10),
+                series: <sf.BoxAndWhiskerSeries<DataKategori, String>>[
+                  sf.BoxAndWhiskerSeries<DataKategori, String>(
                     name: 'Rentang Nilai',
                     dataSource: _dataNilai,
                     xValueMapper: (DataKategori data, _) => data.namaKelas,
                     yValueMapper: (DataKategori data, _) => data.kumpulanNilai,
                     showMean: true,
-                    boxPlotMode: BoxPlotMode.normal,
+                    boxPlotMode: sf.BoxPlotMode.normal,
                     color: Colors.blueAccent.withOpacity(0.7),
                   )
                 ],
@@ -154,74 +155,102 @@ class _BoxPlotPageState extends State<BoxPlotPage> {
 }
 
 // ==========================================================
-// HALAMAN GRAFIK RADAR (LINE SERI AMAN)
+// HALAMAN GRAFIK RADAR ASLI JARING LABA-LABA (fl_chart)
 // ==========================================================
-class RadarChartPage extends StatefulWidget {
+class RadarChartPage extends StatelessWidget {
   const RadarChartPage({super.key});
-
-  @override
-  State<RadarChartPage> createState() => _RadarChartPageState();
-}
-
-class _RadarChartPageState extends State<RadarChartPage> {
-  late List<DataRadar> _dataFisik;
-
-  @override
-  void initState() {
-    super.initState();
-    _dataFisik = [
-      DataRadar('Push Up', 80.0, 60.0, 90.0),
-      DataRadar('Sit Up', 70.0, 85.0, 65.0),
-      DataRadar('Back Up', 85.0, 70.0, 75.0),
-      DataRadar('Pull Up', 60.0, 75.0, 80.0),
-      DataRadar('Squat', 90.0, 65.0, 85.0),
-    ];
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Analisis Fisik - Radar Chart'),
+        title: const Text('Analisis Fisik - Radar Chart Asli'),
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
+            const Text(
+              'Perbandingan Biomotorik Siswa',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            // Indikator Legenda Manual
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildIndicator(Colors.red, 'Siswa A'),
+                const SizedBox(width: 15),
+                _buildIndicator(Colors.green, 'Siswa B'),
+                const SizedBox(width: 15),
+                _buildIndicator(Colors.blue, 'Siswa C'),
+              ],
+            ),
+            const SizedBox(height: 30),
             Expanded(
-              child: SfCartesianChart(
-                title: const ChartTitle(text: 'Perbandingan Biomotorik Siswa'),
-                legend: const Legend(isVisible: true, position: LegendPosition.bottom),
-                primaryXAxis: const CategoryAxis(),
-                primaryYAxis: const NumericAxis(minimum: 0, maximum: 100, interval: 20),
-                series: <CartesianSeries<DataRadar, String>>[
-                  LineSeries<DataRadar, String>(
-                    name: 'Siswa A',
-                    dataSource: _dataFisik,
-                    xValueMapper: (DataRadar data, _) => data.jenisLatihan,
-                    yValueMapper: (DataRadar data, _) => data.nilaiSiswaA,
-                    markerSettings: const MarkerSettings(isVisible: true),
-                    color: Colors.red,
-                  ),
-                  LineSeries<DataRadar, String>(
-                    name: 'Siswa B',
-                    dataSource: _dataFisik,
-                    xValueMapper: (DataRadar data, _) => data.jenisLatihan,
-                    yValueMapper: (DataRadar data, _) => data.nilaiSiswaB,
-                    markerSettings: const MarkerSettings(isVisible: true),
-                    color: Colors.green,
-                  ),
-                  LineSeries<DataRadar, String>(
-                    name: 'Siswa C',
-                    dataSource: _dataFisik,
-                    xValueMapper: (DataRadar data, _) => data.jenisLatihan,
-                    yValueMapper: (DataRadar data, _) => data.nilaiSiswaC,
-                    markerSettings: const MarkerSettings(isVisible: true),
-                    color: Colors.blue,
-                  ),
-                ],
+              // Widget RadarChart Asli dari FL Chart
+              child: RadarChart(
+                RadarChartData(
+                  radarShape: RadarShape.circle, // Bentuk lingkaran jaring laba-laba
+                  dataSets: [
+                    // Jaring Siswa A
+                    RadarDataSet(
+                      fillColor: Colors.red.withOpacity(0.2),
+                      borderColor: Colors.red,
+                      entryRadius: 3,
+                      dataEntries: [
+                        const RadarChartCell(value: 80), // Push Up
+                        const RadarChartCell(value: 70), // Sit Up
+                        const RadarChartCell(value: 85), // Back Up
+                        const RadarChartCell(value: 60), // Pull Up
+                        const RadarChartCell(value: 90), // Squat
+                      ],
+                    ),
+                    // Jaring Siswa B
+                    RadarDataSet(
+                      fillColor: Colors.green.withOpacity(0.2),
+                      borderColor: Colors.green,
+                      entryRadius: 3,
+                      dataEntries: [
+                        const RadarChartCell(value: 60),
+                        const RadarChartCell(value: 85),
+                        const RadarChartCell(value: 70),
+                        const RadarChartCell(value: 75),
+                        const RadarChartCell(value: 65),
+                      ],
+                    ),
+                    // Jaring Siswa C
+                    RadarDataSet(
+                      fillColor: Colors.blue.withOpacity(0.2),
+                      borderColor: Colors.blue,
+                      entryRadius: 3,
+                      dataEntries: [
+                        const RadarChartCell(value: 90),
+                        const RadarChartCell(value: 65),
+                        const RadarChartCell(value: 75),
+                        const RadarChartCell(value: 80),
+                        const RadarChartCell(value: 85),
+                      ],
+                    ),
+                  ],
+                  // Judul latihan di setiap pojok jaring
+                  getTitle: (index, angle) {
+                    switch (index) {
+                      case 0: return const RadarChartTitle(text: 'Push Up');
+                      case 1: return const RadarChartTitle(text: 'Sit Up');
+                      case 2: return const RadarChartTitle(text: 'Back Up');
+                      case 3: return const RadarChartTitle(text: 'Pull Up');
+                      case 4: return const RadarChartTitle(text: 'Squat');
+                      default: return const RadarChartTitle(text: '');
+                    }
+                  },
+                  tickCount: 5,
+                  ticksTextStyle: const TextStyle(color: Colors.grey, fontSize: 10),
+                  gridBorderData: const BorderSide(color: Colors.grey, width: 1),
+                  radarBorderData: const BorderSide(color: Colors.transparent),
+                ),
               ),
             ),
             const SizedBox(height: 20),
@@ -236,6 +265,16 @@ class _RadarChartPageState extends State<RadarChartPage> {
       ),
     );
   }
+
+  Widget _buildIndicator(Color color, String text) {
+    return Row(
+      children: [
+        Container(width: 12, height: 12, color: color),
+        const SizedBox(width: 5),
+        Text(text, style: const TextStyle(fontSize: 14)),
+      ],
+    );
+  }
 }
 
 // ==========================================================
@@ -245,12 +284,4 @@ class DataKategori {
   DataKategori(this.namaKelas, this.kumpulanNilai);
   final String namaKelas;
   final List<num> kumpulanNilai;
-}
-
-class DataRadar {
-  DataRadar(this.jenisLatihan, this.nilaiSiswaA, this.nilaiSiswaB, this.nilaiSiswaC);
-  final String jenisLatihan;
-  final double nilaiSiswaA;
-  final double nilaiSiswaB;
-  final double nilaiSiswaC;
 }
