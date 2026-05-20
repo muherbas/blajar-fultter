@@ -4,13 +4,13 @@ const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 
 const RESOURCES = {"assets/shaders/ink_sparkle.frag": "ecc85a2e95f5e9f53123dcaf8cb9b6ce",
-"assets/fonts/MaterialIcons-Regular.otf": "9cb41b8b401341db06aca1a31c879aab",
+"assets/fonts/MaterialIcons-Regular.otf": "0db35ae7a415370b89e807027510caf0",
 "assets/AssetManifest.bin": "0b0a3415aad49b6e9bf965ff578614f9",
 "assets/FontManifest.json": "7b2a36307916a9721811788013e65289",
 "assets/AssetManifest.bin.json": "a1fee2517bf598633e2f67fcf3e26c94",
-"assets/NOTICES": "7d50bc24485b79a786b30be4a3b73069",
+"assets/NOTICES": "81f3c129a03cb423213d72e79da90bad",
 "assets/AssetManifest.json": "99914b932bd37a50b983c5e7c90ae93b",
-"version.json": "0ccd26c65c399b3012057aee44bc6116",
+"version.json": "4545d3f37e84a5c953ebd8e5e950797f",
 "index.html": "66c9212ef6a7a2933e280bc6e401173b",
 "/": "66c9212ef6a7a2933e280bc6e401173b",
 "flutter.js": "c71a09214cb6f5f8996a531350400a9a",
@@ -24,7 +24,7 @@ const RESOURCES = {"assets/shaders/ink_sparkle.frag": "ecc85a2e95f5e9f53123dcaf8
 "canvaskit/skwasm.worker.js": "bfb704a6c714a75da9ef320991e88b03",
 "canvaskit/canvaskit.js": "c86fbd9e7b17accae76e5ad116583dc4",
 "canvaskit/skwasm.wasm": "e42815763c5d05bba43f9d0337fa7d84",
-"main.dart.js": "e492e51f2889a0e066ae239313a26678"};
+"main.dart.js": "4686bb3a728c51870359832b4376421e"};
 // The application shell files that are downloaded before a service worker can
 // start.
 const CORE = ["main.dart.js",
