@@ -1,6 +1,7 @@
-name: belajar_boxplot
-description: Aplikasi untuk belajar grafik Boxplot dengan Flutter.
+name: radar_chart_app
+description: Radar Chart tanpa package
 publish_to: 'none'
+
 version: 1.0.0+1
 
 environment:
@@ -9,11 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  # Menambahkan package pembuat grafik
-  syncfusion_flutter_charts: ^24.2.7
-  syncfusion_flutter_gauges: ^24.2.7
-  flutter_radar_chart: ^0.2.1
-
+  http: ^1.2 # Ini wajib buat API call
 
 dev_dependencies:
   flutter_test:
