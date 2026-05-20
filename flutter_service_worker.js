@@ -24,7 +24,7 @@ const RESOURCES = {"assets/shaders/ink_sparkle.frag": "ecc85a2e95f5e9f53123dcaf8
 "canvaskit/skwasm.worker.js": "bfb704a6c714a75da9ef320991e88b03",
 "canvaskit/canvaskit.js": "c86fbd9e7b17accae76e5ad116583dc4",
 "canvaskit/skwasm.wasm": "e42815763c5d05bba43f9d0337fa7d84",
-"main.dart.js": "6162d39289c12c4e2760c9d1d5a5274d"};
+"main.dart.js": "e492e51f2889a0e066ae239313a26678"};
 // The application shell files that are downloaded before a service worker can
 // start.
 const CORE = ["main.dart.js",
