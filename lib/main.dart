@@ -1,241 +1,228 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/charts.dart' as sf; // Untuk Boxplot
-import 'radar_chart.dart'; // Import lokal kustom kita
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: RadarChartPage(),
+  ));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class RadarChartPage extends StatefulWidget {
+  const RadarChartPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Belajar Grafika',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
-      home: const MenuUtamaPage(),
-    );
-  }
+  State<RadarChartPage> createState() => _RadarChartPageState();
 }
 
-// ==========================================================
-// HALAMAN MENU UTAMA (DASHBOARD)
-// ==========================================================
-class MenuUtamaPage extends StatelessWidget {
-  const MenuUtamaPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard Utama'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Tombol 1: Boxplot
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-              ),
-              icon: const Icon(Icons.bar_chart),
-              label: const Text('Lihat Grafik Boxplot', style: TextStyle(fontSize: 18)),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const BoxPlotPage(),
-                  ),
-                );
-              },
-            ),
-            
-            const SizedBox(height: 20),
-            
-            // Tombol 2: Radar Chart Jaring Laba-Laba Lokal
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                backgroundColor: Colors.teal,
-                foregroundColor: Colors.white,
-              ),
-              icon: const Icon(Icons.pie_chart_outline),
-              label: const Text('Lihat Grafik Radar', style: TextStyle(fontSize: 18)),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const RadarChartPage(),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ==========================================================
-// HALAMAN GRAFIK BOXPLOT (MENGGUNAKAN SYNCFUSION)
-// ==========================================================
-class BoxPlotPage extends StatefulWidget {
-  const BoxPlotPage({super.key});
-
-  @override
-  State<BoxPlotPage> createState() => _BoxPlotPageState();
-}
-
-class _BoxPlotPageState extends State<BoxPlotPage> {
-  late List<DataKategori> _dataNilai;
+class _RadarChartPageState extends State<RadarChartPage> {
+  List<RadarData> radarData = [];
+  bool isLoading = true;
+  String errorMsg = '';
 
   @override
   void initState() {
     super.initState();
-    // Isian data wajib pakai .0 agar terbaca sebagai num desimal yang sah
-    _dataNilai = [
-      DataKategori('Kelas A', [20.0, 55.0, 60.0, 62.0, 65.0, 68.0, 70.0, 72.0, 98.0]),
-      DataKategori('Kelas B', [45.0, 48.0, 50.0, 53.0, 56.0, 58.0, 60.0, 62.0, 65.0]),
-      DataKategori('Kelas C', [70.0, 72.0, 75.0, 78.0, 80.0, 83.0, 85.0, 88.0, 90.0]),
-    ];
+    fetchRadarData();
+  }
+
+  Future<void> fetchRadarData() async {
+    try {
+      // GANTI URL INI DENGAN API KAMU
+      final response = await http.get(
+        Uri.parse('https://api.example.com/stats'),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        final List dataList = jsonData['data'];
+
+        setState(() {
+          radarData = dataList.map((e) => RadarData.fromJson(e)).toList();
+          isLoading = false;
+          errorMsg = '';
+        });
+      } else {
+        throw Exception('Status: ${response.statusCode}');
+      }
+    } catch (e) {
+      setState(() {
+        // Data dummy kalau API gagal
+        radarData = [
+          RadarData(label: 'Attack', value: 80),
+          RadarData(label: 'Defense', value: 65),
+          RadarData(label: 'Speed', value: 90),
+          RadarData(label: 'Magic', value: 70),
+          RadarData(label: 'Health', value: 85),
+          RadarData(label: 'Luck', value: 50),
+        ];
+        isLoading = false;
+        errorMsg = 'Gagal load API, pakai data dummy. Error: $e';
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Analisis Nilai - Boxplot Diagram'),
-        backgroundColor: Colors.blueAccent,
-        foregroundColor: Colors.white,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: sf.SfCartesianChart(
-                title: const sf.ChartTitle(text: 'Sebaran Nilai Ujian per Kelas'),
-                legend: const sf.Legend(isVisible: true, position: sf.LegendPosition.bottom),
-                primaryXAxis: const sf.CategoryAxis(majorGridLines: sf.MajorGridLines(width: 0)),
-                primaryYAxis: const sf.NumericAxis(minimum: 0, maximum: 100, interval: 10),
-                series: <sf.BoxAndWhiskerSeries<DataKategori, String>>[
-                  sf.SfBoxAndWhiskerSeries<DataKategori, String>(
-                    name: 'Rentang Nilai',
-                    dataSource: _dataNilai,
-                    xValueMapper: (DataKategori data, _) => data.namaKelas,
-                    yValueMapper: (DataKategori data, _) => data.kumpulanNilai, // Klop dengan List<num>?
-                    showMean: true,
-                    boxPlotMode: sf.BoxPlotMode.normal,
-                    color: Colors.blueAccent.withOpacity(0.7),
-                  )
+      appBar: AppBar(title: const Text('Radar Chart API')),
+      body: RefreshIndicator(
+        onRefresh: fetchRadarData,
+        child: isLoading
+          ? const Center(child: CircularProgressIndicator())
+            : ListView(
+                padding: const EdgeInsets.all(24.0),
+                children: [
+                  if (errorMsg.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.only(bottom: 16),
+                      color: Colors.orange.shade100,
+                      child: Text(errorMsg, style: const TextStyle(color: Colors.orange)),
+                    ),
+                  AspectRatio(
+                    aspectRatio: 1,
+                    child: CustomPaint(
+                      painter: RadarChartPainter(
+                        data: radarData,
+                        maxValue: 100,
+                        strokeColor: Colors.blue,
+                        fillColor: Colors.blue.withOpacity(0.3),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  _buildLegend(),
                 ],
               ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Kembali ke Menu Utama'),
-            ),
-          ],
-        ),
       ),
+    );
+  }
+
+  Widget _buildLegend() {
+    return Wrap(
+      spacing: 16,
+      runSpacing: 8,
+      children: radarData.map((item) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(width: 12, height: 12, color: Colors.blue),
+            const SizedBox(width: 4),
+            Text('${item.label}: ${item.value.toInt()}'),
+          ],
+        );
+      }).toList(),
     );
   }
 }
 
-// ==========================================================
-// HALAMAN GRAFIK RADAR ASLI (MENGGUNAKAN FILE LOKAL)
-// ==========================================================
-class RadarChartPage extends StatelessWidget {
-  const RadarChartPage({super.key});
+class RadarData {
+  final String label;
+  final double value;
+
+  RadarData({required this.label, required this.value});
+
+  factory RadarData.fromJson(Map<String, dynamic> json) {
+    return RadarData(
+      label: json['label'],
+      value: (json['value'] as num).toDouble(),
+    );
+  }
+}
+
+class RadarChartPainter extends CustomPainter {
+  final List<RadarData> data;
+  final double maxValue;
+  final Color strokeColor;
+  final Color fillColor;
+  final int ticks;
+
+  RadarChartPainter({
+    required this.data,
+    required this.maxValue,
+    required this.strokeColor,
+    required this.fillColor,
+    this.ticks = 5,
+  });
 
   @override
-  Widget build(BuildContext context) {
-    const namaLatihan = ['Push Up', 'Sit Up', 'Back Up', 'Pull Up', 'Squat'];
-    const penandaNilai = [20, 40, 60, 80, 100];
+  void paint(Canvas canvas, Size size) {
+    if (data.isEmpty) return;
 
-    const dataFisikSiswa = [
-      [80, 70, 85, 60, 90], 
-      [60, 85, 70, 75, 65], 
-      [90, 65, 75, 80, 85], 
-    ];
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = min(size.width / 2, size.height / 2) * 0.8;
+    final angle = 2 * pi / data.length;
 
-    const warnaJaring = [Colors.red, Colors.green, Colors.blue];
+    final gridPaint = Paint()
+    ..color = Colors.grey.shade300
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Analisis Fisik - Radar Chart Lokal'),
-        backgroundColor: Colors.teal,
-        foregroundColor: Colors.white,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildIndicator(Colors.red, 'Siswa A'),
-                const SizedBox(width: 15),
-                _buildIndicator(Colors.green, 'Siswa B'),
-                const SizedBox(width: 15),
-                _buildIndicator(Colors.blue, 'Siswa C'),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: RadarChart(
-                ticks: penandaNilai,
-                features: namaLatihan,
-                data: dataFisikSiswa,
-                graphColors: warnaJaring,
-                outlineColor: Colors.grey,
-                axisColor: Colors.grey.shade400,
-                featuresTextStyle: const TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.bold),
-                ticksTextStyle: const TextStyle(color: Colors.grey, fontSize: 10),
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Kembali ke Menu Utama'),
-            ),
-          ],
-        ),
-      ),
-    );
+    final axisPaint = Paint()
+    ..color = Colors.grey.shade400
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1;
+
+    final dataPaint = Paint()
+    ..color = fillColor
+    ..style = PaintingStyle.fill;
+
+    final dataStrokePaint = Paint()
+    ..color = strokeColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 2;
+
+    // 1. Grid
+    for (int i = 1; i <= ticks; i++) {
+      final r = radius * i / ticks;
+      final path = Path();
+      for (int j = 0; j < data.length; j++) {
+        final x = center.dx + r * cos(angle * j - pi / 2);
+        final y = center.dy + r * sin(angle * j - pi / 2);
+        if (j == 0) path.moveTo(x, y); else path.lineTo(x, y);
+      }
+      path.close();
+      canvas.drawPath(path, gridPaint);
+    }
+
+    // 2. Sumbu + Label
+    final textPainter = TextPainter(textDirection: TextDirection.ltr);
+    for (int i = 0; i < data.length; i++) {
+      final x = center.dx + radius * cos(angle * i - pi / 2);
+      final y = center.dy + radius * sin(angle * i - pi / 2);
+      canvas.drawLine(center, Offset(x, y), axisPaint);
+
+      textPainter.text = TextSpan(
+        text: data[i].label,
+        style: const TextStyle(color: Colors.black, fontSize: 12),
+      );
+      textPainter.layout();
+      final labelOffset = Offset(
+        center.dx + (radius + 16) * cos(angle * i - pi / 2) - textPainter.width / 2,
+        center.dy + (radius + 16) * sin(angle * i - pi / 2) - textPainter.height / 2,
+      );
+      textPainter.paint(canvas, labelOffset);
+    }
+
+    // 3. Data polygon
+    final dataPath = Path();
+    for (int i = 0; i < data.length; i++) {
+      final valueRatio = (data[i].value / maxValue).clamp(0.0, 1.0);
+      final x = center.dx + radius * valueRatio * cos(angle * i - pi / 2);
+      final y = center.dy + radius * valueRatio * sin(angle * i - pi / 2);
+      if (i == 0) dataPath.moveTo(x, y); else dataPath.lineTo(x, y);
+      canvas.drawCircle(Offset(x, y), 4, Paint()..color = strokeColor);
+    }
+    dataPath.close();
+    canvas.drawPath(dataPath, dataPaint);
+    canvas.drawPath(dataPath, dataStrokePaint);
   }
 
-  Widget _buildIndicator(Color color, String text) {
-    return Row(
-      children: [
-        Container(width: 12, height: 12, color: color),
-        const SizedBox(width: 5),
-        Text(text, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-      ],
-    );
+  @override
+  bool shouldRepaint(covariant RadarChartPainter oldDelegate) {
+    return oldDelegate.data!= data || oldDelegate.maxValue!= maxValue;
   }
-}
-
-// ==========================================================
-// MODEL DATA BOXPLOT (KEMBALI KE NUM YANG SAH)
-// ==========================================================
-class DataKategori {
-  DataKategori(this.namaKelas, this.kumpulanNilai);
-  final String namaKelas;
-  final List<num> kumpulanNilai; // <--- Kembali ke num sesuai titah Syncfusion
 }
