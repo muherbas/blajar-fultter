@@ -127,8 +127,8 @@ class _DashboardPageState extends State<DashboardPage> {
                               dataSource: _boxData,
                               xValueMapper: (BoxPlotData data, _) => data.x,
                               yValueMapper: (BoxPlotData data, _) => data.yValues,
-                              boxPlotMode: BoxPlotMode.normal,
-                              color: const Color(0xFFD0E3FF), // Menggunakan parameter 'color' agar lolos versi v24
+                              mode: BoxPlotMode.normal, // <-- Sudah diperbaiki dari boxPlotMode menjadi mode
+                              color: const Color(0xFFD0E3FF),
                               borderColor: const Color(0xFF1E70E0),
                               borderWidth: 2,
                             )
