@@ -39,7 +39,7 @@ class MenuUtamaPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Tombol 1: Untuk membuka Boxplot
+            // Tombol 1: Boxplot
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -60,7 +60,7 @@ class MenuUtamaPage extends StatelessWidget {
             
             const SizedBox(height: 20),
             
-            // Tombol 2: Untuk membuka Radar Chart
+            // Tombol 2: Radar Chart
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -169,12 +169,13 @@ class _RadarChartPageState extends State<RadarChartPage> {
   @override
   void initState() {
     super.initState();
+    // Diubah menjadi double murni (.0) agar tidak bentrok tipe data
     _dataFisik = [
-      DataRadar('Push Up', 80, 60, 90),
-      DataRadar('Sit Up', 70, 85, 65),
-      DataRadar('Back Up', 85, 70, 75),
-      DataRadar('Pull Up', 60, 75, 80),
-      DataRadar('Squat', 90, 65, 85),
+      DataRadar('Push Up', 80.0, 60.0, 90.0),
+      DataRadar('Sit Up', 70.0, 85.0, 65.0),
+      DataRadar('Back Up', 85.0, 70.0, 75.0),
+      DataRadar('Pull Up', 60.0, 75.0, 80.0),
+      DataRadar('Squat', 90.0, 65.0, 85.0),
     ];
   }
 
@@ -204,35 +205,32 @@ class _RadarChartPageState extends State<RadarChartPage> {
                   gridLineType: GridLineType.polygon,
                 ),
                 series: <PolarSeries<DataRadar, String>>[
-                  // Jaring Data Siswa A
+                  // Siswa A
                   PolarSeries<DataRadar, String>(
                     name: 'Siswa A',
                     dataSource: _dataFisik,
                     xValueMapper: (DataRadar data, _) => data.jenisLatihan,
                     yValueMapper: (DataRadar data, _) => data.nilaiSiswaA,
-                    drawType: PolarAreaType.filledRadar, // Sudah fix pakai TITIK (.)
                     color: Colors.red.withOpacity(0.2),
                     borderColor: Colors.red,
                     borderWidth: 2,
                   ),
-                  // Jaring Data Siswa B
+                  // Siswa B
                   PolarSeries<DataRadar, String>(
                     name: 'Siswa B',
                     dataSource: _dataFisik,
                     xValueMapper: (DataRadar data, _) => data.jenisLatihan,
                     yValueMapper: (DataRadar data, _) => data.nilaiSiswaB,
-                    drawType: PolarAreaType.filledRadar, // Sudah fix pakai TITIK (.)
                     color: Colors.green.withOpacity(0.2),
                     borderColor: Colors.green,
                     borderWidth: 2,
                   ),
-                  // Jaring Data Siswa C
+                  // Siswa C
                   PolarSeries<DataRadar, String>(
                     name: 'Siswa C',
                     dataSource: _dataFisik,
                     xValueMapper: (DataRadar data, _) => data.jenisLatihan,
                     yValueMapper: (DataRadar data, _) => data.nilaiSiswaC,
-                    drawType: PolarAreaType.filledRadar, // Sudah fix pakai TITIK (.)
                     color: Colors.blue.withOpacity(0.2),
                     borderColor: Colors.blue,
                     borderWidth: 2,
