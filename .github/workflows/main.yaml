@@ -37,7 +37,8 @@ jobs:
       # Mengubah aplikasi menjadi Web. 
       # PENTING: Ganti "NAMA_REPOSITORI_ANDA" sesuai dengan nama repositori di GitHub
       - name: Build Web
-        run: flutter build web --release --base-href "/NAMA_REPOSITORI_ANDA/"
+        run: flutter build web --release --base-href "/belajar-boxplot-flutter/"
+
 
       # Menyiapkan file web untuk diunggah
       - name: Upload Web Artifact
