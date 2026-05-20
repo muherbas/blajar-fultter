@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 void main() {
   runApp(const MyApp());
@@ -39,7 +38,7 @@ class _DashboardPageState extends State<DashboardPage> {
     BoxPlotData('React', 0.25, 0.4, 0.6, 0.8, 0.95),
   ];
 
-  // Data Radar (10 Komponen Turunan)
+  // Data Radar/Polar (10 Komponen Turunan)
   final List<RadarData> _radarData = [
     RadarData('M.Endur', 75),
     RadarData('Power', 80),
@@ -142,7 +141,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
               const SizedBox(height: 16),
 
-              // ================= CARD 2: RADAR CHART =================
+              // ================= CARD 2: RADAR/POLAR CHART =================
               Card(
                 color: Colors.white,
                 elevation: 0,
@@ -191,7 +190,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       ),
                       SizedBox(
                         height: 320,
-                        child: SfRadarChart(
+                        child: SfPolarChart( // Menggunakan SfPolarChart bawaan versi stabil v24
                           primaryXAxis: const CategoryAxis(
                             labelPlacement: LabelPlacement.onTicks,
                           ),
@@ -200,15 +199,14 @@ class _DashboardPageState extends State<DashboardPage> {
                             maximum: 100,
                             interval: 20,
                           ),
-                          drawType: RadarDrawType.polygon,
-                          series: <RadarSeries<RadarData, String>>[
-                            RadarSeries<RadarData, String>(
+                          series: <PolarSeries<RadarData, String>>[
+                            PolarSeries<RadarData, String>(
                               dataSource: _radarData,
                               xValueMapper: (RadarData data, _) => data.kategori,
                               yValueMapper: (RadarData data, _) => data.nilai,
-                              color: Colors.purple.withOpacity(0.05),
-                              borderColor: Colors.purple,
-                              borderWidth: 2,
+                              drawType: PolarDrawType.line, // Garis penghubung kaku membentuk segi banyak
+                              color: Colors.purple,
+                              width: 2,
                               markerSettings: const MarkerSettings(
                                 isVisible: true,
                                 color: Colors.purple,
