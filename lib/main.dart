@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart' as sf; // Untuk halaman Boxplot
-import 'package:flutter_radar_chart/flutter_radar_chart.dart'; // <--- Library Radar Asli Anda
+import 'package:flutter_radar_chart/flutter_radar_chart.dart'; // Library Radar asli Anda
 
 void main() {
   runApp(const MyApp());
