@@ -8,7 +8,7 @@ const RESOURCES = {"assets/shaders/ink_sparkle.frag": "ecc85a2e95f5e9f53123dcaf8
 "assets/AssetManifest.bin": "0b0a3415aad49b6e9bf965ff578614f9",
 "assets/FontManifest.json": "7b2a36307916a9721811788013e65289",
 "assets/AssetManifest.bin.json": "a1fee2517bf598633e2f67fcf3e26c94",
-"assets/NOTICES": "fd7f5712d22723b49031bc26c4ffecbd",
+"assets/NOTICES": "e4e7cdcab44c927e291b6b32355f84be",
 "assets/AssetManifest.json": "99914b932bd37a50b983c5e7c90ae93b",
 "version.json": "0ccd26c65c399b3012057aee44bc6116",
 "index.html": "66c9212ef6a7a2933e280bc6e401173b",
@@ -24,7 +24,7 @@ const RESOURCES = {"assets/shaders/ink_sparkle.frag": "ecc85a2e95f5e9f53123dcaf8
 "canvaskit/skwasm.worker.js": "bfb704a6c714a75da9ef320991e88b03",
 "canvaskit/canvaskit.js": "c86fbd9e7b17accae76e5ad116583dc4",
 "canvaskit/skwasm.wasm": "e42815763c5d05bba43f9d0337fa7d84",
-"main.dart.js": "194ae3a7a707552f322bb666ccca45fe"};
+"main.dart.js": "30db10df3e097975f2ff331e014778e6"};
 // The application shell files that are downloaded before a service worker can
 // start.
 const CORE = ["main.dart.js",
