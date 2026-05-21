@@ -97,12 +97,13 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
 
   @override
   Widget build(BuildContext context) {
+    // Di sini Anda bebas menambah widget halaman baru ke dalam List tanpa takut error tipe data lagi
     final List<Widget> _halaman = [
       DashboardAtletPage(murid: _muridTerpilih), 
       ManajemenMuridPage( 
         daftarMurid: _daftarMurid,
         muridTerpilih: _muridTerpilih,
-        onMuridDipilih: (muridBaru) { // SUDAH FIXED: Spasi dibuang
+        onMuridDipilih: (muridBaru) { 
           setState(() {
             _muridTerpilih = muridBaru;
             _currentIndex = 0; 
@@ -180,7 +181,7 @@ class DashboardAtletPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'KOMPONEN UTAMA',
+                    'KOMKOMPONEN UTAMA',
                     style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFF38BDF8), letterSpacing: 1.0),
                   ),
                   const SizedBox(height: 24),
@@ -248,8 +249,10 @@ class DashboardAtletPage extends StatelessWidget {
 class ManajemenMuridPage extends StatefulWidget {
   final List<Murid> daftarMurid;
   final Murid muridTerpilih;
-  final Function(Murid) onMuridDipilih;
-  final Function(List<Murid>) onDaftarUpdated;
+  
+  // PERBAIKAN UTAMA: Definisi tipe fungsi diperketat agar tidak bisa menjadi 'dynamic' lagi
+  final void Function(Murid murid) onMuridDipilih;
+  final void Function(List<Murid> listBaru) onDaftarUpdated;
 
   const ManajemenMuridPage({
     Key? key,
@@ -593,116 +596,3 @@ class BoxplotPainter extends CustomPainter {
       double boxWidth = spacing * 0.35;
 
       canvas.drawCircle(Offset(x, outlier), 2.5, Paint()..color = const Color(0xFF38BDF8));
-      canvas.drawLine(Offset(x, topWhisker), Offset(x, q3), linePaint);
-      canvas.drawLine(Offset(x - boxWidth/3, topWhisker), Offset(x + boxWidth/3, topWhisker), linePaint);
-      canvas.drawLine(Offset(x, q1), Offset(x, bottomWhisker), linePaint);
-      canvas.drawLine(Offset(x - boxWidth/3, bottomWhisker), Offset(x + boxWidth/3, bottomWhisker), linePaint);
-
-      Rect boxRect = Rect.fromLTRB(x - boxWidth / 2, q3, x + boxWidth / 2, q1);
-      canvas.drawRect(boxRect, boxPaint);
-      canvas.drawRect(boxRect, Paint()..color = const Color(0xFF38BDF8)..style = PaintingStyle.stroke..strokeWidth = 1);
-      canvas.drawLine(Offset(x - boxWidth / 2, median), Offset(x + boxWidth / 2, median), Paint()..color = const Color(0xFFF8FAFC)..strokeWidth = 1.5);
-    }
-  }
-  @override
-  bool shouldRepaint(covariant BoxplotPainter oldDelegate) => oldDelegate.dataValues != dataValues;
-}
-
-class RadarSpiderChart extends StatelessWidget {
-  final List<double> dataValues;
-  const RadarSpiderChart({Key? key, required this.dataValues}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size.infinite,
-      painter: RadarSpiderPainter(dataValues: dataValues),
-    );
-  }
-}
-
-class RadarSpiderPainter extends CustomPainter {
-  final List<double> dataValues;
-  RadarSpiderPainter({required this.dataValues});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    Offset center = Offset(size.width / 2, size.height / 2);
-    double maxRadius = math.min(size.width, size.height) / 2.7; 
-    int numFeatures = 10;
-
-    List<String> labels = [
-      'MUSCULAR END.', 'POWER', 'CORE STAB.', 'DYN. FLEX', 'SPEED END.',
-      'REACTIVE SP.', 'AGILITY', 'ANTICIPATION', 'MOBILITY', 'REACT AGILITY'
-    ];
-
-    Paint gridPaint = Paint()..color = const Color(0xFF334155)..style = PaintingStyle.stroke..strokeWidth = 1.0;
-    for (int i = 1; i <= 4; i++) {
-      double currentRadius = maxRadius * (i / 4);
-      Path gridPath = Path();
-      for (int j = 0; j < numFeatures; j++) {
-        double angle = (j * 2 * math.pi / numFeatures) - (math.pi / 2);
-        double x = center.dx + currentRadius * math.cos(angle);
-        double y = center.dy + currentRadius * math.sin(angle);
-        if (j == 0) gridPath.moveTo(x, y); else gridPath.lineTo(x, y);
-      }
-      gridPath.close();
-      canvas.drawPath(gridPath, gridPaint);
-    }
-
-    for (int j = 0; j < numFeatures; j++) {
-      double angle = (j * 2 * math.pi / numFeatures) - (math.pi / 2);
-      double x = center.dx + maxRadius * math.cos(angle);
-      double y = center.dy + maxRadius * math.sin(angle);
-      canvas.drawLine(center, Offset(x, y), gridPaint);
-      
-      TextPainter textPainter = TextPainter(
-        text: TextSpan(
-          text: labels[j],
-          style: const TextStyle(fontSize: 7.5, fontWeight: FontWeight.w800, color: Color(0xFF94A3B8), letterSpacing: 0.3),
-        ),
-        textDirection: TextDirection.ltr,
-      )..layout();
-      
-      double textX = center.dx + (maxRadius + 14) * math.cos(angle) - (textPainter.width / 2);
-      double textY = center.dy + (maxRadius + 10) * math.sin(angle) - (textPainter.height / 2);
-      textPainter.paint(canvas, Offset(textX, textY));
-    }
-
-    List<double> teamAvgValues = [0.65, 0.70, 0.60, 0.65, 0.68, 0.70, 0.62, 0.65, 0.70, 0.60];
-    Path teamPath = Path();
-    for (int j = 0; j < numFeatures; j++) {
-      double angle = (j * 2 * math.pi / numFeatures) - (math.pi / 2);
-      double currentRadius = maxRadius * teamAvgValues[j];
-      double x = center.dx + currentRadius * math.cos(angle);
-      double y = center.dy + currentRadius * math.sin(angle);
-      if (j == 0) teamPath.moveTo(x, y); else teamPath.lineTo(x, y);
-    }
-    teamPath.close();
-    canvas.drawPath(teamPath, Paint()..color = const Color(0xFF0EA5E9).withOpacity(0.12)..style = PaintingStyle.fill);
-    canvas.drawPath(teamPath, Paint()..color = const Color(0xFF0EA5E9).withOpacity(0.5)..style = PaintingStyle.stroke..strokeWidth = 1.2);
-
-    Path studentPath = Path();
-    List<Offset> studentPoints = [];
-    for (int j = 0; j < numFeatures; j++) {
-      double angle = (j * 2 * math.pi / numFeatures) - (math.pi / 2);
-      double currentRadius = maxRadius * dataValues[j];
-      double x = center.dx + currentRadius * math.cos(angle);
-      double y = center.dy + currentRadius * math.sin(angle);
-      studentPoints.add(Offset(x, y));
-      if (j == 0) studentPath.moveTo(x, y); else studentPath.lineTo(x, y);
-    }
-    studentPath.close();
-    canvas.drawPath(studentPath, Paint()..color = const Color(0xFFF43F5E).withOpacity(0.28)..style = PaintingStyle.fill);
-    canvas.drawPath(studentPath, Paint()..color = const Color(0xFFF43F5E)..style = PaintingStyle.stroke..strokeWidth = 2.0);
-
-    Paint pointPaint = Paint()..color = const Color(0xFFFFF1F2);
-    for (Offset point in studentPoints) {
-      canvas.drawCircle(point, 3, pointPaint);
-      canvas.drawCircle(point, 1.5, Paint()..color = const Color(0xFFE11D48));
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant RadarSpiderPainter oldDelegate) => oldDelegate.dataValues != dataValues;
-}
