@@ -1,24 +1,22 @@
-name: fitness_tracker_gauge
-description: "Aplikasi visualisasi data fitness murid menggunakan Boxplot dan Radial Bar Chart." 
+name: statistik_atlet_app
+description: "A new Flutter project for Athlete Dashboard Statistics."
 publish_to: 'none'
-
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: '>=3.0.0 <4.0.0' # Menyesuaikan dengan versi Flutter yang Anda gunakan
 
 dependencies:
   flutter:
     sdk: flutter
 
-  syncfusion_flutter_gauges: ^24.2.9
-  syncfusion_flutter_charts: ^24.2.7
-  cupertino_icons: ^1.0.5
+  # Tidak perlu menambahkan dependency chart eksternal karena grafik 
+  # digambar manual menggunakan Canvas & CustomPainter bawaan Flutter.
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
+  flutter_lints: ^3.0.0
 
 flutter:
   uses-material-design: true
