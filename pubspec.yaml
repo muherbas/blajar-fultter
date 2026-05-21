@@ -11,22 +11,19 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Package utama untuk membuat Radial Gauge
-  syncfusion_flutter_gauges: ^21.2.9
+  # KEDUA LINE INI SUDAH DISARANKAN OLEH LOG GITHUB ACTIONS AGAR SELARAS
+  syncfusion_flutter_gauges: ^24.2.9
   syncfusion_flutter_charts: ^24.2.7
-  # Standar ikon untuk Flutter
+  
   cupertino_icons: ^1.0.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  
-  # Linter untuk memastikan kualitas kode Anda tetap rapi
+
   flutter_lints: ^2.0.0
 
 flutter:
   uses-material-design: true
-  # Daftarkan asset Anda di bawah ini
   assets:
-    - assets/atlet_data.json
-
+    - assets/let_data.json
