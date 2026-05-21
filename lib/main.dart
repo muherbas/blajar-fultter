@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
+import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,25 +13,25 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Statistik Atlet',
+      title: 'Dashboard Syncfusion',
       theme: ThemeData(
         brightness: Brightness.light,
         scaffoldBackgroundColor: const Color(0xFFF5F6FA),
       ),
-      home: const DashboardAtletPage(),
+      home: const SyncfusionDashboardPage(),
     );
   }
 }
 
-class DashboardAtletPage extends StatelessWidget {
-  const DashboardAtletPage({Key? key}) : super(key: key);
+class SyncfusionDashboardPage extends StatelessWidget {
+  const SyncfusionDashboardPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Statistik Ruri',
+          'Statistik Atlet (Syncfusion)',
           style: TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -41,7 +42,7 @@ class DashboardAtletPage extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
-            // CARD 1: BOXPLOT ATLET (KOMPONEN UTAMA)
+            // CARD 1: 7 GRAFIK BOXPLOT (KOMPONEN UTAMA)
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -53,67 +54,37 @@ class DashboardAtletPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    '1 Boxplot Atlet: Komponen Utama',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF3F51B5),
+                    '1 Boxplot Atlet: Komponen Utama (7 Kategori)',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF3F51B5)),
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: 250,
+                    child: SfCartesianChart(
+                      primaryXAxis: const CategoryAxis(),
+                      primaryYAxis: const NumericAxis(minimum: 10, maximum: 100, interval: 20),
+                      series: <CartesianSeries>[
+                        BoxAndWhiskerSeries<BoxPlotData, String>(
+                          dataSource: getBoxPlotData(),
+                          xValueMapper: (BoxPlotData data, _) => data.x,
+                          // Mengambil list data acak untuk dihitung otomatis nilainya oleh Syncfusion
+                          yValueMapper: (BoxPlotData data, _) => data.y,
+                          boxPlotMode: BoxPlotMode.normal,
+                          showMean: true,
+                          color: const Color(0xFF4A90E2),
+                          borderColor: Colors.black87,
+                          borderWidth: 1.5,
+                        )
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  const SizedBox(
-                    height: 220,
-                    child: BoxplotChart(),
-                  ),
-                  const SizedBox(height: 12),
-                  
-                  // Info Box Rata-rata Keseluruhan Murid
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Container(
-                      width: 180,
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          const Text(
-                            'Nilai Rata-Rata Keseluruhan Murid',
-                            style: TextStyle(fontSize: 9, color: Colors.black54),
-                          ),
-                          const Text(
-                            '68.5',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
-                          ),
-                          const SizedBox(height: 4),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: 0.685,
-                              backgroundColor: Colors.grey[200],
-                              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF4285F4)),
-                              minHeight: 10,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Avg: 68.5',
-                            style: TextStyle(fontSize: 9, color: Colors.black54),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
-            // CARD 2: RADAR ATLET (KOMPONEN TURUNAN / SHOT PUT DISTANCE)
+
+            // CARD 2: RADAR GAUGE DENGAN 10 PARAMETER BERLAPIS
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -124,56 +95,29 @@ class DashboardAtletPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        '1 Radar Atlet: Komponen Turunan',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF880E4F),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFECB3),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: const Text(
-                          'Avg: 73.7',
-                          style: TextStyle(fontSize: 9, color: Colors.brown, fontWeight: FontWeight.bold),
-                        ),
-                      )
-                    ],
+                  const Text(
+                    '1 Radar Atlet: 10 Parameter Jarak/Durasi',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF880E4F)),
                   ),
                   const SizedBox(height: 10),
-                  const Center(
-                    child: Text(
-                      'Shot put distance',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87),
-                    ),
-                  ),
-                  const Align(
-                    alignment: Alignment.centerRight,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          'PARAMETER TERPILIH:',
-                          style: TextStyle(fontSize: 8, color: Colors.black54, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          'MUSCULAR ENDURANCE',
-                          style: TextStyle(fontSize: 10, color: Colors.black87, fontWeight: FontWeight.bold),
-                        ),
+                  SizedBox(
+                    height: 330,
+                    child: SfRadialGauge(
+                      axes: <RadialAxis>[
+                        // Di Syncfusion, membuat lingkaran berlapis dilakukan dengan menumpuk RadialAxis 
+                        // dari yang terluar (radius terbesar) hingga yang terdalam (radius terkecil).
+                        buildGaugeAxis(radiusFactor: 0.95, value: 85, color: Colors.orange, label: 'P1: 13M'),
+                        buildGaugeAxis(radiusFactor: 0.87, value: 70, color: Colors.red, label: 'P2: 12M'),
+                        buildGaugeAxis(radiusFactor: 0.79, value: 75, color: Colors.purple, label: 'P3: 11M'),
+                        buildGaugeAxis(radiusFactor: 0.71, value: 90, color: Colors.blue, label: 'P4: 10M'),
+                        buildGaugeAxis(radiusFactor: 0.63, value: 55, color: Colors.teal, label: 'P5: 9M'),
+                        buildGaugeAxis(radiusFactor: 0.55, value: 65, color: Colors.green, label: 'P6: 8M'),
+                        buildGaugeAxis(radiusFactor: 0.47, value: 40, color: Colors.amber, label: 'P7: 7M'),
+                        buildGaugeAxis(radiusFactor: 0.39, value: 80, color: Colors.indigo, label: 'P8: 6M'),
+                        buildGaugeAxis(radiusFactor: 0.31, value: 50, color: Colors.pink, label: 'P9: 5M'),
+                        buildGaugeAxis(radiusFactor: 0.23, value: 35, color: Colors.cyan, label: 'P10: 4M'),
                       ],
                     ),
-                  ),
-                  const SizedBox(
-                    height: 260,
-                    child: RadialDistanceChart(),
                   ),
                 ],
               ),
@@ -183,178 +127,65 @@ class DashboardAtletPage extends StatelessWidget {
       ),
     );
   }
-}
 
-// === WIDGET GRAFIK BOXPLOT ===
-class BoxplotChart extends StatelessWidget {
-  const BoxplotChart({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final List<String> labels = ['Gly', 'End', 'Spd', 'Coord', 'Flex', 'Bal', 'React'];
-    return Column(
-      children: [
-        Expanded(
-          child: CustomPaint(
-            size: Size.infinite,
-            painter: BoxplotPainter(),
+  // Helper function untuk membuat Axis berlapis pada Radial Gauge (10 parameter)
+  RadialAxis buildGaugeAxis({
+    required double radiusFactor, 
+    required double value, 
+    required Color color, 
+    required String label
+  }) {
+    return RadialAxis(
+      maximum: 100,
+      showLabels: false,
+      showTicks: false,
+      startAngle: 270, // Memulai arah lingkaran dari atas tegak lurus
+      endAngle: 270,
+      radiusFactor: radiusFactor,
+      axisLineStyle: const AxisLineStyle(
+        thickness: 8,
+        color: Color(0xFFE0E0E0), // Background track abu-abu
+      ),
+      pointers: <GaugePointer>[
+        RangePointer(
+          value: value,
+          width: 8,
+          color: color,
+          pointerShape: PointerShape.rectangle,
+          cornerStyle: CornerStyle.bothCurve, // Ujung melengkung halus
+        ),
+      ],
+      annotations: <GaugeAnnotation>[
+        // Menampilkan teks label parameter kecil di atas ring masing-masing
+        GaugeAnnotation(
+          angle: 275,
+          positionFactor: radiusFactor + 0.02,
+          widget: Text(
+            label,
+            style: const TextStyle(fontSize: 7, fontWeight: FontWeight.bold, color: Colors.black54),
           ),
         ),
-        const SizedBox(height: 6),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: labels.map((label) => SizedBox(
-            width: 40,
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 10, color: Colors.black87, fontWeight: FontWeight.w500),
-            ),
-          )).toList(),
-        ),
       ],
     );
   }
-}
 
-class BoxplotPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint linePaint = Paint()
-      ..color = Colors.black87
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
-
-    final Paint boxPaint = Paint()
-      ..color = const Color(0xFF4A90E2)
-      ..style = PaintingStyle.fill;
-
-    // Menggambar baseline horizontal bawah
-    canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), linePaint);
-    
-    int dataCount = 7;
-    double spacing = size.width / dataCount;
-
-    // Format Data: [outlierY, topWhiskerY, q3Y, medianY, q1Y, bottomWhiskerY] (skala 0.0 sampai 1.0)
-    List<List<double>> boxData = [
-      [0.0, 0.25, 0.38, 0.50, 0.65, 0.82],   // Gly
-      [0.23, 0.28, 0.42, 0.56, 0.70, 0.85],  // End (dengan Outlier)
-      [0.25, 0.32, 0.45, 0.55, 0.68, 0.88],  // Spd (dengan Outlier)
-      [0.0, 0.22, 0.35, 0.48, 0.62, 0.80],   // Coord
-      [0.0, 0.20, 0.32, 0.44, 0.58, 0.75],   // Flex
-      [0.0, 0.15, 0.28, 0.40, 0.55, 0.76],   // Bal
-      [0.24, 0.30, 0.46, 0.58, 0.72, 0.86],  // React (dengan Outlier)
+  // Fungsi penyuplai data acak untuk 7 Grafik Boxplot
+  List<BoxPlotData> getBoxPlotData() {
+    return [
+      BoxPlotData('Gly', [20, 35, 45, 50, 65, 75, 85]),
+      BoxPlotData('End', [25, 40, 50, 55, 60, 70, 90]),
+      BoxPlotData('Spd', [30, 42, 48, 52, 65, 78, 88]),
+      BoxPlotData('Coord', [15, 30, 40, 48, 58, 72, 80]),
+      BoxPlotData('Flex', [40, 50, 55, 62, 70, 82, 95]),
+      BoxPlotData('Bal', [35, 45, 58, 65, 72, 85, 98]),
+      BoxPlotData('React', [22, 38, 44, 54, 63, 75, 86]),
     ];
-
-    for (int i = 0; i < dataCount; i++) {
-      double x = (spacing * i) + (spacing / 2);
-      var data = boxData[i];
-      
-      double outlier = data[0] * size.height;
-      double topWhisker = data[1] * size.height;
-      double q3 = data[2] * size.height;
-      double median = data[3] * size.height;
-      double q1 = data[4] * size.height;
-      double bottomWhisker = data[5] * size.height;
-      double boxWidth = spacing * 0.45;
-
-      // Gambar titik Outlier (jika terdeteksi nilai > 0)
-      if (data[0] > 0) {
-        canvas.drawCircle(Offset(x, outlier), 3, Paint()..color = const Color(0xFF0D47A1));
-      }
-      
-      // Menggambar garis Whisker T-Bar Atas & Bawah
-      canvas.drawLine(Offset(x, topWhisker), Offset(x, q3), linePaint);
-      canvas.drawLine(Offset(x - boxWidth/4, topWhisker), Offset(x + boxWidth/4, topWhisker), linePaint);
-      canvas.drawLine(Offset(x, q1), Offset(x, bottomWhisker), linePaint);
-      canvas.drawLine(Offset(x - boxWidth/4, bottomWhisker), Offset(x + boxWidth/4, bottomWhisker), linePaint);
-
-      // Menggambar Kotak Utama Boxplot (Q1 ke Q3)
-      Rect boxRect = Rect.fromLTRB(x - boxWidth / 2, q3, x + boxWidth / 2, q1);
-      canvas.drawRect(boxRect, boxPaint);
-      canvas.drawRect(boxRect, linePaint);
-      
-      // Menggambar Garis Nilai Tengah (Median)
-      canvas.drawLine(Offset(x - boxWidth / 2, median), Offset(x + boxWidth / 2, median), linePaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-// === WIDGET GRAFIK RADAR/CONCENTRIC RING BAR ===
-class RadialDistanceChart extends StatelessWidget {
-  const RadialDistanceChart({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        CustomPaint(
-          size: Size.infinite,
-          painter: RadialDistancePainter(),
-        ),
-        // Skala Indikator Jarak (13M, 12M, dll.) diposisikan manual di tengah atas cincin grafik
-        const Positioned(top: 42, left: 145, child: Text('13M', style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.black54))),
-        const Positioned(top: 58, left: 145, child: Text('12M', style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.black54))),
-        const Positioned(top: 74, left: 145, child: Text('11M', style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.black54))),
-        const Positioned(top: 90, left: 145, child: Text('10M', style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.black54))),
-      ],
-    );
   }
 }
 
-class RadialDistancePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    Offset center = Offset(size.width / 2, size.height / 2);
-    
-    // Konfigurasi radius cincin berlapis dari luar ke dalam
-    List<double> radii = [100, 85, 70, 55, 40];
-    
-    // Warna tiap bar sesuai screenshot asli (Orange, Merah Tua, Ungu, Biru Tua, Biru Muda)
-    List<Color> colors = [
-      const Color(0xFFE67E22),
-      const Color(0xFFC0392B),
-      const Color(0xFF9B59B6),
-      const Color(0xFF2980B9),
-      const Color(0xFF3498DB),
-    ];
-    
-    // Persentase panjang bar & sudut mulai lingkaran (agar melengkung dinamis tidak searah)
-    List<double> sweepPercentages = [0.85, 0.65, 0.72, 0.90, 0.45];
-    List<double> startAngles = [-math.pi / 2, -math.pi / 4, 0.0, math.pi / 3, math.pi / 1.5];
-
-    // Kuas untuk background track lingkaran abu-abu transparan
-    Paint bgPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 10
-      ..color = const Color(0xFFE0E0E0).withOpacity(0.4);
-
-    for (int i = 0; i < radii.length; i++) {
-      double radius = radii[i];
-      // Gambar lingkaran abu-abu sebagai base jalur tracker
-      canvas.drawCircle(center, radius, bgPaint);
-
-      // Kuas untuk progress bar berwarna dengan ujung melengkung halus (StrokeCap.round)
-      Paint progressPaint = Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 10
-        ..color = colors[i]
-        ..strokeCap = StrokeCap.round;
-
-      double sweepAngle = 2 * math.pi * sweepPercentages[i];
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        startAngles[i],
-        sweepAngle,
-        false,
-        progressPaint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+// Model data terstruktur untuk Boxplot Syncfusion
+class BoxPlotData {
+  BoxPlotData(this.x, this.y);
+  final String x;
+  final List<num> y; // Syncfusion membutuhkan kumpulan array angka acak untuk dihitung statistiknya
 }
