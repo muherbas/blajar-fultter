@@ -56499,12 +56499,12 @@ if(r)q.b.pop()
 return!0},
 $S:36}
 A.z_.prototype={
-M(a){return new A.pU(B.y5,"Dashboard Atlet Manual",A.a5D(B.L,B.xR,null),!1,null)}}
+M(a){return new A.pU(B.y5,"Dashboard Atlet Standar",A.a5D(B.L,B.xR,null),!1,null)}}
 A.x3.prototype={
 M(a){var s=null,r=A.wo(12),q=A.wo(8),p=t.nA
-r=A.wT(s,A.wP(A.b([B.Jx,B.hG,B.Fz,B.FA,new A.hX(B.d4,s,s,A.wT(s,A.wP(A.b([B.Jw,B.Ju],p),B.jq,B.bI),s,new A.dB(B.i,s,s,q,s,s,B.aM),s,s,B.jB,180),s)],p),B.dd,B.bI),s,new A.dB(B.jm,s,s,r,s,s,B.aM),s,s,B.fl,1/0)
+r=A.wT(s,A.wP(A.b([B.Jx,B.hG,B.Fy,B.FA,new A.hX(B.d4,s,s,A.wT(s,A.wP(A.b([B.Jw,B.Ju],p),B.jq,B.bI),s,new A.dB(B.i,s,s,q,s,s,B.aM),s,s,B.jB,180),s)],p),B.dd,B.bI),s,new A.dB(B.jm,s,s,r,s,s,B.aM),s,s,B.fl,1/0)
 q=A.wo(12)
-return new A.r1(new A.nY(B.Jy,0,B.xL,!0,new A.Fs(s,s,1/0,56),s),new A.B1(B.fl,A.wP(A.b([r,B.hG,A.wT(s,A.wP(A.b([B.Jv,B.hG,B.Fy],p),B.dd,B.bI),s,new A.dB(B.jm,s,s,q,s,s,B.aM),s,s,B.fl,1/0)],p),B.de,B.bI),s),s)}}
+return new A.r1(new A.nY(B.Jy,0,B.xL,!0,new A.Fs(s,s,1/0,56),s),new A.B1(B.fl,A.wP(A.b([r,B.hG,A.wT(s,A.wP(A.b([B.Jv,B.hG,B.Fz],p),B.dd,B.bI),s,new A.dB(B.jm,s,s,q,s,s,B.aM),s,s,B.fl,1/0)],p),B.de,B.bI),s),s)}}
 A.wv.prototype={
 M(a){var s=null,r=A.b(["Gly","End","Spd","Coord","Flex","Bal","React"],t.s),q=t.AS
 return A.wP(A.b([new A.xK(1,B.jC,A.x1(s,s,s,new A.ww(s),B.hE),s),B.FB,A.a5e(A.X(new A.af(r,new A.Jm(),q),!0,q.h("au.E")),B.de,B.C9,B.h1)],t.nA),B.de,B.bI)}}
@@ -56565,12 +56565,12 @@ n=b+r*Math.cos(o)
 m=a0+r*Math.sin(o)
 if(p===0)q.fi(n,m)
 else q.cr(n,m)}q.aE()
-a5.cD(q,a4)}for(c=a2+12,p=0;p<10;++p){o=p*2*3.141592653589793/10-1.5707963267948966
+a5.cD(q,a4)}for(c=a2+14,p=0;p<10;++p){o=p*2*3.141592653589793/10-1.5707963267948966
 a5.f6(a1,new A.o(b+a2*Math.cos(o),a0+a2*Math.sin(o)),a4)
 a=A.Br(d,B.IC,a3[p])
 l=new A.rM(a,B.aQ,B.j,B.at.i(0,B.at)?new A.fC(1):B.at,d,d,d,d,B.aH,d)
 l.GH()
-l.aj(a5,new A.o(b+c*Math.cos(o)-l.b.b/2,a0+c*Math.sin(o)-l.b.a.a.gd5()/2))}k=[0.85,0.6,0.75,0.9,0.5,0.7,0.45,0.8,0.65,0.55]
+l.aj(a5,new A.o(b+c*Math.cos(o)-l.b.b/2,a0+c*Math.sin(o)-l.b.a.a.gd5()/2))}k=[0.85,0.55,0.75,0.9,0.4,0.7,0.5,0.85,0.6,0.65]
 j=$.a5().cA()
 i=A.b([],t.kQ)
 for(p=0;p<10;++p){o=p*2*3.141592653589793/10-1.5707963267948966
@@ -60373,10 +60373,10 @@ B.Fs=new A.a0(B.co,!0,!1,!1,!1)
 B.Ft=new A.a0(B.co,!0,!0,!1,!1)
 B.Fw=new A.M(1e5,1e5)
 B.hF=new A.dV(0,0,null,null)
-B.DU=new A.zW(null)
-B.Fy=new A.dV(null,300,B.DU,null)
 B.vK=new A.wv(null)
-B.Fz=new A.dV(null,220,B.vK,null)
+B.Fy=new A.dV(null,220,B.vK,null)
+B.DU=new A.zW(null)
+B.Fz=new A.dV(null,300,B.DU,null)
 B.FA=new A.dV(null,12,null,null)
 B.hG=new A.dV(null,16,null,null)
 B.FB=new A.dV(null,6,null,null)
@@ -60432,7 +60432,7 @@ B.xT=new A.w(4294967040)
 B.FW=new A.Ta(1,"double")
 B.GA=new A.m(!0,B.xh,null,"monospace",null,null,48,B.jE,null,null,null,null,null,null,null,null,null,B.FX,B.xT,B.FW,null,"fallback style; consider putting your text in a Material",null,null,null,null)
 B.Im=new A.m(!0,null,null,null,null,null,null,B.bD,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-B.IC=new A.m(!0,B.r,null,null,null,null,9,B.bD,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+B.IC=new A.m(!0,B.r,null,null,null,null,10,B.bD,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 B.IB=new A.m(!0,B.t,null,null,null,null,10,B.X,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 B.Gs=new A.m(!0,B.r,null,".AppleSystemUIFont",null,null,null,null,null,null,null,null,null,null,null,null,null,B.e,null,null,null,"blackRedwoodCity displayLarge",null,null,null,null)
 B.GS=new A.m(!0,B.r,null,".AppleSystemUIFont",null,null,null,null,null,null,null,null,null,null,null,null,null,B.e,null,null,null,"blackRedwoodCity displayMedium",null,null,null,null)
@@ -60647,13 +60647,13 @@ B.Jt=new A.cH(B.I2,B.Jb,B.IV,B.GR,B.IO,B.I_,B.Je,B.Hi,B.HI,B.IH,B.GJ,B.IX,B.IL,B
 B.uP=new A.m(!0,B.t,null,null,null,null,16,B.bD,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 B.Ju=new A.fx("68.5",null,B.uP,null,null)
 B.ID=new A.m(!0,B.jf,null,null,null,null,12,B.bD,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-B.Jv=new A.fx("1 Radar Atlet: 10 Parameter (Jaring Polygon)",null,B.ID,null,null)
+B.Jv=new A.fx("1 Radar Atlet: 10 Parameter (Spider Chart)",null,B.ID,null,null)
 B.I1=new A.m(!0,B.r,null,null,null,null,9,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 B.Jw=new A.fx("Rata-rata Keseluruhan Murid",null,B.I1,null,null)
 B.xs=new A.w(4282339765)
 B.In=new A.m(!0,B.xs,null,null,null,null,12,B.bD,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 B.Jx=new A.fx("1 Boxplot Atlet: Komponen Utama (7 Kategori)",null,B.In,null,null)
-B.Jy=new A.fx("Statistik Atlet (Boxplot & Radar)",null,B.uP,null,null)
+B.Jy=new A.fx("Statistik Atlet",null,B.uP,null,null)
 B.LX=new A.TQ(0,"system")
 B.Jz=new A.rR(null)
 B.eq=new A.Bv(0,"clamp")
