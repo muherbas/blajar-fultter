@@ -1,228 +1,281 @@
-import 'dart:math';
+import 'package:fl_chart_app/presentation/resources/app_resources.dart';
+import 'package:fl_chart_app/util/extensions/color_extensions.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
-void main() {
-  runApp(const MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: RadarChartPage(),
-  ));
-}
+class RadarChartSample1 extends StatefulWidget {
+  RadarChartSample1({super.key});
 
-class RadarChartPage extends StatefulWidget {
-  const RadarChartPage({super.key});
-
-  @override
-  State<RadarChartPage> createState() => _RadarChartPageState();
-}
-
-class _RadarChartPageState extends State<RadarChartPage> {
-  List<RadarData> radarData = [];
-  bool isLoading = true;
-  String errorMsg = '';
+  final gridColor = AppColors.contentColorPurple.lighten(80);
+  final titleColor = AppColors.contentColorPurple.lighten(80);
+  final fashionColor = AppColors.contentColorRed;
+  final artColor = AppColors.contentColorCyan;
+  final boxingColor = AppColors.contentColorGreen;
+  final entertainmentColor = AppColors.contentColorWhite;
+  final offRoadColor = AppColors.contentColorYellow;
 
   @override
-  void initState() {
-    super.initState();
-    fetchRadarData();
-  }
+  State<RadarChartSample1> createState() => _RadarChartSample1State();
+}
 
-  Future<void> fetchRadarData() async {
-    try {
-      // GANTI URL INI DENGAN API KAMU
-      final response = await http.get(
-        Uri.parse('https://api.example.com/stats'),
-      ).timeout(const Duration(seconds: 10));
-
-      if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body);
-        final List dataList = jsonData['data'];
-
-        setState(() {
-          radarData = dataList.map((e) => RadarData.fromJson(e)).toList();
-          isLoading = false;
-          errorMsg = '';
-        });
-      } else {
-        throw Exception('Status: ${response.statusCode}');
-      }
-    } catch (e) {
-      setState(() {
-        // Data dummy kalau API gagal
-        radarData = [
-          RadarData(label: 'Attack', value: 80),
-          RadarData(label: 'Defense', value: 65),
-          RadarData(label: 'Speed', value: 90),
-          RadarData(label: 'Magic', value: 70),
-          RadarData(label: 'Health', value: 85),
-          RadarData(label: 'Luck', value: 50),
-        ];
-        isLoading = false;
-        errorMsg = 'Gagal load API, pakai data dummy. Error: $e';
-      });
-    }
-  }
+class _RadarChartSample1State extends State<RadarChartSample1> {
+  int selectedDataSetIndex = -1;
+  double angleValue = 0;
+  bool relativeAngleMode = true;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Radar Chart API')),
-      body: RefreshIndicator(
-        onRefresh: fetchRadarData,
-        child: isLoading
-          ? const Center(child: CircularProgressIndicator())
-            : ListView(
-                padding: const EdgeInsets.all(24.0),
-                children: [
-                  if (errorMsg.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      margin: const EdgeInsets.only(bottom: 16),
-                      color: Colors.orange.shade100,
-                      child: Text(errorMsg, style: const TextStyle(color: Colors.orange)),
-                    ),
-                  AspectRatio(
-                    aspectRatio: 1,
-                    child: CustomPaint(
-                      painter: RadarChartPainter(
-                        data: radarData,
-                        maxValue: 100,
-                        strokeColor: Colors.blue,
-                        fillColor: Colors.blue.withOpacity(0.3),
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text(
+            'Title configuration',
+            style: TextStyle(
+              color: AppColors.mainTextColor2,
+            ),
+          ),
+          Row(
+            children: [
+              const Text(
+                'Angle',
+                style: TextStyle(
+                  color: AppColors.mainTextColor2,
+                ),
+              ),
+              Slider(
+                value: angleValue,
+                max: 360,
+                onChanged: (double value) => setState(() => angleValue = value),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Checkbox(
+                value: relativeAngleMode,
+                onChanged: (v) => setState(() => relativeAngleMode = v!),
+              ),
+              const Text('Relative'),
+            ],
+          ),
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                selectedDataSetIndex = -1;
+              });
+            },
+            child: Text(
+              'Categories'.toUpperCase(),
+              style: const TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w300,
+                color: AppColors.mainTextColor1,
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: rawDataSets()
+                .asMap()
+                .map((index, value) {
+                  final isSelected = index == selectedDataSetIndex;
+                  return MapEntry(
+                    index,
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          selectedDataSetIndex = index;
+                        });
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        margin: const EdgeInsets.symmetric(vertical: 2),
+                        height: 26,
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? AppColors.pageBackground
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(46),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 4,
+                          horizontal: 6,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 400),
+                              curve: Curves.easeInToLinear,
+                              padding: EdgeInsets.all(isSelected ? 8 : 6),
+                              decoration: BoxDecoration(
+                                color: value.color,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            AnimatedDefaultTextStyle(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInToLinear,
+                              style: TextStyle(
+                                color:
+                                    isSelected ? value.color : widget.gridColor,
+                              ),
+                              child: Text(value.title),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  _buildLegend(),
-                ],
+                  );
+                })
+                .values
+                .toList(),
+          ),
+          AspectRatio(
+            aspectRatio: 1.3,
+            child: RadarChart(
+              RadarChartData(
+                radarTouchData: RadarTouchData(
+                  touchCallback: (FlTouchEvent event, response) {
+                    if (!event.isInterestedForInteractions) {
+                      setState(() {
+                        selectedDataSetIndex = -1;
+                      });
+                      return;
+                    }
+                    setState(() {
+                      selectedDataSetIndex =
+                          response?.touchedSpot?.touchedDataSetIndex ?? -1;
+                    });
+                  },
+                ),
+                dataSets: showingDataSets(),
+                radarBackgroundColor: Colors.transparent,
+                borderData: FlBorderData(show: false),
+                radarBorderData: const BorderSide(color: Colors.transparent),
+                titlePositionPercentageOffset: 0.2,
+                titleTextStyle:
+                    TextStyle(color: widget.titleColor, fontSize: 14),
+                getTitle: (index, angle) {
+                  final usedAngle =
+                      relativeAngleMode ? angle + angleValue : angleValue;
+                  return switch (index) {
+                    0 => RadarChartTitle(
+                        text: 'Mobile or Tablet',
+                        angle: usedAngle,
+                      ),
+                    2 => RadarChartTitle(
+                        text: 'Desktop',
+                        angle: usedAngle,
+                      ),
+                    1 => RadarChartTitle(text: 'TV', angle: usedAngle),
+                    _ => const RadarChartTitle(text: '', angle: 0),
+                  };
+                },
+                tickCount: 1,
+                ticksTextStyle:
+                    const TextStyle(color: Colors.transparent, fontSize: 10),
+                tickBorderData: const BorderSide(color: Colors.transparent),
+                gridBorderData: BorderSide(color: widget.gridColor, width: 2),
               ),
+              duration: const Duration(milliseconds: 400),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildLegend() {
-    return Wrap(
-      spacing: 16,
-      runSpacing: 8,
-      children: radarData.map((item) {
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(width: 12, height: 12, color: Colors.blue),
-            const SizedBox(width: 4),
-            Text('${item.label}: ${item.value.toInt()}'),
-          ],
-        );
-      }).toList(),
-    );
+  List<RadarDataSet> showingDataSets() {
+    return rawDataSets().asMap().entries.map((entry) {
+      final index = entry.key;
+      final rawDataSet = entry.value;
+
+      final isSelected = index == selectedDataSetIndex
+          ? true
+          : selectedDataSetIndex == -1
+              ? true
+              : false;
+
+      return RadarDataSet(
+        fillColor: isSelected
+            ? rawDataSet.color.withValues(alpha: 0.2)
+            : rawDataSet.color.withValues(alpha: 0.05),
+        borderColor: isSelected
+            ? rawDataSet.color
+            : rawDataSet.color.withValues(alpha: 0.25),
+        entryRadius: isSelected ? 3 : 2,
+        dataEntries:
+            rawDataSet.values.map((e) => RadarEntry(value: e)).toList(),
+        borderWidth: isSelected ? 2.3 : 2,
+      );
+    }).toList();
+  }
+
+  List<RawDataSet> rawDataSets() {
+    return [
+      RawDataSet(
+        title: 'Fashion',
+        color: widget.fashionColor,
+        values: [
+          300,
+          50,
+          250,
+        ],
+      ),
+      RawDataSet(
+        title: 'Art & Tech',
+        color: widget.artColor,
+        values: [
+          250,
+          100,
+          200,
+        ],
+      ),
+      RawDataSet(
+        title: 'Entertainment',
+        color: widget.entertainmentColor,
+        values: [
+          200,
+          150,
+          50,
+        ],
+      ),
+      RawDataSet(
+        title: 'Off-road Vehicle',
+        color: widget.offRoadColor,
+        values: [
+          150,
+          200,
+          150,
+        ],
+      ),
+      RawDataSet(
+        title: 'Boxing',
+        color: widget.boxingColor,
+        values: [
+          100,
+          250,
+          100,
+        ],
+      ),
+    ];
   }
 }
 
-class RadarData {
-  final String label;
-  final double value;
-
-  RadarData({required this.label, required this.value});
-
-  factory RadarData.fromJson(Map<String, dynamic> json) {
-    return RadarData(
-      label: json['label'],
-      value: (json['value'] as num).toDouble(),
-    );
-  }
-}
-
-class RadarChartPainter extends CustomPainter {
-  final List<RadarData> data;
-  final double maxValue;
-  final Color strokeColor;
-  final Color fillColor;
-  final int ticks;
-
-  RadarChartPainter({
-    required this.data,
-    required this.maxValue,
-    required this.strokeColor,
-    required this.fillColor,
-    this.ticks = 5,
+class RawDataSet {
+  RawDataSet({
+    required this.title,
+    required this.color,
+    required this.values,
   });
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (data.isEmpty) return;
-
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = min(size.width / 2, size.height / 2) * 0.8;
-    final angle = 2 * pi / data.length;
-
-    final gridPaint = Paint()
-    ..color = Colors.grey.shade300
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 1;
-
-    final axisPaint = Paint()
-    ..color = Colors.grey.shade400
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 1;
-
-    final dataPaint = Paint()
-    ..color = fillColor
-    ..style = PaintingStyle.fill;
-
-    final dataStrokePaint = Paint()
-    ..color = strokeColor
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 2;
-
-    // 1. Grid
-    for (int i = 1; i <= ticks; i++) {
-      final r = radius * i / ticks;
-      final path = Path();
-      for (int j = 0; j < data.length; j++) {
-        final x = center.dx + r * cos(angle * j - pi / 2);
-        final y = center.dy + r * sin(angle * j - pi / 2);
-        if (j == 0) path.moveTo(x, y); else path.lineTo(x, y);
-      }
-      path.close();
-      canvas.drawPath(path, gridPaint);
-    }
-
-    // 2. Sumbu + Label
-    final textPainter = TextPainter(textDirection: TextDirection.ltr);
-    for (int i = 0; i < data.length; i++) {
-      final x = center.dx + radius * cos(angle * i - pi / 2);
-      final y = center.dy + radius * sin(angle * i - pi / 2);
-      canvas.drawLine(center, Offset(x, y), axisPaint);
-
-      textPainter.text = TextSpan(
-        text: data[i].label,
-        style: const TextStyle(color: Colors.black, fontSize: 12),
-      );
-      textPainter.layout();
-      final labelOffset = Offset(
-        center.dx + (radius + 16) * cos(angle * i - pi / 2) - textPainter.width / 2,
-        center.dy + (radius + 16) * sin(angle * i - pi / 2) - textPainter.height / 2,
-      );
-      textPainter.paint(canvas, labelOffset);
-    }
-
-    // 3. Data polygon
-    final dataPath = Path();
-    for (int i = 0; i < data.length; i++) {
-      final valueRatio = (data[i].value / maxValue).clamp(0.0, 1.0);
-      final x = center.dx + radius * valueRatio * cos(angle * i - pi / 2);
-      final y = center.dy + radius * valueRatio * sin(angle * i - pi / 2);
-      if (i == 0) dataPath.moveTo(x, y); else dataPath.lineTo(x, y);
-      canvas.drawCircle(Offset(x, y), 4, Paint()..color = strokeColor);
-    }
-    dataPath.close();
-    canvas.drawPath(dataPath, dataPaint);
-    canvas.drawPath(dataPath, dataStrokePaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant RadarChartPainter oldDelegate) {
-    return oldDelegate.data!= data || oldDelegate.maxValue!= maxValue;
-  }
+  final String title;
+  final Color color;
+  final List<double> values;
 }
