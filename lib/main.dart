@@ -84,7 +84,7 @@ class _DashboardAtletViewState extends State<DashboardAtletView> {
 
     double nilaiAktif = komponenTurunan[parameterTurunanTerpilih] ?? 0;
 
-    // Data Radial Ring: Cincin luar adalah nilai parameter aktif, cincin dalam adalah rata-rata (Sebagai pengganti jarum pointer)
+    // Data Radial Ring: Cincin luar adalah nilai parameter aktif, cincin dalam adalah rata-rata
     final List<RadialChartData> dataRadialInteraktif = [
       RadialChartData('Skor Aktif', nilaiAktif, Colors.orangeAccent.shade700),
       RadialChartData('Rata-rata Murid', rataRataTurunan, Colors.indigo.shade900),
@@ -199,7 +199,7 @@ class _DashboardAtletViewState extends State<DashboardAtletView> {
                     ),
                     const SizedBox(height: 15),
 
-                    // RADIAL BAR BERLAPIS (AMAN SEPANJANG MASA DARI ERROR GRADIENT SHADER)
+                    // RADIAL BAR BERLAPIS (KOTAK BERSIH AMAN DARI ERROR GRADIENT SHADER)
                     Row(
                       children: [
                         Expanded(
@@ -207,7 +207,7 @@ class _DashboardAtletViewState extends State<DashboardAtletView> {
                           child: SizedBox(
                             height: 160,
                             child: SfCircularChart(
-                              key: UniqueKey(), // Memaksa grafik re-render mulus saat diklik
+                              key: UniqueKey(), 
                               annotations: <CircularChartAnnotation>[
                                 CircularChartAnnotation(
                                   widget: Column(
@@ -232,6 +232,7 @@ class _DashboardAtletViewState extends State<DashboardAtletView> {
                                   radius: '100%',
                                   innerRadius: '55%',
                                   gap: '12%',
+                                  cornerStyle: CornerStyle.none, // Diubah ke none biar tidak memicu bug conicalGradient
                                 )
                               ],
                             ),
