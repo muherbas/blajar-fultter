@@ -1,209 +1,202 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:syncfusion_flutter_charts/charts.dart'; // Import Syncfusion
+import 'package:syncfusion_flutter_charts/charts.dart';
 
-void main() {
-  runApp(const MainApp());
-}
+void main() => runApp(const MyApp());
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: StatistikPage(),
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
+      home: const DashboardAtlet(),
     );
   }
 }
 
-class StatistikPage extends StatefulWidget {
-  const StatistikPage({super.key});
+class DashboardAtlet extends StatefulWidget {
+  const DashboardAtlet({super.key});
 
   @override
-  State<StatistikPage> createState() => _StatistikPageState();
+  State<DashboardAtlet> createState() => _DashboardAtletState();
 }
 
-class _StatistikPageState extends State<StatistikPage> {
-  // Fungsi baca JSON dari assets
-  Future<Map<String, dynamic>> loadAtletData() async {
-    String jsonString = await rootBundle.loadString('assets/atlet_data.json');
-    return json.decode(jsonString);
-  }
+// Model data untuk Box and Whisker (Boxplot)
+class BoxPlotData {
+  final String x;
+  final List<num> y;
+  BoxPlotData(this.x, this.y);
+}
 
+// Model data untuk Radial Bar Chart
+class RadialData {
+  final String x;
+  final num y;
+  final Color color;
+  RadialData(this.x, this.y, this.color);
+}
+
+class _DashboardAtletState extends State<DashboardAtlet> {
   @override
   Widget build(BuildContext context) {
+    // 1. Data Dummy Boxplot sebaran nilai 20 murid (Min, Q1, Median, Q3, Max)
+    final List<BoxPlotData> dataBoxPlot = [
+      BoxPlotData('Gly', [40, 55, 68, 80, 92]),
+      BoxPlotData('End', [30, 48, 62, 75, 90]),
+      BoxPlotData('Spd', [35, 50, 65, 78, 88]),
+      BoxPlotData('Coord', [45, 60, 72, 82, 95]),
+      BoxPlotData('Flex', [42, 58, 70, 84, 93]),
+      BoxPlotData('Bal', [50, 65, 76, 88, 98]),
+      BoxPlotData('React', [32, 46, 60, 72, 85]),
+    ];
+
+    // 2. Data Dummy Radial Bar untuk komponen turunan melingkar berlapis
+    final List<RadialData> dataRadial = [
+      RadialData('M.Endur', 85, Colors.orange),
+      RadialData('Power', 78, Colors.red.shade700),
+      RadialData('Core', 70, Colors.blue.shade700),
+      RadialData('Dyn.Flex', 62, Colors.teal),
+    ];
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Statistik Ruri', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.white,
-        elevation: 0,
+        title: const Text("Statistik Ruri", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
         centerTitle: true,
+        backgroundColor: Colors.indigo.shade50,
       ),
-      backgroundColor: const Color(0xFFF5F6FA), // Background abu-abu muda ala dashboard web
-      body: FutureBuilder<Map<String, dynamic>>(
-        future: loadAtletData(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData) {
-            return const Center(child: Text('Data tidak ditemukan'));
-          }
-
-          final dataAplikasi = snapshot.data!;
-          
-          // Ambil data untuk Boxplot
-          final List<dynamic> boxplotDataRaw = dataAplikasi['komponen_utama_boxplot']['data_parameter'];
-          
-          // Ambil data untuk Radial Bar
-          final List<dynamic> radialDataRaw = dataAplikasi['komponen_turunan_radial_bar']['data_komparasi'];
-          final String parameterTerpilih = dataAplikasi['komponen_turunan_radial_bar']['parameter_terpilih'];
-          final double avgKeseluruhan = dataAplikasi['nilai_rata_rata_keseluruhan_murid'].toDouble();
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // -------------------------------------------------------------
-                // 1. KELOMPOK GRAFIK BOXPLOT (KOMPONEN UTAMA)
-                // -------------------------------------------------------------
-                Card(
-                  color: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "1 Boxplot Atlet: Komponen Utama",
-                          style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 14),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          children: [
+            // ========================================================
+            // GRAFIK 1: BOXPLOT ATLET (KOMPONEN UTAMA)
+            // ========================================================
+            Card(
+              elevation: 1,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "1 Boxplot Atlet: Komponen Utama",
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.indigo),
+                    ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      height: 260,
+                      child: SfCartesianChart(
+                        primaryXAxis: const CategoryAxis(
+                          majorGridLines: MajorGridLines(width: 0),
+                          labelStyle: TextStyle(fontSize: 10),
                         ),
-                        const SizedBox(height: 10),
-                        
-                        // Menggunakan Stack agar bisa menaruh box nilai rata-rata di pojok kanan bawah chart
-                        Stack(
+                        primaryYAxis: const NumericAxis(
+                          minimum: 0,
+                          maximum: 100,
+                          interval: 20,
+                          majorGridLines: MajorGridLines(width: 0.5, color: Colors.grey),
+                        ),
+                        plotAreaBorderWidth: 0,
+                        series: <CartesianSeries<BoxPlotData, String>>[
+                          BoxAndWhiskerSeries<BoxPlotData, String>(
+                            dataSource: dataBoxPlot,
+                            xValueMapper: (BoxPlotData data, _) => data.x,
+                            yValueMapper: (BoxPlotData data, _) => data.y,
+                            boxPlotMode: BoxPlotMode.normal,
+                            showMean: true,
+                            fillColor: Colors.blueAccent.withOpacity(0.7),
+                            strokeColor: Colors.blue.shade900,
+                            strokeWidth: 1.5,
+                          )
+                        ],
+                      ),
+                    ),
+                    // Rata-rata card di pojok bawah kanan sesuai gambar
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.プリント(color: Colors.grey.shade200, width: 1) ?? Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: const Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Container(
-                              height: 300,
-                              child: SfCartesianChart(
-                                primaryXAxis: CategoryAxis(),
-                                primaryYAxis: NumericAxis(minimum: 0, maximum: 100, interval: 20),
-                                series: <BoxAndWhiskerSeries<dynamic, String>>[
-                                  BoxAndWhiskerSeries<dynamic, String>(
-                                    dataSource: boxplotDataRaw,
-                                    xValueMapper: (dynamic data, _) => data['parameter'],
-                                    // Mapping seluruh nilai statistik boxplot dari JSON
-                                    minimumMapper: (dynamic data, _) => data['min'].toDouble(),
-                                    lowerQuartileMapper: (dynamic data, _) => data['q1'].toDouble(),
-                                    medianMapper: (dynamic data, _) => data['median'].toDouble(),
-                                    upperQuartileMapper: (dynamic data, _) => data['q3'].toDouble(),
-                                    maximumMapper: (dynamic data, _) => data['max'].toDouble(),
-                                    outliersMapper: (dynamic data, _) => (data['outliers'] as List).map((e) => e.toDouble()).toList(),
-                                    boxPlotMode: BoxPlotMode.normal,
-                                    color: Colors.blue.withOpacity(0.7),
-                                    borderColor: Colors.blue,
-                                    strokeWidth: 2,
-                                  )
-                                ],
-                              ),
-                            ),
-                            
-                            // Kotak Nilai Rata-Rata Keseluruhan Murid di pojok kanan bawah
-                            Positioned(
-                              bottom: 20,
-                              right: 15,
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[100],
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: Colors.grey[300]!),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    const Text("Nilai Rata-Rata Keseluruhan Murid", style: TextStyle(fontSize: 10, color: Colors.black54)),
-                                    Text("$avgKeseluruhan", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black80)),
-                                  ],
-                                ),
-                              ),
-                            )
+                            Text("Nilai Rata-Rata Keseluruhan Murid", style: TextStyle(fontSize: 9, color: Colors.black54)),
+                            Text("68.5", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-                
-                const SizedBox(height: 16),
-
-                // -------------------------------------------------------------
-                // 2. KELOMPOK GRAFIK RADIAL BAR (KOMPONEN TURUNAN)
-                // -------------------------------------------------------------
-                Card(
-                  color: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.between,
-                          children: [
-                            const Text(
-                              "1 Radar Atlet: Komponen Turunan",
-                              style: TextStyle(color: Colors.purple, fontWeight: FontWeight.bold, fontSize: 14),
-                            ),
-                            Text(
-                              "PARAMETER TERPILIH:\n$parameterTerpilih",
-                              textAlign: MainAxisAlignment.right,
-                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black54),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 15),
-                        
-                        // Grafik Radial Bar
-                        Container(
-                          height: 320,
-                          child: SfCircularChart(
-                            // Legenda di pojok kanan/kiri otomatis menampilkan nama dan nilai
-                            legend: Legend(
-                              isVisible: true, 
-                              position: LegendPosition.right,
-                              overflowMode: LegendItemOverflowMode.wrap,
-                            ),
-                            series: <CircularSeries<dynamic, String>>[
-                              RadialBarSeries<dynamic, String>(
-                                dataSource: radialDataRaw,
-                                xValueMapper: (dynamic data, _) => "${data['nama_murid']} (${data['skor_persentase']}% )",
-                                yValueMapper: (dynamic data, _) => data['skor_persentase'],
-                                maximumValue: 100,
-                                radius: '100%',
-                                innerRadius: '30%',
-                                gap: '8%', // Jarak antar ring bar lingkaran
-                                useAnchorPoint: false, // Menghilangkan penunjuk garis/dot tambahan
-                                trackColor: Colors.grey[200]!, // Warna jalur kosong lingkaran
-                                dataLabelSettings: const DataLabelSettings(isVisible: false), // Garis penunjuk luar dimatikan
-                              )
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          );
-        },
+            const SizedBox(height: 16),
+
+            // ========================================================
+            // GRAFIK 2: RADAR / RADIAL BAR ATLET (KOMPONEN TURUNAN)
+            // ========================================================
+            Card(
+              elevation: 1,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "1 Radar Atlet: Komponen Turunan",
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.purple),
+                        ),
+                        Text("Avg: 73.7", style: TextStyle(fontSize: 10, color: Colors.purple, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    const Center(
+                      child: Text(
+                        "Shot put distance",
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    // Menggunakan RadialBarSeries berlapis melingkar seperti gambar target
+                    SizedBox(
+                      height: 240,
+                      child: SfCircularChart(
+                        key: UniqueKey(),
+                        series: <CircularSeries<RadialData, String>>[
+                          RadialBarSeries<RadialData, String>(
+                            dataSource: dataRadial,
+                            xValueMapper: (RadialData data, _) => data.x,
+                            yValueMapper: (RadialData data, _) => data.y,
+                            pointColorMapper: (RadialData data, _) => data.color,
+                            maximumValue: 100,
+                            radius: '90%',
+                            innerRadius: '35%',
+                            gap: '8%',
+                            cornerStyle: CornerStyle.bothCurve,
+                            dataLabelSettings: const DataLabelSettings(
+                              isVisible: false,
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
