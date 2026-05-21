@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Dashboard Atlet Standar',
+      title: 'Dashboard Atlet Manual',
       theme: ThemeData(
         brightness: Brightness.light,
         scaffoldBackgroundColor: const Color(0xFFF5F6FA),
@@ -30,7 +30,7 @@ class DashboardAtletPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Statistik Atlet (Custom Paint)',
+          'Statistik Atlet (Boxplot & Radar)',
           style: TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -61,13 +61,39 @@ class DashboardAtletPage extends StatelessWidget {
                     height: 220,
                     child: BoxplotChart(),
                   ),
+                  const SizedBox(height: 12),
+                  // Informasi Perbandingan Rata-rata di Pojok Kanan
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Container(
+                      width: 180,
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          const Text(
+                            'Rata-rata Keseluruhan Murid',
+                            style: TextStyle(fontSize: 9, color: Colors.black54),
+                          ),
+                          const Text(
+                            '68.5',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
                 ],
               ),
             ),
             
             const SizedBox(height: 16),
             
-            // CARD 2: RADAR GAUGE BERLAPIS (10 PARAMETER)
+            // CARD 2: RADAR POLYGON (10 PARAMETER)
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -79,13 +105,13 @@ class DashboardAtletPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    '1 Radar Atlet: 10 Parameter Jarak/Durasi',
+                    '1 Radar Atlet: 10 Parameter (Jaring Polygon)',
                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF880E4F)),
                   ),
                   const SizedBox(height: 16),
                   const SizedBox(
-                    height: 320,
-                    child: RadialDistanceChart(),
+                    height: 300,
+                    child: RadarPolygonChart(),
                   ),
                 ],
               ),
@@ -97,7 +123,7 @@ class DashboardAtletPage extends StatelessWidget {
   }
 }
 
-// ==================== GENERATOR BOXPLOT WIDGET ====================
+// ==================== WIDGET & PAINTER BOXPLOT ====================
 class BoxplotChart extends StatelessWidget {
   const BoxplotChart({Key? key}) : super(key: key);
 
@@ -145,7 +171,7 @@ class BoxplotPainter extends CustomPainter {
     int dataCount = 7;
     double spacing = size.width / dataCount;
 
-    // Koordinat acak 7 Boxplot
+    // Data Koordinat Gambar Boxplot (Skala 0.0 sampai 1.0 dari atas ke bawah)
     List<List<double>> boxData = [
       [0.0, 0.25, 0.38, 0.50, 0.65, 0.82],
       [0.23, 0.28, 0.42, 0.56, 0.70, 0.85],
@@ -186,84 +212,116 @@ class BoxplotPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// ==================== GENERATOR 10 TINGKAT GAUGE WIDGET ====================
-class RadialDistanceChart extends StatelessWidget {
-  const RadialDistanceChart({Key? key}) : super(key: key);
+// ==================== WIDGET & PAINTER RADAR POLYGON ====================
+class RadarPolygonChart extends StatelessWidget {
+  const RadarPolygonChart({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        CustomPaint(
-          size: Size.infinite,
-          painter: RadialDistancePainter(),
-        ),
-        // Menampilkan teks indikator parameter acak secara bertingkat di atas garis cincin
-        const Positioned(top: 18, left: 145, child: Text('P1: 13M', style: TextStyle(fontSize: 6, fontWeight: FontWeight.bold, color: Colors.black54))),
-        const Positioned(top: 32, left: 145, child: Text('P2: 12M', style: TextStyle(fontSize: 6, fontWeight: FontWeight.bold, color: Colors.black54))),
-        const Positioned(top: 46, left: 145, child: Text('P3: 11M', style: TextStyle(fontSize: 6, fontWeight: FontWeight.bold, color: Colors.black54))),
-        const Positioned(top: 60, left: 145, child: Text('P4: 10M', style: TextStyle(fontSize: 6, fontWeight: FontWeight.bold, color: Colors.black54))),
-        const Positioned(top: 74, left: 145, child: Text('P5: 9M', style: TextStyle(fontSize: 6, fontWeight: FontWeight.bold, color: Colors.black54))),
-        const Positioned(top: 88, left: 145, child: Text('P6: 8M', style: TextStyle(fontSize: 6, fontWeight: FontWeight.bold, color: Colors.black54))),
-        const Positioned(top: 102, left: 145, child: Text('P7: 7M', style: TextStyle(fontSize: 6, fontWeight: FontWeight.bold, color: Colors.black54))),
-        const Positioned(top: 116, left: 145, child: Text('P8: 6M', style: TextStyle(fontSize: 6, fontWeight: FontWeight.bold, color: Colors.black54))),
-        const Positioned(top: 130, left: 145, child: Text('P9: 5M', style: TextStyle(fontSize: 6, fontWeight: FontWeight.bold, color: Colors.black54))),
-        const Positioned(top: 144, left: 145, child: Text('P10: 4M', style: TextStyle(fontSize: 6, fontWeight: FontWeight.bold, color: Colors.black54))),
-      ],
+    return CustomPaint(
+      size: Size.infinite,
+      painter: RadarPolygonPainter(),
     );
   }
 }
 
-class RadialDistancePainter extends CustomPainter {
+class RadarPolygonPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     Offset center = Offset(size.width / 2, size.height / 2);
-    
-    // Radius bertingkat untuk mengakomodasi total 10 cincin parameter secara pas
-    List<double> radii = [135, 121, 107, 93, 79, 65, 51, 37, 23, 9];
-    
-    // Warna acak untuk masing-masing 10 ring parameter
-    List<Color> colors = [
-      Colors.orange, Colors.red, Colors.purple, Colors.blue, Colors.teal,
-      Colors.green, Colors.amber, Colors.indigo, Colors.pink, Colors.cyan
-    ];
-    
-    // Panjang nilai acak isi bar (0.0 sampai 1.0) untuk 10 parameter
-    List<double> sweepPercentages = [0.85, 0.65, 0.72, 0.90, 0.45, 0.78, 0.60, 0.83, 0.52, 0.40];
-    
-    // Arah titik mulai lengkungan lingkaran yang diacak agar estetik
-    List<double> startAngles = [
-      -math.pi / 2, -math.pi / 4, 0.0, math.pi / 3, math.pi / 1.5,
-      -math.pi / 3, math.pi / 4, math.pi / 6, -math.pi / 6, math.pi / 2
-    ];
+    double maxRadius = math.min(size.width, size.height) / 2.3;
+    int numFeatures = 10; // 10 Parameter sesuai kolom data excel/materi
 
-    Paint bgPaint = Paint()
+    // Label 10 Parameter untuk ditaruh di ujung sudut
+    List<String> labels = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8', 'P9', 'P10'];
+
+    // 1. MENGGAMBAR JARING LABA-LABA BACKGROUND (POLYGON SEGI-10)
+    Paint gridPaint = Paint()
+      ..color = Colors.black26
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 8
-      ..color = const Color(0xFFE0E0E0).withOpacity(0.4);
+      ..strokeWidth = 1.0;
 
-    for (int i = 0; i < radii.length; i++) {
-      double radius = radii[i];
-      if (radius <= 0) continue; // Mencegah nilai radius minus atau nol
+    // Membuat 5 lapis jaring polygon (Skala tingkat nilai 20%, 40%, 60%, 80%, 100%)
+    for (int i = 1; i <= 5; i++) {
+      double currentRadius = maxRadius * (i / 5);
+      Path gridPath = Path();
       
-      // Menggambar track abu-abu dasar
-      canvas.drawCircle(center, radius, bgPaint);
+      for (int j = 0; j < numFeatures; j++) {
+        double angle = (j * 2 * math.pi / numFeatures) - (math.pi / 2);
+        double x = center.dx + currentRadius * math.cos(angle);
+        double y = center.dy + currentRadius * math.sin(angle);
+        
+        if (j == 0) {
+          gridPath.moveTo(x, y);
+        } else {
+          gridPath.lineTo(x, y);
+        }
+      }
+      gridPath.close();
+      canvas.drawPath(gridPath, gridPaint);
+    }
 
-      // Menggambar nilai warna parameter aktif
-      Paint progressPaint = Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 8
-        ..color = colors[i]
-        ..strokeCap = StrokeCap.round;
+    // 2. MENGGAMBAR GARIS JARI-JARI / AXIS TIAP PARAMETER
+    for (int j = 0; j < numFeatures; j++) {
+      double angle = (j * 2 * math.pi / numFeatures) - (math.pi / 2);
+      double x = center.dx + maxRadius * math.cos(angle);
+      double y = center.dy + maxRadius * math.sin(angle);
+      canvas.drawLine(center, Offset(x, y), gridPaint);
+      
+      // Menggambar Text Label kecil di setiap ujung garis parameter
+      TextPainter textPainter = TextPainter(
+        text: TextSpan(
+          text: labels[j],
+          style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black54),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      
+      // Atur posisi teks sedikit melompat keluar dari ujung garis agar rapi
+      double textX = center.dx + (maxRadius + 12) * math.cos(angle) - (textPainter.width / 2);
+      double textY = center.dy + (maxRadius + 12) * math.sin(angle) - (textPainter.height / 2);
+      textPainter.paint(canvas, Offset(textX, textY));
+    }
 
-      double sweepAngle = 2 * math.pi * sweepPercentages[i];
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        startAngles[i],
-        sweepAngle,
-        false,
-        progressPaint,
-      );
+    // 3. MENGGAMBAR AREA DATA MURID (POLYGON BERWARNA TRANSPARAN)
+    // Angka acak/dummy pencapaian murid skala 0.0 sampai 1.0 untuk 10 parameter
+    List<double> dataValues = [0.85, 0.60, 0.75, 0.90, 0.50, 0.70, 0.45, 0.80, 0.65, 0.55];
+
+    Path dataPath = Path();
+    List<Offset> dataPoints = [];
+
+    for (int j = 0; j < numFeatures; j++) {
+      double angle = (j * 2 * math.pi / numFeatures) - (math.pi / 2);
+      double currentRadius = maxRadius * dataValues[j];
+      double x = center.dx + currentRadius * math.cos(angle);
+      double y = center.dy + currentRadius * math.sin(angle);
+      
+      dataPoints.add(Offset(x, y));
+      if (j == 0) {
+        dataPath.moveTo(x, y);
+      } else {
+        dataPath.lineTo(x, y);
+      }
+    }
+    dataPath.close();
+
+    // Warnai isi jaring area nilai murid dengan warna merah transparan cerah
+    Paint fillPaint = Paint()
+      ..color = const Color(0xFFE91E63).withOpacity(0.3)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(dataPath, fillPaint);
+
+    // Gambar garis tepi jaring nilai murid agar tampak tegas
+    Paint strokePaint = Paint()
+      ..color = const Color(0xFFE91E63)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+    canvas.drawPath(dataPath, strokePaint);
+
+    // Beri titik bulat kecil di setiap koordinat nilai data murid
+    Paint pointPaint = Paint()..color = const Color(0xFF880E4F);
+    for (Offset point in dataPoints) {
+      canvas.drawCircle(point, 3, pointPaint);
     }
   }
 
