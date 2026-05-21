@@ -1,5 +1,5 @@
 name: fitness_tracker_gauge
-description: Aplikasi visualisasi data fitness murid menggunakan Radial Gauge.
+description: Aplikasi visualisasi data fitness murid menggunakan Boxplot dan Radial Bar Chart.
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -11,19 +11,14 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # KEDUA LINE INI SUDAH DISARANKAN OLEH LOG GITHUB ACTIONS AGAR SELARAS
   syncfusion_flutter_gauges: ^24.2.9
   syncfusion_flutter_charts: ^24.2.7
-  
   cupertino_icons: ^1.0.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
   flutter_lints: ^2.0.0
 
 flutter:
   uses-material-design: true
-  assets:
-    - assets/let_data.json
