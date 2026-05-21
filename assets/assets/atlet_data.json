@@ -1,0 +1,44 @@
+{
+  "nama_atlet_terpilih": "Ruri",
+  "nilai_rata_rata_keseluruhan_murid": 68.5,
+  
+  "komponen_utama_boxplot": {
+    "catatan": "Data ini berisi statistik sebaran seluruh murid untuk membuat true boxplot chart",
+    "data_parameter": [
+      { "parameter": "Gly", "min": 50, "q1": 65, "median": 75, "q3": 82, "max": 95, "outliers": [] },
+      { "parameter": "End", "min": 45, "q1": 60, "median": 72, "q3": 80, "max": 92, "outliers": [95] },
+      { "parameter": "Spd", "min": 55, "q1": 62, "median": 68, "q3": 75, "max": 88, "outliers": [90] },
+      { "parameter": "Coord", "min": 50, "q1": 70, "median": 80, "q3": 85, "max": 94, "outliers": [] },
+      { "parameter": "Flex", "min": 40, "q1": 58, "median": 70, "q3": 78, "max": 90, "outliers": [] },
+      { "parameter": "Bal", "min": 60, "q1": 75, "median": 82, "q3": 90, "max": 98, "outliers": [] },
+      { "parameter": "React", "min": 45, "q1": 55, "median": 60, "q3": 70, "max": 85, "outliers": [88] }
+    ]
+  },
+
+  "komponen_turunan_radial_bar": {
+    "catatan": "Data komparasi performa latihan berdasarkan rumusan repetisi*set atau waktu*set",
+    "parameter_terpilih": "MUSCULAR ENDURANCE",
+    "data_komparasi": [
+      {
+        "nama_murid": "Ruri (Anda)",
+        "skor_persentase": 78,
+        "detail_latihan": { "formula": "repetisi * set", "hasil_mentah": 240 }
+      },
+      {
+        "nama_murid": "Murid B",
+        "skor_persentase": 82,
+        "detail_latihan": { "formula": "repetisi * set", "hasil_mentah": 260 }
+      },
+      {
+        "nama_murid": "Murid C",
+        "skor_persentase": 65,
+        "detail_latihan": { "formula": "lama_waktu * set", "hasil_mentah": 180 }
+      },
+      {
+        "nama_murid": "Murid D",
+        "skor_persentase": 70,
+        "detail_latihan": { "formula": "repetisi * set", "hasil_mentah": 210 }
+      }
+    ]
+  }
+}
