@@ -11,9 +11,7 @@ dependencies:
     sdk: flutter
   syncfusion_flutter_charts: ^24.2.7
   syncfusion_flutter_gauges: ^24.2.7
-  # Tidak perlu menambahkan dependency chart eksternal karena grafik 
-  # digambar manual menggunakan Canvas & CustomPainter bawaan Flutter.
-
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
