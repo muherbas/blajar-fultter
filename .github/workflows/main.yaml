@@ -1,37 +1,46 @@
-name: Preview UI via GitHub Pages
+name: Flutter Web Preview
 
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch:
+    branches: [ "main" ] # Otomatis update web setiap Anda push ke branch main
 
+# Memberikan izin ke token GitHub untuk mempublikasikan website halaman (GitHub Pages)
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Kode
-        uses: actions/checkout@v4
+      # 1. Mengambil kode terbaru dari repository Anda
+      - uses: actions/checkout@v4
 
-      - name: Setup Flutter
+      # 2. Setup Flutter SDK di Server GitHub
+      - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.0'
           channel: 'stable'
 
-      - name: Install Dependencies
-        run: flutter pub get
+      # 3. Bersihkan cache dan ambil dependensi
+      - name: Clean and Install dependencies
+        run: |
+          flutter clean
+          flutter pub get
 
-      # Di sini tanda kutipnya sudah dirapikan dan ditambahkan renderer html langsung
-      - name: Build Web
-        run: flutter build web --release --base-href "/blajar-fultter/" --web-renderer html
+      # 4. Proses Kompilasi menjadi file Web HTML/JS (Bukan APK)
+      - name: Build Flutter Web
+        run: flutter build web --base-href "/${{ github.event.repository.name }}/"
 
-      - name: Deploy ke Branch gh-pages
-        uses: JamesIves/github-pages-deploy-action@v4
+      # 5. Mengunggah hasil kompilasi web ke server internal GitHub
+      - name: Upload Web Artifacts
+        uses: actions/upload-pages-artifact@v3
         with:
-          folder: build/web
-          branch: gh-pages
+          path: build/web
+
+      # 6. Menayangkan langsung hasil kompilasi ke internet (Deploy)
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
