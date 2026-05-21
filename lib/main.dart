@@ -140,7 +140,7 @@ class _DashboardAtletViewState extends State<DashboardAtletView> {
                         decoration: BoxDecoration(
                           color: Colors.grey.shade50,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.grey.shade300),
+                          border: Border.all(color: Colors.grey.shade300), // Border yang valid & bersih
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -187,7 +187,7 @@ class _DashboardAtletViewState extends State<DashboardAtletView> {
                     ),
                     const SizedBox(height: 15),
 
-                    // RADIAL GAUGE DENGAN RANGE POINTER & NEEDLE POINTER
+                    // RADIAL GAUGE AMAN TANPA CONICAL GRADIENT BUG
                     Row(
                       children: [
                         Expanded(
@@ -206,12 +206,12 @@ class _DashboardAtletViewState extends State<DashboardAtletView> {
                                   radiusFactor: 0.95,
                                   axisLineStyle: AxisLineStyle(thickness: 18, color: Colors.orange.shade100),
                                   pointers: <GaugePointer>[
-                                    // 1. Batang Melingkar Skor Aktif Parameter Terpilih
+                                    // 1. Batang Melingkar Skor Aktif (CornerStyle diubah ke murni kotak/clean agar tidak memicu eror paint shader)
                                     RangePointer(
                                       value: nilaiGaugeAktif,
                                       width: 18,
                                       color: Colors.orangeAccent.shade700,
-                                      cornerStyle: CornerStyle.bothCurve,
+                                      cornerStyle: CornerStyle.none, 
                                     ),
                                     // 2. Jarum Pembanding Posisi Rata-Rata Murid
                                     NeedlePointer(
@@ -307,7 +307,7 @@ class _DashboardAtletViewState extends State<DashboardAtletView> {
                               ),
                               onTap: () {
                                 setState(() {
-                                  parameterTurunanTerpilih = key; // Memicu gauge berputar interaktif
+                                  parameterTurunanTerpilih = key; 
                                 });
                               },
                             ),
