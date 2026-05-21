@@ -1,5 +1,5 @@
-name: radar_chart_app
-description: Radar Chart tanpa package
+name: fitness_tracker_gauge
+description: Aplikasi visualisasi data fitness murid menggunakan Radial Gauge.
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -10,12 +10,19 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^1.2.0
+
+  # Package utama untuk membuat Radial Gauge
+  syncfusion_flutter_gauges: ^21.1.35
+
+  # Standar ikon untuk Flutter
+  cupertino_icons: ^1.0.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  
+  # Linter untuk memastikan kualitas kode Anda tetap rapi
+  flutter_lints: ^2.0.0
 
 flutter:
   uses-material-design: true
