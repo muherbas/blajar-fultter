@@ -28,15 +28,19 @@ class DashboardAtletPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Variabel dummy untuk ID dan Nama Murid, nanti bisa dihubungkan ke database dinamis
+    const String idMurid = "001";
+    const String namaMurid = "BUDI SANTOSO";
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'ATHLETE PERFORMANCE DASHBOARD',
+          'DASHBOARD PERFORMANCE [$idMurid - $namaMurid]',
           style: TextStyle(
             color: Color(0xFFF8FAFC), 
-            fontSize: 14, 
+            fontSize: 13, 
             fontWeight: FontWeight.w900, 
-            letterSpacing: 1.5
+            letterSpacing: 1.2
           ),
         ),
         centerTitle: true,
@@ -47,7 +51,7 @@ class DashboardAtletPage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
         child: Column(
           children: [
-            // ==================== CARD 1: BOXPLOT (7 PARAMETER) ====================
+            // ==================== CARD 1: BOXPLOT (KOMPONEN UTAMA) ====================
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -66,7 +70,7 @@ class DashboardAtletPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'COMPONENTS OF FITNESS (MAIN)',
+                    'KOMPONEN UTAMA',
                     style: TextStyle(
                       fontSize: 11, 
                       fontWeight: FontWeight.w900, 
@@ -103,7 +107,7 @@ class DashboardAtletPage extends StatelessWidget {
             
             const SizedBox(height: 20),
             
-            // ==================== CARD 2: RADAR SPIDER DENGAN DUA LAPISAN JARING ====================
+            // ==================== CARD 2: RADAR SPIDER (KOMPONEN TURUNAN) ====================
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -121,30 +125,26 @@ class DashboardAtletPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const Text(
+                    'KOMPONEN TURUNAN',
+                    style: TextStyle(
+                      fontSize: 11, 
+                      fontWeight: FontWeight.w900, 
+                      color: Color(0xFFF43F5E), 
+                      letterSpacing: 1.0
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  // REVISI LAYOUT: Legend ditaruh di bawah tulisan judul (Enter) agar tidak memotong layar HP
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'SPECIFIC ATHLETIC BIOMOTORIC (RADAR)',
-                        style: TextStyle(
-                          fontSize: 11, 
-                          fontWeight: FontWeight.w900, 
-                          color: Color(0xFFF43F5E), 
-                          letterSpacing: 1.0
-                        ),
-                      ),
-                      // Legend Indikator Cerdas
-                      Row(
-                        children: [
-                          Container(width: 8, height: 8, color: const Color(0xFFF43F5E)),
-                          const SizedBox(width: 4),
-                          const Text('Murid', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 8, fontWeight: FontWeight.bold)),
-                          const SizedBox(width: 12),
-                          Container(width: 8, height: 8, color: const Color(0xFF0EA5E9)),
-                          const SizedBox(width: 4),
-                          const Text('Tim Avg', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 8, fontWeight: FontWeight.bold)),
-                        ],
-                      )
+                      Container(width: 8, height: 8, color: const Color(0xFFF43F5E)),
+                      const SizedBox(width: 4),
+                      const Text('Murid', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 8, fontWeight: FontWeight.bold)),
+                      const SizedBox(width: 12),
+                      Container(width: 8, height: 8, color: const Color(0xFF0EA5E9)),
+                      const SizedBox(width: 4),
+                      const Text('Tim Avg', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 8, fontWeight: FontWeight.bold)),
                     ],
                   ),
                   const SizedBox(height: 24),
@@ -162,13 +162,22 @@ class DashboardAtletPage extends StatelessWidget {
   }
 }
 
-// ==================== CODE IMPLEMENTASI BOXPLOT GRAPH ====================
+// ==================== IMPLEMENTASI GRAFIK BOXPLOT ====================
 class BoxplotChart extends StatelessWidget {
   const BoxplotChart({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final List<String> labels = ['STRENGTH', 'ENDURANCE', 'SPEED', 'COORD', 'FLEX', 'BALANCE', 'REACTION'];
+    final List<String> labels = [
+      'STRENGTH',
+      'ENDURANCE',
+      'SPEED',
+      'COORD',
+      'FLEX',
+      'BALANCE',
+      'REACTION'
+    ];
+    
     return Column(
       children: [
         Expanded(
@@ -217,6 +226,7 @@ class BoxplotPainter extends CustomPainter {
     for (int i = 0; i < dataCount; i++) {
       double x = (spacing * i) + (spacing / 2);
       var data = boxData[i];
+      
       double outlier = data[0] * size.height;
       double topWhisker = data[1] * size.height;
       double q3 = data[2] * size.height;
@@ -228,6 +238,7 @@ class BoxplotPainter extends CustomPainter {
       if (data[0] > 0) {
         canvas.drawCircle(Offset(x, outlier), 2.5, Paint()..color = const Color(0xFF38BDF8));
       }
+      
       canvas.drawLine(Offset(x, topWhisker), Offset(x, q3), linePaint);
       canvas.drawLine(Offset(x - boxWidth/3, topWhisker), Offset(x + boxWidth/3, topWhisker), linePaint);
       canvas.drawLine(Offset(x, q1), Offset(x, bottomWhisker), linePaint);
@@ -239,11 +250,12 @@ class BoxplotPainter extends CustomPainter {
       canvas.drawLine(Offset(x - boxWidth / 2, median), Offset(x + boxWidth / 2, median), Paint()..color = const Color(0xFFF8FAFC)..strokeWidth = 1.5);
     }
   }
+
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// ==================== CODE IMPLEMENTASI RADAR / SPIDER DENGAN DUA JARING ====================
+// ==================== IMPLEMENTASI GRAFIK RADAR SPIDER ====================
 class RadarSpiderChart extends StatelessWidget {
   const RadarSpiderChart({Key? key}) : super(key: key);
 
@@ -303,7 +315,7 @@ class RadarSpiderPainter extends CustomPainter {
       textPainter.paint(canvas, Offset(textX, textY));
     }
 
-    // 3. LAPISAN JARING A: GLOBAL TEAM AVERAGE (WARNA BIRU CYAN SEBAGAI LATAR PEMBANDING)
+    // 3. LAPISAN JARING A: GLOBAL TEAM AVERAGE
     List<double> teamAvgValues = [0.65, 0.70, 0.60, 0.65, 0.68, 0.70, 0.62, 0.65, 0.70, 0.60];
     Path teamPath = Path();
     for (int j = 0; j < numFeatures; j++) {
@@ -317,7 +329,7 @@ class RadarSpiderPainter extends CustomPainter {
     canvas.drawPath(teamPath, Paint()..color = const Color(0xFF0EA5E9).withOpacity(0.12)..style = PaintingStyle.fill);
     canvas.drawPath(teamPath, Paint()..color = const Color(0xFF0EA5E9).withOpacity(0.5)..style = PaintingStyle.stroke..strokeWidth = 1.2);
 
-    // 4. LAPISAN JARING B: DATA UTAMA NILAI MURID (WARNA MERAH ROSE - MENUMPUK DI ATAS TIM)
+    // 4. LAPISAN JARING B: DATA NILAI MURID
     List<double> studentValues = [0.80, 0.65, 0.85, 0.50, 0.70, 0.90, 0.75, 0.60, 0.80, 0.55];
     Path studentPath = Path();
     List<Offset> studentPoints = [];
@@ -333,7 +345,7 @@ class RadarSpiderPainter extends CustomPainter {
     canvas.drawPath(studentPath, Paint()..color = const Color(0xFFF43F5E).withOpacity(0.28)..style = PaintingStyle.fill);
     canvas.drawPath(studentPath, Paint()..color = const Color(0xFFF43F5E)..style = PaintingStyle.stroke..strokeWidth = 2.0);
 
-    // Titik sendi nilai murid
+    // Titik sudut nilai murid
     Paint pointPaint = Paint()..color = const Color(0xFFFFF1F2);
     for (Offset point in studentPoints) {
       canvas.drawCircle(point, 3, pointPaint);
