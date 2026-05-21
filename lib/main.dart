@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:syncfusion_flutter_charts/charts.dart'; // Untuk Boxplot atas
+import 'package:syncfusion_flutter_gauges/gauges.dart';  // Untuk Gauge interaktif bawah
 
 void main() => runApp(const MyApp());
 
@@ -20,45 +21,62 @@ class DashboardAtlet extends StatefulWidget {
   const DashboardAtlet({super.key});
 
   @override
-  State<DashboardAtlet> createState() => _DashboardAtletState();
+  Widget build(BuildContext context) {
+    return const DashboardAtletView();
+  }
 }
 
-// Model data untuk Box and Whisker (Boxplot)
+class DashboardAtletView extends StatefulWidget {
+  const DashboardAtletView({super.key});
+
+  @override
+  State<DashboardAtletView> createState() => _DashboardAtletViewState();
+}
+
+// Model data untuk Box and Whisker (Boxplot) 7 Parameter Utama
 class BoxPlotData {
   final String x;
   final List<num> y;
   BoxPlotData(this.x, this.y);
 }
 
-// Model data untuk Radial Bar Chart
-class RadialData {
-  final String x;
-  final num y;
-  final Color color;
-  RadialData(this.x, this.y, this.color);
-}
+class _DashboardAtletViewState extends State<DashboardAtletView> {
+  String parameterTurunanTerpilih = "MUSCULAR ENDURANCE"; // Default terpilih awal
 
-class _DashboardAtletState extends State<DashboardAtlet> {
+  // Data 10 Parameter Komponen Turunan Murid (Sistem Key-Value Map)
+  final Map<String, double> komponenTurunan = {
+    "MUSCULAR ENDURANCE": 78,
+    "POWER": 82,
+    "CORE STABILITY": 70,
+    "DYNAMIC FLEXIBILITY": 65,
+    "SPEED ENDURANCE": 75,
+    "REACTIVE SPEED": 60,
+    "AGILITY": 88,
+    "ANTICIPATION & SPATIAL AWARENESS": 80,
+    "MOBILITY": 72,
+    "OPEN REACTIVE AGILITY": 67,
+  };
+
+  // Fungsi menghitung rata-rata total untuk baseline jarum pembanding
+  double get rataRataTurunan {
+    double total = komponenTurunan.values.fold(0, (sum, item) => sum + item);
+    return total / komponenTurunan.length;
+  }
+
   @override
   Widget build(BuildContext context) {
-    // 1. Data Dummy Boxplot sebaran nilai 20 murid (Min, Q1, Median, Q3, Max)
+    // Data sebaran nilai 20 murid untuk 7 Parameter Utama (Format: [Min, Q1, Median, Q3, Max])
     final List<BoxPlotData> dataBoxPlot = [
-      BoxPlotData('Gly', [40, 55, 68, 80, 92]),
-      BoxPlotData('End', [30, 48, 62, 75, 90]),
-      BoxPlotData('Spd', [35, 50, 65, 78, 88]),
-      BoxPlotData('Coord', [45, 60, 72, 82, 95]),
-      BoxPlotData('Flex', [42, 58, 70, 84, 93]),
-      BoxPlotData('Bal', [50, 65, 76, 88, 98]),
-      BoxPlotData('React', [32, 46, 60, 72, 85]),
+      BoxPlotData('STRENGTH', [45, 60, 75, 82, 95]),
+      BoxPlotData('ENDURANCE', [50, 58, 68, 78, 92]),
+      BoxPlotData('SPEED', [40, 52, 65, 74, 88]),
+      BoxPlotData('COORD', [55, 65, 72, 85, 96]),
+      BoxPlotData('FLEX', [35, 48, 60, 72, 85]),
+      BoxPlotData('BALANCE', [60, 68, 76, 88, 98]),
+      BoxPlotData('REACTION', [42, 50, 63, 75, 90]),
     ];
 
-    // 2. Data Dummy Radial Bar untuk komponen turunan melingkar berlapis
-    final List<RadialData> dataRadial = [
-      RadialData('M.Endur', 85, Colors.orange),
-      RadialData('Power', 78, Colors.red.shade700),
-      RadialData('Core', 70, Colors.blue.shade700),
-      RadialData('Dyn.Flex', 62, Colors.teal),
-    ];
+    double nilaiGaugeAktif = komponenTurunan[parameterTurunanTerpilih] ?? 0;
 
     return Scaffold(
       appBar: AppBar(
@@ -71,7 +89,7 @@ class _DashboardAtletState extends State<DashboardAtlet> {
         child: Column(
           children: [
             // ========================================================
-            // GRAFIK 1: BOXPLOT ATLET (KOMPONEN UTAMA)
+            // GRAFIK 1: BOXPLOT 7 PARAMETER (KOMPONEN UTAMA)
             // ========================================================
             Card(
               elevation: 1,
@@ -87,11 +105,11 @@ class _DashboardAtletState extends State<DashboardAtlet> {
                     ),
                     const SizedBox(height: 10),
                     SizedBox(
-                      height: 260,
+                      height: 220,
                       child: SfCartesianChart(
                         primaryXAxis: const CategoryAxis(
                           majorGridLines: MajorGridLines(width: 0),
-                          labelStyle: TextStyle(fontSize: 10),
+                          labelStyle: TextStyle(fontSize: 8, fontWeight: FontWeight.bold),
                         ),
                         primaryYAxis: const NumericAxis(
                           minimum: 0,
@@ -107,28 +125,28 @@ class _DashboardAtletState extends State<DashboardAtlet> {
                             yValueMapper: (BoxPlotData data, _) => data.y,
                             boxPlotMode: BoxPlotMode.normal,
                             showMean: true,
-                            fillColor: Colors.blueAccent.withOpacity(0.7),
+                            fillColor: Colors.blueAccent.withOpacity(0.6),
                             strokeColor: Colors.blue.shade900,
                             strokeWidth: 1.5,
                           )
                         ],
                       ),
                     ),
-                    // Rata-rata card di pojok bawah kanan sesuai gambar
+                    const SizedBox(height: 5),
                     Align(
                       alignment: Alignment.centerRight,
                       child: Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
                           color: Colors.grey.shade50,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.プリント(color: Colors.grey.shade200, width: 1) ?? Border.all(color: Colors.grey.shade300),
+                          border: Border.all(color: Colors.grey.shade200),
                         ),
                         child: const Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text("Nilai Rata-Rata Keseluruhan Murid", style: TextStyle(fontSize: 9, color: Colors.black54)),
-                            Text("68.5", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            Text("68.5", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),
@@ -140,7 +158,7 @@ class _DashboardAtletState extends State<DashboardAtlet> {
             const SizedBox(height: 16),
 
             // ========================================================
-            // GRAFIK 2: RADAR / RADIAL BAR ATLET (KOMPONEN TURUNAN)
+            // GRAFIK 2: RADIAL GAUGE INTERAKTIF (10 PARAMETER TURUNAN)
             // ========================================================
             Card(
               elevation: 1,
@@ -150,54 +168,44 @@ class _DashboardAtletState extends State<DashboardAtlet> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
+                        const Text(
                           "1 Radar Atlet: Komponen Turunan",
                           style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.purple),
                         ),
-                        Text("Avg: 73.7", style: TextStyle(fontSize: 10, color: Colors.purple, fontWeight: FontWeight.bold)),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(color: Colors.purple.shade50, borderRadius: BorderRadius.circular(6)),
+                          child: Text(
+                            'Avg: ${rataRataTurunan.toStringAsFixed(1)}%',
+                            style: const TextStyle(color: Colors.purple, fontWeight: FontWeight.bold, fontSize: 11),
+                          ),
+                        )
                       ],
                     ),
-                    const SizedBox(height: 5),
-                    const Center(
-                      child: Text(
-                        "Shot put distance",
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    // Menggunakan RadialBarSeries berlapis melingkar seperti gambar target
-                    SizedBox(
-                      height: 240,
-                      child: SfCircularChart(
-                        key: UniqueKey(),
-                        series: <CircularSeries<RadialData, String>>[
-                          RadialBarSeries<RadialData, String>(
-                            dataSource: dataRadial,
-                            xValueMapper: (RadialData data, _) => data.x,
-                            yValueMapper: (RadialData data, _) => data.y,
-                            pointColorMapper: (RadialData data, _) => data.color,
-                            maximumValue: 100,
-                            radius: '90%',
-                            innerRadius: '35%',
-                            gap: '8%',
-                            cornerStyle: CornerStyle.bothCurve,
-                            dataLabelSettings: const DataLabelSettings(
-                              isVisible: false,
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+                    const SizedBox(height: 15),
+
+                    // RADIAL GAUGE ASLI DENGAN RANGE POINTER & NEEDLE POINTER
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 5,
+                          child: SizedBox(
+                            height: 160,
+                            child: SfRadialGauge(
+                              axes: <RadialAxis>[
+                                RadialAxis(
+                                  minimum: 0,
+                                  maximum: 100,
+                                  showLabels: false,
+                                  showTicks: false,
+                                  startAngle: 270,
+                                  endAngle: 270,
+                                  radiusFactor: 0.95,
+                                  axisLineStyle: AxisLineStyle(thickness: 18, color: Colors.orange.shade100),
+                                  pointers: <GaugePointer>[
+                                    // 1. Batang Melingkar Skor Aktif Parameter Terpilih
+                                    RangePointer(
+                                      value: nilaiGaugeAktif,
