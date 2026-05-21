@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Dashboard Atlet Manual',
+      title: 'Dashboard Atlet Standar',
       theme: ThemeData(
         brightness: Brightness.light,
         scaffoldBackgroundColor: const Color(0xFFF5F6FA),
@@ -30,7 +30,7 @@ class DashboardAtletPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Statistik Atlet (Boxplot & Radar)',
+          'Statistik Atlet',
           style: TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -41,7 +41,7 @@ class DashboardAtletPage extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
-            // CARD 1: 7 GRAFIK BOXPLOT (KOMPONEN UTAMA)
+            // CARD 1: 7 GRAFIK BOXPLOT (KOMPONEN UTAMA) - SUDAH OK
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -62,7 +62,6 @@ class DashboardAtletPage extends StatelessWidget {
                     child: BoxplotChart(),
                   ),
                   const SizedBox(height: 12),
-                  // Informasi Perbandingan Rata-rata di Pojok Kanan
                   Align(
                     alignment: Alignment.centerRight,
                     child: Container(
@@ -93,7 +92,7 @@ class DashboardAtletPage extends StatelessWidget {
             
             const SizedBox(height: 16),
             
-            // CARD 2: RADAR POLYGON (10 PARAMETER)
+            // CARD 2: REVISI - SEKARANG MENJADI GRAFIK RADAR / SPIDER (10 PARAMETER)
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -105,13 +104,13 @@ class DashboardAtletPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    '1 Radar Atlet: 10 Parameter (Jaring Polygon)',
+                    '1 Radar Atlet: 10 Parameter (Spider Chart)',
                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF880E4F)),
                   ),
                   const SizedBox(height: 16),
                   const SizedBox(
                     height: 300,
-                    child: RadarPolygonChart(),
+                    child: RadarSpiderChart(),
                   ),
                 ],
               ),
@@ -171,7 +170,6 @@ class BoxplotPainter extends CustomPainter {
     int dataCount = 7;
     double spacing = size.width / dataCount;
 
-    // Data Koordinat Gambar Boxplot (Skala 0.0 sampai 1.0 dari atas ke bawah)
     List<List<double>> boxData = [
       [0.0, 0.25, 0.38, 0.50, 0.65, 0.82],
       [0.23, 0.28, 0.42, 0.56, 0.70, 0.85],
@@ -212,36 +210,36 @@ class BoxplotPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// ==================== WIDGET & PAINTER RADAR POLYGON ====================
-class RadarPolygonChart extends StatelessWidget {
-  const RadarPolygonChart({Key? key}) : super(key: key);
+// ==================== REVISI: GRAFIK RADAR / SPIDER WIDGET ====================
+class RadarSpiderChart extends StatelessWidget {
+  const RadarSpiderChart({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
       size: Size.infinite,
-      painter: RadarPolygonPainter(),
+      painter: RadarSpiderPainter(),
     );
   }
 }
 
-class RadarPolygonPainter extends CustomPainter {
+class RadarSpiderPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     Offset center = Offset(size.width / 2, size.height / 2);
     double maxRadius = math.min(size.width, size.height) / 2.3;
-    int numFeatures = 10; // 10 Parameter sesuai kolom data excel/materi
+    int numFeatures = 10; // Kunci 10 Parameter jaring laba-laba
 
-    // Label 10 Parameter untuk ditaruh di ujung sudut
+    // Nama label 10 parameter (bisa diubah sesuai materi nunchaku/biomotorik nanti)
     List<String> labels = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8', 'P9', 'P10'];
 
-    // 1. MENGGAMBAR JARING LABA-LABA BACKGROUND (POLYGON SEGI-10)
+    // 1. GAMBAR JARING LABA-LABA BACKGROUND (POLYGON SEGI-10 BERLAPIS)
     Paint gridPaint = Paint()
       ..color = Colors.black26
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
 
-    // Membuat 5 lapis jaring polygon (Skala tingkat nilai 20%, 40%, 60%, 80%, 100%)
+    // Membuat 5 tingkatan lingkaran jaring polygon (Skala tingkat nilai 20% sampai 100%)
     for (int i = 1; i <= 5; i++) {
       double currentRadius = maxRadius * (i / 5);
       Path gridPath = Path();
@@ -261,31 +259,32 @@ class RadarPolygonPainter extends CustomPainter {
       canvas.drawPath(gridPath, gridPaint);
     }
 
-    // 2. MENGGAMBAR GARIS JARI-JARI / AXIS TIAP PARAMETER
+    // 2. GAMBAR GARIS JARI-JARI / AXIS DAN TEKS LABEL
     for (int j = 0; j < numFeatures; j++) {
       double angle = (j * 2 * math.pi / numFeatures) - (math.pi / 2);
       double x = center.dx + maxRadius * math.cos(angle);
       double y = center.dy + maxRadius * math.sin(angle);
+      
+      // Tarik garis lurus dari pusat ke ujung jaring
       canvas.drawLine(center, Offset(x, y), gridPaint);
       
-      // Menggambar Text Label kecil di setiap ujung garis parameter
+      // Gambar Teks Label Parameter (P1 - P10) di ujung setiap sudut
       TextPainter textPainter = TextPainter(
         text: TextSpan(
           text: labels[j],
-          style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black54),
+          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black54),
         ),
         textDirection: TextDirection.ltr,
       )..layout();
       
-      // Atur posisi teks sedikit melompat keluar dari ujung garis agar rapi
-      double textX = center.dx + (maxRadius + 12) * math.cos(angle) - (textPainter.width / 2);
-      double textY = center.dy + (maxRadius + 12) * math.sin(angle) - (textPainter.height / 2);
+      double textX = center.dx + (maxRadius + 14) * math.cos(angle) - (textPainter.width / 2);
+      double textY = center.dy + (maxRadius + 14) * math.sin(angle) - (textPainter.height / 2);
       textPainter.paint(canvas, Offset(textX, textY));
     }
 
-    // 3. MENGGAMBAR AREA DATA MURID (POLYGON BERWARNA TRANSPARAN)
-    // Angka acak/dummy pencapaian murid skala 0.0 sampai 1.0 untuk 10 parameter
-    List<double> dataValues = [0.85, 0.60, 0.75, 0.90, 0.50, 0.70, 0.45, 0.80, 0.65, 0.55];
+    // 3. GAMBAR AREA DATA SKOR ATLET (POLYGON BERWARNA TRANSPARAN)
+    // Nilai inputan acak skala 0.0 sampai 1.0 untuk masing-masing 10 parameter
+    List<double> dataValues = [0.85, 0.55, 0.75, 0.90, 0.40, 0.70, 0.50, 0.85, 0.60, 0.65];
 
     Path dataPath = Path();
     List<Offset> dataPoints = [];
@@ -305,20 +304,20 @@ class RadarPolygonPainter extends CustomPainter {
     }
     dataPath.close();
 
-    // Warnai isi jaring area nilai murid dengan warna merah transparan cerah
+    // Mewarnai bagian dalam area skor dengan warna merah muda transparan yang tegas
     Paint fillPaint = Paint()
       ..color = const Color(0xFFE91E63).withOpacity(0.3)
       ..style = PaintingStyle.fill;
     canvas.drawPath(dataPath, fillPaint);
 
-    // Gambar garis tepi jaring nilai murid agar tampak tegas
+    // Menggambar garis luar tegas penutup area skor
     Paint strokePaint = Paint()
       ..color = const Color(0xFFE91E63)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
     canvas.drawPath(dataPath, strokePaint);
 
-    // Beri titik bulat kecil di setiap koordinat nilai data murid
+    // Memberikan bulatan titik penanda kecil di setiap sudut nilai skor
     Paint pointPaint = Paint()..color = const Color(0xFF880E4F);
     for (Offset point in dataPoints) {
       canvas.drawCircle(point, 3, pointPaint);
