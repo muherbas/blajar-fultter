@@ -1,313 +1,181 @@
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/charts.dart'; // IMPORT UTAMA UNTUK SEMUA GRAFIK
+import 'dart:math' as math;
 
-void main() => runApp(const MyApp());
+void main() {
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
-      home: const DashboardAtlet(),
+      title: 'Statistik Atlet',
+      theme: ThemeData(
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: const Color(0xFFF5F6FA),
+      ),
+      home: const DashboardAtletPage(),
     );
   }
 }
 
-class DashboardAtlet extends StatefulWidget {
-  const DashboardAtlet({super.key});
+class DashboardAtletPage extends StatelessWidget {
+  const DashboardAtletPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return const DashboardAtletView();
-  }
-}
-
-class DashboardAtletView extends StatefulWidget {
-  const DashboardAtletView({super.key});
-
-  @override
-  State<DashboardAtletView> createState() => _DashboardAtletViewState();
-}
-
-// Model data untuk Boxplot 7 Parameter Utama
-class BoxPlotData {
-  final String x;
-  final List<num> y;
-  BoxPlotData(this.x, this.y);
-}
-
-// Model data untuk Radial Bar Chart Interaktif
-class RadialChartData {
-  final String x;
-  final num y;
-  final Color color;
-  RadialChartData(this.x, this.y, this.color);
-}
-
-class _DashboardAtletViewState extends State<DashboardAtletView> {
-  String parameterTurunanTerpilih = "MUSCULAR ENDURANCE"; // Default awal
-
-  // Data 10 Parameter Komponen Turunan
-  final Map<String, double> komponenTurunan = {
-    "MUSCULAR ENDURANCE": 78,
-    "POWER": 82,
-    "CORE STABILITY": 70,
-    "DYNAMIC FLEXIBILITY": 65,
-    "SPEED ENDURANCE": 75,
-    "REACTIVE SPEED": 60,
-    "AGILITY": 88,
-    "ANTICIPATION & SPATIAL AWARENESS": 80,
-    "MOBILITY": 72,
-    "OPEN REACTIVE AGILITY": 67,
-  };
-
-  double get rataRataTurunan {
-    double total = komponenTurunan.values.fold(0, (sum, item) => sum + item);
-    return total / komponenTurunan.length;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // Data sebaran Boxplot 7 Parameter Utama
-    final List<BoxPlotData> dataBoxPlot = [
-      BoxPlotData('STRENGTH', [45, 60, 75, 82, 95]),
-      BoxPlotData('ENDURANCE', [50, 58, 68, 78, 92]),
-      BoxPlotData('SPEED', [40, 52, 65, 74, 88]),
-      BoxPlotData('COORD', [55, 65, 72, 85, 96]),
-      BoxPlotData('FLEX', [35, 48, 60, 72, 85]),
-      BoxPlotData('BALANCE', [60, 68, 76, 88, 98]),
-      BoxPlotData('REACTION', [42, 50, 63, 75, 90]),
-    ];
-
-    double nilaiAktif = komponenTurunan[parameterTurunanTerpilih] ?? 0;
-
-    // Data Radial Ring: Cincin luar adalah nilai parameter aktif, cincin dalam adalah rata-rata
-    final List<RadialChartData> dataRadialInteraktif = [
-      RadialChartData('Skor ...', nilaiAktif, Colors.orangeAccent.shade700),
-      RadialChartData('Rata-rata ...', rataRataTurunan, Colors.indigo.shade900),
-    ];
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Statistik Ruri", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        title: const Text(
+          'Statistik Ruri',
+          style: TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
-        backgroundColor: Colors.indigo.shade50,
+        backgroundColor: const Color(0xFFE3E7F1),
+        elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
-            // ========================================================
-            // GRAFIK 1: BOXPLOT 7 PARAMETER (KOMPONEN UTAMA)
-            // ========================================================
-            Card(
-              elevation: 1,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "1 Boxplot Atlet: Komponen Utama",
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.indigo),
+            // CARD 1: BOXPLOT ATLET (KOMPONEN UTAMA)
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F3F9),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '1 Boxplot Atlet: Komponen Utama',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF3F51B5),
                     ),
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      height: 220,
-                      child: SfCartesianChart(
-                        primaryXAxis: const CategoryAxis(
-                          majorGridLines: MajorGridLines(width: 0),
-                          labelStyle: TextStyle(fontSize: 8, fontWeight: FontWeight.bold),
-                        ),
-                        primaryYAxis: const NumericAxis(
-                          minimum: 0,
-                          maximum: 100,
-                          interval: 20,
-                          majorGridLines: MajorGridLines(width: 0.5, color: Colors.grey),
-                        ),
-                        plotAreaBorderWidth: 0,
-                        series: <CartesianSeries<BoxPlotData, String>>[
-                          BoxAndWhiskerSeries<BoxPlotData, String>(
-                            dataSource: dataBoxPlot,
-                            xValueMapper: (BoxPlotData data, _) => data.x,
-                            yValueMapper: (BoxPlotData data, _) => data.y,
-                            boxPlotMode: BoxPlotMode.normal,
-                            showMean: true,
-                            fillColor: Colors.blueAccent.withOpacity(0.6),
-                            strokeColor: Colors.blue.shade900,
-                            strokeWidth: 1.5,
-                          )
+                  ),
+                  const SizedBox(height: 16),
+                  const SizedBox(
+                    height: 220,
+                    child: BoxplotChart(),
+                  ),
+                  const SizedBox(height: 12),
+                  
+                  // Info Box Rata-rata Keseluruhan Murid
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Container(
+                      width: 180,
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          const Text(
+                            'Nilai Rata-Rata Keseluruhan Murid',
+                            style: TextStyle(fontSize: 9, color: Colors.black54),
+                          ),
+                          const Text(
+                            '68.5',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                          ),
+                          const SizedBox(height: 4),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: 0.685,
+                              backgroundColor: Colors.grey[200],
+                              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF4285F4)),
+                              minHeight: 10,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Avg: 68.5',
+                            style: TextStyle(fontSize: 9, color: Colors.black54),
+                          ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 5),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            const Text("Nilai Rata-Rata Keseluruhan Murid", style: TextStyle(fontSize: 9, color: Colors.black54)),
-                            Text("68.5", style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  )
+                ],
               ),
             ),
+            
             const SizedBox(height: 16),
-
-            // ========================================================
-            // GRAFIK 2: RADIAL RING INTERAKTIF (10 PARAMETER TURUNAN)
-            // ========================================================
-            Card(
-              elevation: 1,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          "1 Radar Atlet: Komponen Turunan",
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.purple),
+            
+            // CARD 2: RADAR ATLET (KOMPONEN TURUNAN / SHOT PUT DISTANCE)
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F3F9),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        '1 Radar Atlet: Komponen Turunan',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF880E4F),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(color: Colors.purple.shade50, borderRadius: BorderRadius.circular(6)),
-                          child: Text(
-                            'Avg: ${rataRataTurunan.toStringAsFixed(1)}%',
-                            style: const TextStyle(color: Colors.purple, fontWeight: FontWeight.bold, fontSize: 11),
-                          ),
-                        )
-                      ],
-                    ),
-                    const SizedBox(height: 15),
-
-                    // RADIAL BAR (DIJAMIN AMAN BEBAS ERROR)
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 5,
-                          child: SizedBox(
-                            height: 160,
-                            child: SfCircularChart(
-                              key: UniqueKey(), 
-                              annotations: <CircularChartAnnotation>[
-                                CircularChartAnnotation(
-                                  widget: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        '${nilaiAktif.toStringAsFixed(0)}%',
-                                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                                      ),
-                                      const Text("SKOR", style: TextStyle(fontSize: 8, color: Colors.grey, fontWeight: FontWeight.bold)),
-                                    ],
-                                  ),
-                                )
-                              ],
-                              series: <CircularSeries<RadialChartData, String>>[
-                                RadialBarSeries<RadialChartData, String>(
-                                  dataSource: dataRadialInteraktif,
-                                  xValueMapper: (RadialChartData data, _) => data.x,
-                                  yValueMapper: (RadialChartData data, _) => data.y,
-                                  pointColorMapper: (RadialChartData data, _) => data.color,
-                                  maximumValue: 100,
-                                  radius: '100%',
-                                  innerRadius: '55%',
-                                  gap: '12%',
-                                  cornerStyle: CornerStyle.none,
-                                )
-                              ],
-                            ),
-                          ),
-                        ),
-                        // Detail parameter terpilih
-                        Expanded(
-                          flex: 5,
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text("INFO INDIKATOR:", style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold)),
-                                const SizedBox(height: 6),
-                                _buildLegendRow(Colors.orangeAccent.shade700, "Cincin Luar: Skor Aktif"),
-                                const SizedBox(height: 4),
-                                _buildLegendRow(Colors.indigo.shade900, "Cincin Dalam: Rata-rata"),
-                                const Divider(height: 16),
-                                const Text("TERPILIH ATLET:", style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold)),
-                                Text(
-                                  parameterTurunanTerpilih,
-                                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.black87),
-                                ),
-                              ],
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    const Divider(),
-
-                    // LIST VIEW 10 PARAMETER INTERAKTIF
-                    const Text("Sentuh nama komponen untuk memutar grafik:", style: TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: Colors.grey)),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      height: 160,
-                      child: ListView(
-                        shrinkWrap: true,
-                        children: komponenTurunan.keys.map((String key) {
-                          bool isSelected = parameterTurunanTerpilih == key;
-                          return Card(
-                            color: isSelected ? Colors.orange.shade700 : Colors.grey.shade100,
-                            margin: const EdgeInsets.only(bottom: 6),
-                            child: ListTile(
-                              dense: true,
-                              title: Text(
-                                key,
-                                style: TextStyle(
-                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                  color: isSelected ? Colors.white : Colors.black87,
-                                  fontSize: 11,
-                                ),
-                              ),
-                              trailing: Text(
-                                '${komponenTurunan[key]?.toStringAsFixed(0)}%',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: isSelected ? Colors.white : Colors.orange.shade900,
-                                  fontSize: 11,
-                                ),
-                              ),
-                              onTap: () {
-                                setState(() {
-                                  parameterTurunanTerpilih = key; 
-                                });
-                              },
-                            ),
-                          );
-                        }).toList(),
                       ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFECB3),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          'Avg: 73.7',
+                          style: TextStyle(fontSize: 9, color: Colors.brown, fontWeight: FontWeight.bold),
+                        ),
+                      )
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  const Center(
+                    child: Text(
+                      'Shot put distance',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87),
                     ),
-                  ],
-                ),
+                  ),
+                  const Align(
+                    alignment: Alignment.centerRight,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'PARAMETER TERPILIH:',
+                          style: TextStyle(fontSize: 8, color: Colors.black54, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          'MUSCULAR ENDURANCE',
+                          style: TextStyle(fontSize: 10, color: Colors.black87, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 260,
+                    child: RadialDistanceChart(),
+                  ),
+                ],
               ),
             ),
           ],
@@ -315,14 +183,178 @@ class _DashboardAtletViewState extends State<DashboardAtletView> {
       ),
     );
   }
+}
 
-  Widget _buildLegendRow(Color color, String text) {
-    return Row(
+// === WIDGET GRAFIK BOXPLOT ===
+class BoxplotChart extends StatelessWidget {
+  const BoxplotChart({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final List<String> labels = ['Gly', 'End', 'Spd', 'Coord', 'Flex', 'Bal', 'React'];
+    return Column(
       children: [
-        Container(width: 12, height: 4, color: color),
-        const SizedBox(width: 6),
-        Expanded(child: Text(text, style: const TextStyle(fontSize: 11, color: Colors.black54))),
+        Expanded(
+          child: CustomPaint(
+            size: Size.infinite,
+            painter: BoxplotPainter(),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: labels.map((label) => SizedBox(
+            width: 40,
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 10, color: Colors.black87, fontWeight: FontWeight.w500),
+            ),
+          )).toList(),
+        ),
       ],
     );
   }
+}
+
+class BoxplotPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint linePaint = Paint()
+      ..color = Colors.black87
+      ..strokeWidth = 1.0
+      ..style = PaintingStyle.stroke;
+
+    final Paint boxPaint = Paint()
+      ..color = const Color(0xFF4A90E2)
+      ..style = PaintingStyle.fill;
+
+    // Menggambar baseline horizontal bawah
+    canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), linePaint);
+    
+    int dataCount = 7;
+    double spacing = size.width / dataCount;
+
+    // Format Data: [outlierY, topWhiskerY, q3Y, medianY, q1Y, bottomWhiskerY] (skala 0.0 sampai 1.0)
+    List<List<double>> boxData = [
+      [0.0, 0.25, 0.38, 0.50, 0.65, 0.82],   // Gly
+      [0.23, 0.28, 0.42, 0.56, 0.70, 0.85],  // End (dengan Outlier)
+      [0.25, 0.32, 0.45, 0.55, 0.68, 0.88],  // Spd (dengan Outlier)
+      [0.0, 0.22, 0.35, 0.48, 0.62, 0.80],   // Coord
+      [0.0, 0.20, 0.32, 0.44, 0.58, 0.75],   // Flex
+      [0.0, 0.15, 0.28, 0.40, 0.55, 0.76],   // Bal
+      [0.24, 0.30, 0.46, 0.58, 0.72, 0.86],  // React (dengan Outlier)
+    ];
+
+    for (int i = 0; i < dataCount; i++) {
+      double x = (spacing * i) + (spacing / 2);
+      var data = boxData[i];
+      
+      double outlier = data[0] * size.height;
+      double topWhisker = data[1] * size.height;
+      double q3 = data[2] * size.height;
+      double median = data[3] * size.height;
+      double q1 = data[4] * size.height;
+      double bottomWhisker = data[5] * size.height;
+      double boxWidth = spacing * 0.45;
+
+      // Gambar titik Outlier (jika terdeteksi nilai > 0)
+      if (data[0] > 0) {
+        canvas.drawCircle(Offset(x, outlier), 3, Paint()..color = const Color(0xFF0D47A1));
+      }
+      
+      // Menggambar garis Whisker T-Bar Atas & Bawah
+      canvas.drawLine(Offset(x, topWhisker), Offset(x, q3), linePaint);
+      canvas.drawLine(Offset(x - boxWidth/4, topWhisker), Offset(x + boxWidth/4, topWhisker), linePaint);
+      canvas.drawLine(Offset(x, q1), Offset(x, bottomWhisker), linePaint);
+      canvas.drawLine(Offset(x - boxWidth/4, bottomWhisker), Offset(x + boxWidth/4, bottomWhisker), linePaint);
+
+      // Menggambar Kotak Utama Boxplot (Q1 ke Q3)
+      Rect boxRect = Rect.fromLTRB(x - boxWidth / 2, q3, x + boxWidth / 2, q1);
+      canvas.drawRect(boxRect, boxPaint);
+      canvas.drawRect(boxRect, linePaint);
+      
+      // Menggambar Garis Nilai Tengah (Median)
+      canvas.drawLine(Offset(x - boxWidth / 2, median), Offset(x + boxWidth / 2, median), linePaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// === WIDGET GRAFIK RADAR/CONCENTRIC RING BAR ===
+class RadialDistanceChart extends StatelessWidget {
+  const RadialDistanceChart({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        CustomPaint(
+          size: Size.infinite,
+          painter: RadialDistancePainter(),
+        ),
+        // Skala Indikator Jarak (13M, 12M, dll.) diposisikan manual di tengah atas cincin grafik
+        const Positioned(top: 42, left: 145, child: Text('13M', style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.black54))),
+        const Positioned(top: 58, left: 145, child: Text('12M', style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.black54))),
+        const Positioned(top: 74, left: 145, child: Text('11M', style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.black54))),
+        const Positioned(top: 90, left: 145, child: Text('10M', style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.black54))),
+      ],
+    );
+  }
+}
+
+class RadialDistancePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    Offset center = Offset(size.width / 2, size.height / 2);
+    
+    // Konfigurasi radius cincin berlapis dari luar ke dalam
+    List<double> radii = [100, 85, 70, 55, 40];
+    
+    // Warna tiap bar sesuai screenshot asli (Orange, Merah Tua, Ungu, Biru Tua, Biru Muda)
+    List<Color> colors = [
+      const Color(0xFFE67E22),
+      const Color(0xFFC0392B),
+      const Color(0xFF9B59B6),
+      const Color(0xFF2980B9),
+      const Color(0xFF3498DB),
+    ];
+    
+    // Persentase panjang bar & sudut mulai lingkaran (agar melengkung dinamis tidak searah)
+    List<double> sweepPercentages = [0.85, 0.65, 0.72, 0.90, 0.45];
+    List<double> startAngles = [-math.pi / 2, -math.pi / 4, 0.0, math.pi / 3, math.pi / 1.5];
+
+    // Kuas untuk background track lingkaran abu-abu transparan
+    Paint bgPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 10
+      ..color = const Color(0xFFE0E0E0).withOpacity(0.4);
+
+    for (int i = 0; i < radii.length; i++) {
+      double radius = radii[i];
+      // Gambar lingkaran abu-abu sebagai base jalur tracker
+      canvas.drawCircle(center, radius, bgPaint);
+
+      // Kuas untuk progress bar berwarna dengan ujung melengkung halus (StrokeCap.round)
+      Paint progressPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 10
+        ..color = colors[i]
+        ..strokeCap = StrokeCap.round;
+
+      double sweepAngle = 2 * math.pi * sweepPercentages[i];
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        startAngles[i],
+        sweepAngle,
+        false,
+        progressPaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
