@@ -2,12 +2,11 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
-// 1. Model Murid dengan 3 Parameter
 class Murid {
   final String nama;
-  final double p1; // Kekuatan (Merah)
-  final double p2; // Kecepatan (Hijau)
-  final double p3; // Kelenturan (Biru)
+  final double p1; // Parameter 1 (Misal: Kekuatan)
+  final double p2; // Parameter 2 (Misal: Kecepatan)
+  final double p3; // Parameter 3 (Misal: Kelenturan)
 
   Murid({
     required this.nama, 
@@ -16,7 +15,6 @@ class Murid {
     required this.p3
   });
 
-  // Menghitung rata-rata otomatis
   double get rataRata => (p1 + p2 + p3) / 3;
 }
 
@@ -32,7 +30,6 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true, 
         colorSchemeSeed: Colors.indigo,
-        brightness: Brightness.light,
       ),
       home: const DashboardMultiParameter(),
     );
@@ -46,13 +43,13 @@ class DashboardMultiParameter extends StatelessWidget {
   Widget build(BuildContext context) {
     final random = Random();
 
-    // 2. Generate Data 5 Murid dengan 3 Parameter Acak
+    // Data acak untuk 5 orang murid dengan 3 parameter kemampuan
     final List<Murid> dataMurid = List.generate(5, (index) {
       return Murid(
         nama: 'Murid ${index + 1}',
-        p1: 40.0 + random.nextInt(51), // 40-90
-        p2: 30.0 + random.nextInt(61), // 30-90
-        p3: 50.0 + random.nextInt(41), // 50-90
+        p1: 40.0 + random.nextInt(51), // Skor 40 - 90
+        p2: 35.0 + random.nextInt(56), // Skor 35 - 90
+        p3: 50.0 + random.nextInt(41), // Skor 50 - 90
       );
     });
 
@@ -70,19 +67,19 @@ class DashboardMultiParameter extends StatelessWidget {
 
           return Card(
             margin: const EdgeInsets.only(bottom: 20),
-            elevation: 4,
+            elevation: 3,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  // Header: Nama & Rata-rata (Perbaikan spaceBetween)
+                  // Header Kartu Murid
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween, 
                     children: [
                       Text(
                         murid.nama,
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -91,63 +88,69 @@ class DashboardMultiParameter extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          'Avg: ${murid.rataRata.toStringAsFixed(1)}',
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          'Rata-rata: ${murid.rataRata.toStringAsFixed(1)}',
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 20),
 
-                  // CONCENTRIC RADIAL GAUGE
+                  // CONCENTRIC MULTI-AXIS RADIAL GAUGE (Gaya Cincin Aktivitas)
                   SizedBox(
                     height: 220,
                     child: SfRadialGauge(
                       axes: <RadialAxis>[
+                        // Lingkaran 1: LUAR (Parameter 1 - Merah)
                         RadialAxis(
-                          minimum: 0,
-                          maximum: 100,
-                          showLabels: false,
-                          showTicks: false,
-                          startAngle: 270,
-                          endAngle: 270,
-                          axisLineStyle: const AxisLineStyle(
-                            thickness: 0, // Sembunyikan garis axis utama
-                          ),
+                          minimum: 0, maximum: 100,
+                          showLabels: false, showTicks: false,
+                          startAngle: 270, endAngle: 270,
+                          radiusFactor: 0.95, // Mengatur ukuran lingkaran luar
+                          axisLineStyle: AxisLineStyle(thickness: 14, color: Colors.red.shade100),
                           pointers: <GaugePointer>[
-                            // Ring Luar (P1 - Strength)
                             RangePointer(
                               value: murid.p1,
-                              width: 18,
-                              pointerOffset: 0.1,
-                              radiusFactor: 0.95,
+                              width: 14,
                               color: Colors.redAccent,
-                              enableAnimation: true,
                               cornerStyle: CornerStyle.bothCurve,
-                            ),
-                            // Ring Tengah (P2 - Speed)
+                            )
+                          ],
+                        ),
+                        
+                        // Lingkaran 2: TENGAH (Parameter 2 - Hijau)
+                        RadialAxis(
+                          minimum: 0, maximum: 100,
+                          showLabels: false, showTicks: false,
+                          startAngle: 270, endAngle: 270,
+                          radiusFactor: 0.77, // Mengecil masuk ke dalam
+                          axisLineStyle: AxisLineStyle(thickness: 14, color: Colors.green.shade100),
+                          pointers: <GaugePointer>[
                             RangePointer(
                               value: murid.p2,
-                              width: 18,
-                              pointerOffset: 0.1,
-                              radiusFactor: 0.75,
+                              width: 14,
                               color: Colors.greenAccent.shade700,
-                              enableAnimation: true,
                               cornerStyle: CornerStyle.bothCurve,
-                            ),
-                            // Ring Dalam (P3 - Agility)
+                            )
+                          ],
+                        ),
+                        
+                        // Lingkaran 3: DALAM (Parameter 3 - Biru) + Angka Rata-Rata di Tengah
+                        RadialAxis(
+                          minimum: 0, maximum: 100,
+                          showLabels: false, showTicks: false,
+                          startAngle: 270, endAngle: 270,
+                          radiusFactor: 0.59, // Paling dalam
+                          axisLineStyle: AxisLineStyle(thickness: 14, color: Colors.blue.shade100),
+                          pointers: <GaugePointer>[
                             RangePointer(
                               value: murid.p3,
-                              width: 18,
-                              pointerOffset: 0.1,
-                              radiusFactor: 0.55,
+                              width: 14,
                               color: Colors.blueAccent,
-                              enableAnimation: true,
                               cornerStyle: CornerStyle.bothCurve,
-                            ),
+                            )
                           ],
                           annotations: <GaugeAnnotation>[
-                            // Angka Rata-rata di Tengah (Perbandingan Antar Murid)
                             GaugeAnnotation(
                               widget: Column(
                                 mainAxisSize: MainAxisSize.min,
@@ -155,12 +158,12 @@ class DashboardMultiParameter extends StatelessWidget {
                                   Text(
                                     murid.rataRata.toStringAsFixed(0),
                                     style: const TextStyle(
-                                      fontSize: 32, 
+                                      fontSize: 28, 
                                       fontWeight: FontWeight.bold,
                                       color: Colors.black87
                                     ),
                                   ),
-                                  const Text("SKOR", style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                  const Text("SKOR", style: TextStyle(fontSize: 9, color: Colors.grey, fontWeight: FontWeight.bold)),
                                 ],
                               ),
                               angle: 90,
@@ -172,16 +175,16 @@ class DashboardMultiParameter extends StatelessWidget {
                     ),
                   ),
                   
-                  // Legend Sederhana
-                  const SizedBox(height: 10),
+                  // Keterangan Warna Parameter (Legend)
+                  const SizedBox(height: 15),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildLegend("Str", Colors.redAccent),
-                      const SizedBox(width: 15),
-                      _buildLegend("Spd", Colors.greenAccent.shade700),
-                      const SizedBox(width: 15),
-                      _buildLegend("Agl", Colors.blueAccent),
+                      _buildLegendItem("Kekuatan", Colors.redAccent),
+                      const SizedBox(width: 16),
+                      _buildLegendItem("Kecepatan", Colors.greenAccent.shade700),
+                      const SizedBox(width: 16),
+                      _buildLegendItem("Kelenturan", Colors.blueAccent),
                     ],
                   )
                 ],
@@ -193,14 +196,20 @@ class DashboardMultiParameter extends StatelessWidget {
     );
   }
 
-  Widget _buildLegend(String label, Color color) {
+  Widget _buildLegendItem(String label, Color color) {
     return Row(
       children: [
-        Container(width: 10, height: 10, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-        const SizedBox(width: 5),
-        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        Container(
+          width: 10, 
+          height: 10, 
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label, 
+          style: const TextStyle(fontSize: 12, color: Colors.black54, fontWeight: FontWeight.w500),
+        ),
       ],
     );
   }
 }
-
