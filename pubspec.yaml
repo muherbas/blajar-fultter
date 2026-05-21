@@ -26,3 +26,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  # Daftarkan asset Anda di bawah ini
+  assets:
+    - assets/atlet_data.json
+
