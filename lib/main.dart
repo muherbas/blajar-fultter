@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/charts.dart'; // Untuk Boxplot atas
-import 'package:syncfusion_flutter_gauges/gauges.dart';  // Untuk Gauge bawah
+import 'package:syncfusion_flutter_charts/charts.dart'; // Menggunakan satu package utama agar aman dari konflik shader
 
 void main() => runApp(const MyApp());
 
@@ -33,17 +32,25 @@ class DashboardAtletView extends StatefulWidget {
   State<DashboardAtletView> createState() => _DashboardAtletViewState();
 }
 
-// Model data untuk Box and Whisker (Boxplot) 7 Parameter Utama
+// Model data untuk Boxplot 7 Parameter Utama
 class BoxPlotData {
   final String x;
   final List<num> y;
   BoxPlotData(this.x, this.y);
 }
 
-class _DashboardAtletViewState extends State<DashboardAtletView> {
-  String parameterTurunanTerpilih = "MUSCULAR ENDURANCE"; // Default terpilih awal
+// Model data untuk Radial Bar Chart Interaktif
+class RadialChartData {
+  final String x;
+  final num y;
+  final Color color;
+  RadialChartData(this.x, this.y, this.color);
+}
 
-  // Data 10 Parameter Komponen Turunan Murid (Sistem Key-Value Map)
+class _DashboardAtletViewState extends State<DashboardAtletView> {
+  String parameterTurunanTerpilih = "MUSCULAR ENDURANCE"; // Default awal
+
+  // Data 10 Parameter Komponen Turunan
   final Map<String, double> komponenTurunan = {
     "MUSCULAR ENDURANCE": 78,
     "POWER": 82,
@@ -57,7 +64,6 @@ class _DashboardAtletViewState extends State<DashboardAtletView> {
     "OPEN REACTIVE AGILITY": 67,
   };
 
-  // Fungsi menghitung rata-rata total untuk baseline jarum pembanding
   double get rataRataTurunan {
     double total = komponenTurunan.values.fold(0, (sum, item) => sum + item);
     return total / komponenTurunan.length;
@@ -65,7 +71,7 @@ class _DashboardAtletViewState extends State<DashboardAtletView> {
 
   @override
   Widget build(BuildContext context) {
-    // Data sebaran nilai 20 murid untuk 7 Parameter Utama (Format: [Min, Q1, Median, Q3, Max])
+    // Data sebaran Boxplot 7 Parameter Utama
     final List<BoxPlotData> dataBoxPlot = [
       BoxPlotData('STRENGTH', [45, 60, 75, 82, 95]),
       BoxPlotData('ENDURANCE', [50, 58, 68, 78, 92]),
@@ -76,7 +82,13 @@ class _DashboardAtletViewState extends State<DashboardAtletView> {
       BoxPlotData('REACTION', [42, 50, 63, 75, 90]),
     ];
 
-    double nilaiGaugeAktif = komponenTurunan[parameterTurunanTerpilih] ?? 0;
+    double nilaiAktif = komponenTurunan[parameterTurunanTerpilih] ?? 0;
+
+    // Data Radial Ring: Cincin luar adalah nilai parameter aktif, cincin dalam adalah rata-rata (Sebagai pengganti jarum pointer)
+    final List<RadialChartData> dataRadialInteraktif = [
+      RadialChartData('Skor Aktif', nilaiAktif, Colors.orangeAccent.shade700),
+      RadialChartData('Rata-rata Murid', rataRataTurunan, Colors.indigo.shade900),
+    ];
 
     return Scaffold(
       appBar: AppBar(
@@ -140,7 +152,7 @@ class _DashboardAtletViewState extends State<DashboardAtletView> {
                         decoration: BoxDecoration(
                           color: Colors.grey.shade50,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.grey.shade300), // Border yang valid & bersih
+                          border: Border.all(color: Colors.grey.shade300),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -158,7 +170,7 @@ class _DashboardAtletViewState extends State<DashboardAtletView> {
             const SizedBox(height: 16),
 
             // ========================================================
-            // GRAFIK 2: RADIAL GAUGE INTERAKTIF (10 PARAMETER TURUNAN)
+            // GRAFIK 2: RADIAL RING INTERAKTIF (10 PARAMETER TURUNAN)
             // ========================================================
             Card(
               elevation: 1,
@@ -187,67 +199,45 @@ class _DashboardAtletViewState extends State<DashboardAtletView> {
                     ),
                     const SizedBox(height: 15),
 
-                    // RADIAL GAUGE AMAN TANPA CONICAL GRADIENT BUG
+                    // RADIAL BAR BERLAPIS (AMAN SEPANJANG MASA DARI ERROR GRADIENT SHADER)
                     Row(
                       children: [
                         Expanded(
                           flex: 5,
                           child: SizedBox(
                             height: 160,
-                            child: SfRadialGauge(
-                              axes: <RadialAxis>[
-                                RadialAxis(
-                                  minimum: 0,
-                                  maximum: 100,
-                                  showLabels: false,
-                                  showTicks: false,
-                                  startAngle: 270,
-                                  endAngle: 270,
-                                  radiusFactor: 0.95,
-                                  axisLineStyle: AxisLineStyle(thickness: 18, color: Colors.orange.shade100),
-                                  pointers: <GaugePointer>[
-                                    // 1. Batang Melingkar Skor Aktif (CornerStyle diubah ke murni kotak/clean agar tidak memicu eror paint shader)
-                                    RangePointer(
-                                      value: nilaiGaugeAktif,
-                                      width: 18,
-                                      color: Colors.orangeAccent.shade700,
-                                      cornerStyle: CornerStyle.none, 
-                                    ),
-                                    // 2. Jarum Pembanding Posisi Rata-Rata Murid
-                                    NeedlePointer(
-                                      value: rataRataTurunan,
-                                      needleLength: 0.75,
-                                      needleColor: Colors.indigo.shade900,
-                                      needleStartWidth: 1,
-                                      needleEndWidth: 4,
-                                      knobStyle: KnobStyle(
-                                        knobRadius: 0.06,
-                                        color: Colors.indigo.shade900,
+                            child: SfCircularChart(
+                              key: UniqueKey(), // Memaksa grafik re-render mulus saat diklik
+                              annotations: <CircularChartAnnotation>[
+                                CircularChartAnnotation(
+                                  widget: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        '${nilaiAktif.toStringAsFixed(0)}%',
+                                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                                       ),
-                                    ),
-                                  ],
-                                  annotations: <GaugeAnnotation>[
-                                    GaugeAnnotation(
-                                      widget: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            '${nilaiGaugeAktif.toStringAsFixed(0)}%',
-                                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
-                                          ),
-                                          const Text("SKOR", style: TextStyle(fontSize: 8, color: Colors.grey, fontWeight: FontWeight.bold)),
-                                        ],
-                                      ),
-                                      angle: 90,
-                                      positionFactor: 0,
-                                    )
-                                  ],
+                                      const Text("SKOR", style: TextStyle(fontSize: 8, color: Colors.grey, fontWeight: FontWeight.bold)),
+                                    ],
+                                  ),
+                                )
+                              ],
+                              series: <CircularSeries<RadialChartData, String>>[
+                                RadialBarSeries<RadialChartData, String>(
+                                  dataSource: dataRadialInteraktif,
+                                  xValueMapper: (RadialChartData data, _) => data.x,
+                                  yValueMapper: (RadialChartData data, _) => data.y,
+                                  pointColorMapper: (RadialChartData data, _) => data.color,
+                                  maximumValue: 100,
+                                  radius: '100%',
+                                  innerRadius: '55%',
+                                  gap: '12%',
                                 )
                               ],
                             ),
                           ),
                         ),
-                        // Legenda Info Indikator Jarum vs Batang
+                        // Detail parameter terpilih
                         Expanded(
                           flex: 5,
                           child: Padding(
@@ -257,9 +247,9 @@ class _DashboardAtletViewState extends State<DashboardAtletView> {
                               children: [
                                 const Text("INFO INDIKATOR:", style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold)),
                                 const SizedBox(height: 6),
-                                _buildLegendRow(Colors.orangeAccent.shade700, "Batang: Skor Aktif"),
+                                _buildLegendRow(Colors.orangeAccent.shade700, "Cincin Luar: Skor Aktif"),
                                 const SizedBox(height: 4),
-                                _buildLegendRow(Colors.indigo.shade900, "Jarum: Rata-rata"),
+                                _buildLegendRow(Colors.indigo.shade900, "Cincin Dalam: Rata-rata"),
                                 const Divider(height: 16),
                                 const Text("TERPILIH ATLET:", style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold)),
                                 Text(
