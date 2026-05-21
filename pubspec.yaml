@@ -1,5 +1,5 @@
 name: fitness_tracker_gauge
-description: Aplikasi visualisasi data fitness murid menggunakan Boxplot dan Radial Bar Chart.
+description: "Aplikasi visualisasi data fitness murid menggunakan Boxplot dan Radial Bar Chart." 
 publish_to: 'none'
 
 version: 1.0.0+1
