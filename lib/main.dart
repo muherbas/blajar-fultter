@@ -51,7 +51,7 @@ class DashboardAtletPage extends StatelessWidget {
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                color: const Color(0xFF1E293B), // Elegan dark card
+                color: const Color(0xFF1E293B),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
@@ -70,7 +70,7 @@ class DashboardAtletPage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11, 
                       fontWeight: FontWeight.w900, 
-                      color: Color(0xFF38BDF8), // Light Blue Accent
+                      color: Color(0xFF38BDF8),
                       letterSpacing: 1.0
                     ),
                   ),
@@ -80,7 +80,6 @@ class DashboardAtletPage extends StatelessWidget {
                     child: BoxplotChart(),
                   ),
                   const SizedBox(height: 16),
-                  // Angka perbandingan ditaruh minimalis di pojok kanan bawah
                   Align(
                     alignment: Alignment.centerRight,
                     child: Column(
@@ -104,7 +103,7 @@ class DashboardAtletPage extends StatelessWidget {
             
             const SizedBox(height: 20),
             
-            // ==================== CARD 2: RADAR SPIDER (10 PARAMETER) ====================
+            // ==================== CARD 2: RADAR SPIDER DENGAN DUA LAPISAN JARING ====================
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -122,18 +121,35 @@ class DashboardAtletPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'SPECIFIC ATHLETIC BIOMOTORIC (RADAR)',
-                    style: TextStyle(
-                      fontSize: 11, 
-                      fontWeight: FontWeight.w900, 
-                      color: Color(0xFFF43F5E), // Rose Accent
-                      letterSpacing: 1.0
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'SPECIFIC ATHLETIC BIOMOTORIC (RADAR)',
+                        style: TextStyle(
+                          fontSize: 11, 
+                          fontWeight: FontWeight.w900, 
+                          color: Color(0xFFF43F5E), 
+                          letterSpacing: 1.0
+                        ),
+                      ),
+                      // Legend Indikator Cerdas
+                      Row(
+                        children: [
+                          Container(width: 8, height: 8, color: const Color(0xFFF43F5E)),
+                          const SizedBox(width: 4),
+                          const Text('Murid', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 8, fontWeight: FontWeight.bold)),
+                          const SizedBox(width: 12),
+                          Container(width: 8, height: 8, color: const Color(0xFF0EA5E9)),
+                          const SizedBox(width: 4),
+                          const Text('Tim Avg', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 8, fontWeight: FontWeight.bold)),
+                        ],
+                      )
+                    ],
                   ),
                   const SizedBox(height: 24),
                   const SizedBox(
-                    height: 340, // Ruang ekstra agar teks perimeter tidak terpotong
+                    height: 340, 
                     child: RadarSpiderChart(),
                   ),
                 ],
@@ -152,17 +168,7 @@ class BoxplotChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Sesuai request parameter Boxplot tunggal
-    final List<String> labels = [
-      'STRENGTH',
-      'ENDURANCE',
-      'SPEED',
-      'COORD', // Disingkat sedikit agar pas di layar HP
-      'FLEX',
-      'BALANCE',
-      'REACTION'
-    ];
-    
+    final List<String> labels = ['STRENGTH', 'ENDURANCE', 'SPEED', 'COORD', 'FLEX', 'BALANCE', 'REACTION'];
     return Column(
       children: [
         Expanded(
@@ -191,70 +197,53 @@ class BoxplotChart extends StatelessWidget {
 class BoxplotPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint linePaint = Paint()
-      ..color = const Color(0xFF475569) // Muted border
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
+    final Paint linePaint = Paint()..color = const Color(0xFF475569)..strokeWidth = 1.0..style = PaintingStyle.stroke;
+    final Paint boxPaint = Paint()..color = const Color(0xFF0284C7)..style = PaintingStyle.fill;
 
-    final Paint boxPaint = Paint()
-      ..color = const Color(0xFF0284C7) // Elit Ocean Blue
-      ..style = PaintingStyle.fill;
-
-    // Baseline
     canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), linePaint);
-
     int dataCount = 7;
     double spacing = size.width / dataCount;
 
-    // Simulasi distribusi data Boxplot atlet
     List<List<double>> boxData = [
-      [0.0, 0.20, 0.35, 0.48, 0.60, 0.80], // STRENGTH
-      [0.15, 0.25, 0.40, 0.52, 0.65, 0.82], // ENDURANCE
-      [0.0, 0.30, 0.45, 0.55, 0.70, 0.88], // SPEED
-      [0.0, 0.18, 0.32, 0.45, 0.58, 0.76], // COORDINATION
-      [0.0, 0.22, 0.38, 0.50, 0.62, 0.78], // FLEXIBILITY
-      [0.0, 0.12, 0.28, 0.40, 0.55, 0.72], // BALANCE
-      [0.20, 0.28, 0.42, 0.56, 0.68, 0.84], // REACTION TIME
+      [0.0, 0.20, 0.35, 0.48, 0.60, 0.80], 
+      [0.15, 0.25, 0.40, 0.52, 0.65, 0.82], 
+      [0.0, 0.30, 0.45, 0.55, 0.70, 0.88], 
+      [0.0, 0.18, 0.32, 0.45, 0.58, 0.76], 
+      [0.0, 0.22, 0.38, 0.50, 0.62, 0.78], 
+      [0.0, 0.12, 0.28, 0.40, 0.55, 0.72], 
+      [0.20, 0.28, 0.42, 0.56, 0.68, 0.84], 
     ];
 
     for (int i = 0; i < dataCount; i++) {
       double x = (spacing * i) + (spacing / 2);
       var data = boxData[i];
-      
       double outlier = data[0] * size.height;
       double topWhisker = data[1] * size.height;
       double q3 = data[2] * size.height;
       double median = data[3] * size.height;
       double q1 = data[4] * size.height;
       double bottomWhisker = data[5] * size.height;
-      double boxWidth = spacing * 0.35; // Kotak dibuat lebih ramping agar elegan
+      double boxWidth = spacing * 0.35;
 
-      // Draw Outlier jika ada (> 0)
       if (data[0] > 0) {
         canvas.drawCircle(Offset(x, outlier), 2.5, Paint()..color = const Color(0xFF38BDF8));
       }
-      
-      // Kumis/Whisker Atas & Bawah
       canvas.drawLine(Offset(x, topWhisker), Offset(x, q3), linePaint);
       canvas.drawLine(Offset(x - boxWidth/3, topWhisker), Offset(x + boxWidth/3, topWhisker), linePaint);
       canvas.drawLine(Offset(x, q1), Offset(x, bottomWhisker), linePaint);
       canvas.drawLine(Offset(x - boxWidth/3, bottomWhisker), Offset(x + boxWidth/3, bottomWhisker), linePaint);
 
-      // Kotak Utama (Q1 - Q3)
       Rect boxRect = Rect.fromLTRB(x - boxWidth / 2, q3, x + boxWidth / 2, q1);
       canvas.drawRect(boxRect, boxPaint);
       canvas.drawRect(boxRect, Paint()..color = const Color(0xFF38BDF8)..style = PaintingStyle.stroke..strokeWidth = 1);
-
-      // Garis Tengah Median (Warna kontras elit)
       canvas.drawLine(Offset(x - boxWidth / 2, median), Offset(x + boxWidth / 2, median), Paint()..color = const Color(0xFFF8FAFC)..strokeWidth = 1.5);
     }
   }
-
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// ==================== CODE IMPLEMENTASI RADAR / SPIDER GRAPH ====================
+// ==================== CODE IMPLEMENTASI RADAR / SPIDER DENGAN DUA JARING ====================
 class RadarSpiderChart extends StatelessWidget {
   const RadarSpiderChart({Key? key}) : super(key: key);
 
@@ -271,44 +260,24 @@ class RadarSpiderPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     Offset center = Offset(size.width / 2, size.height / 2);
-    double maxRadius = math.min(size.width, size.height) / 2.7; // Radius disesuaikan agar ruang teks aman
+    double maxRadius = math.min(size.width, size.height) / 2.7; 
     int numFeatures = 10;
 
-    // Sesuai 10 Parameter Grafik Radar yang diminta
     List<String> labels = [
-      'MUSCULAR END.',
-      'POWER',
-      'CORE STAB.',
-      'DYN. FLEX',
-      'SPEED END.',
-      'REACTIVE SP.',
-      'AGILITY',
-      'ANTICIPATION',
-      'MOBILITY',
-      'REACT AGILITY'
+      'MUSCULAR END.', 'POWER', 'CORE STAB.', 'DYN. FLEX', 'SPEED END.',
+      'REACTIVE SP.', 'AGILITY', 'ANTICIPATION', 'MOBILITY', 'REACT AGILITY'
     ];
 
-    // 1. GRID JARING SPIDER BACKGROUND (POLYGON)
-    Paint gridPaint = Paint()
-      ..color = const Color(0xFF334155) // Slate 700 gelap halus
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
-
-    // Menggambar 4 tingkat ring jaring laba-laba
+    // 1. GRID JARING SPIDER BACKGROUND
+    Paint gridPaint = Paint()..color = const Color(0xFF334155)..style = PaintingStyle.stroke..strokeWidth = 1.0;
     for (int i = 1; i <= 4; i++) {
       double currentRadius = maxRadius * (i / 4);
       Path gridPath = Path();
-      
       for (int j = 0; j < numFeatures; j++) {
         double angle = (j * 2 * math.pi / numFeatures) - (math.pi / 2);
         double x = center.dx + currentRadius * math.cos(angle);
         double y = center.dy + currentRadius * math.sin(angle);
-        
-        if (j == 0) {
-          gridPath.moveTo(x, y);
-        } else {
-          gridPath.lineTo(x, y);
-        }
+        if (j == 0) gridPath.moveTo(x, y); else gridPath.lineTo(x, y);
       }
       gridPath.close();
       canvas.drawPath(gridPath, gridPaint);
@@ -319,10 +288,8 @@ class RadarSpiderPainter extends CustomPainter {
       double angle = (j * 2 * math.pi / numFeatures) - (math.pi / 2);
       double x = center.dx + maxRadius * math.cos(angle);
       double y = center.dy + maxRadius * math.sin(angle);
-      
       canvas.drawLine(center, Offset(x, y), gridPaint);
       
-      // Gambar Teks Parameter mengelilingi sudut jaring
       TextPainter textPainter = TextPainter(
         text: TextSpan(
           text: labels[j],
@@ -331,50 +298,44 @@ class RadarSpiderPainter extends CustomPainter {
         textDirection: TextDirection.ltr,
       )..layout();
       
-      // Kalkulasi offset penempatan teks agar presisi di luar ujung sudut jaring
       double textX = center.dx + (maxRadius + 14) * math.cos(angle) - (textPainter.width / 2);
       double textY = center.dy + (maxRadius + 10) * math.sin(angle) - (textPainter.height / 2);
       textPainter.paint(canvas, Offset(textX, textY));
     }
 
-    // 3. DRAW DATA ATHLETE POLYGON (DATA AREA SKOR)
-    // Nilai dummy capaian latihan murid (skala 0.0 sampai 1.0)
-    List<double> dataValues = [0.80, 0.65, 0.85, 0.50, 0.70, 0.90, 0.75, 0.60, 0.80, 0.55];
-
-    Path dataPath = Path();
-    List<Offset> dataPoints = [];
-
+    // 3. LAPISAN JARING A: GLOBAL TEAM AVERAGE (WARNA BIRU CYAN SEBAGAI LATAR PEMBANDING)
+    List<double> teamAvgValues = [0.65, 0.70, 0.60, 0.65, 0.68, 0.70, 0.62, 0.65, 0.70, 0.60];
+    Path teamPath = Path();
     for (int j = 0; j < numFeatures; j++) {
       double angle = (j * 2 * math.pi / numFeatures) - (math.pi / 2);
-      double currentRadius = maxRadius * dataValues[j];
+      double currentRadius = maxRadius * teamAvgValues[j];
       double x = center.dx + currentRadius * math.cos(angle);
       double y = center.dy + currentRadius * math.sin(angle);
-      
-      dataPoints.add(Offset(x, y));
-      if (j == 0) {
-        dataPath.moveTo(x, y);
-      } else {
-        dataPath.lineTo(x, y);
-      }
+      if (j == 0) teamPath.moveTo(x, y); else teamPath.lineTo(x, y);
     }
-    dataPath.close();
+    teamPath.close();
+    canvas.drawPath(teamPath, Paint()..color = const Color(0xFF0EA5E9).withOpacity(0.12)..style = PaintingStyle.fill);
+    canvas.drawPath(teamPath, Paint()..color = const Color(0xFF0EA5E9).withOpacity(0.5)..style = PaintingStyle.stroke..strokeWidth = 1.2);
 
-    // Isian warna dalam jaring (Neon Crimson Transparan)
-    Paint fillPaint = Paint()
-      ..color = const Color(0xFFF43F5E).withOpacity(0.25)
-      ..style = PaintingStyle.fill;
-    canvas.drawPath(dataPath, fillPaint);
+    // 4. LAPISAN JARING B: DATA UTAMA NILAI MURID (WARNA MERAH ROSE - MENUMPUK DI ATAS TIM)
+    List<double> studentValues = [0.80, 0.65, 0.85, 0.50, 0.70, 0.90, 0.75, 0.60, 0.80, 0.55];
+    Path studentPath = Path();
+    List<Offset> studentPoints = [];
+    for (int j = 0; j < numFeatures; j++) {
+      double angle = (j * 2 * math.pi / numFeatures) - (math.pi / 2);
+      double currentRadius = maxRadius * studentValues[j];
+      double x = center.dx + currentRadius * math.cos(angle);
+      double y = center.dy + currentRadius * math.sin(angle);
+      studentPoints.add(Offset(x, y));
+      if (j == 0) studentPath.moveTo(x, y); else studentPath.lineTo(x, y);
+    }
+    studentPath.close();
+    canvas.drawPath(studentPath, Paint()..color = const Color(0xFFF43F5E).withOpacity(0.28)..style = PaintingStyle.fill);
+    canvas.drawPath(studentPath, Paint()..color = const Color(0xFFF43F5E)..style = PaintingStyle.stroke..strokeWidth = 2.0);
 
-    // Garis tepi area jaring nilai atlet
-    Paint strokePaint = Paint()
-      ..color = const Color(0xFFF43F5E)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
-    canvas.drawPath(dataPath, strokePaint);
-
-    // Titik sendi kecil di tiap parameter nilai
+    // Titik sendi nilai murid
     Paint pointPaint = Paint()..color = const Color(0xFFFFF1F2);
-    for (Offset point in dataPoints) {
+    for (Offset point in studentPoints) {
       canvas.drawCircle(point, 3, pointPaint);
       canvas.drawCircle(point, 1.5, Paint()..color = const Color(0xFFE11D48));
     }
