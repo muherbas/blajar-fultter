@@ -321,7 +321,7 @@ class _DashboardAtletViewState extends State<DashboardAtletView> {
       children: [
         Container(width: 12, height: 4, color: color),
         const SizedBox(width: 6),
-        Expanded(child: Text(text, style: const TextStyle(fontSize: 11, color: Colors.black70))),
+        Expanded(child: Text(text, style: const TextStyle(fontSize: 11, color: Colors.black54))),
       ],
     );
   }
