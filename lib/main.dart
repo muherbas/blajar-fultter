@@ -2,6 +2,20 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
+import 'dart:convert'; // Wajib diimport untuk fungsi json.decode
+import 'package:flutter/services.dart' show rootBundle;
+
+// Fungsi untuk membaca JSON dari folder assets
+Future<Map<String, dynamic>> loadAtletData() async {
+  // 1. Ambil file json sebagai String teks mentah
+  String jsonString = await rootBundle.loadString('assets/atlet_data.json');
+  
+  // 2. Decode/ubah teks tersebut menjadi Map/Object yang bisa dibaca Dart
+  Map<String, dynamic> dataTerpilih = json.decode(jsonString);
+  
+  return dataTerpilih;
+}
+
 // 1. Model Data Lengkap 17 Parameter untuk 1 Murid
 class DetailPerformaMurid {
   final String nama;
@@ -91,6 +105,37 @@ class _DashboardAtletState extends State<DashboardAtlet> {
     );
   }
 
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: FutureBuilder<Map<String, dynamic>>(
+      future: loadAtletData(), // Memanggil fungsi di Langkah 3
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // Tampilkan loading spinner selama data sedang dibaca
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          // Tampilkan error jika ada salah ketik di JSON atau pubspec
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (!snapshot.hasData) {
+          return Center(child: Text('Data tidak ditemukan'));
+        }
+
+        // Jika data sukses dibaca, masukkan ke variabel lokal
+        final dataAplikasi = snapshot.data!;
+        
+        // Sekarang Anda bisa melempar dataAplikasi ke widget grafik Boxplot atau Radial Bar Anda!
+        return Column(
+          children: [
+            Text("Statistik: ${dataAplikasi['nama_atlet_terpilih']}"),
+            // Di sini tempat Anda menaruh widget SfCartesianChart dan SfCircularChart Anda
+          ],
+        );
+      },
+    ),
+  );
+}
+
   @override
   Widget build(BuildContext context) {
     // List data untuk mempermudah pembuatan grafik Bar Chart atas
@@ -107,6 +152,7 @@ class _DashboardAtletState extends State<DashboardAtlet> {
     double nilaiGaugeAktif = muridAktif.komponenTurunan[parameterTurunanTerpilih] ?? 0;
 
     return Scaffold(
+
       appBar: AppBar(
         title: Text(muridAktif.nama, style: const TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
