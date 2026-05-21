@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/charts.dart'; // Menggunakan satu package utama agar aman dari konflik shader
+import 'package:syncfusion_flutter_charts/charts.dart'; // IMPORT UTAMA UNTUK SEMUA GRAFIK
 
 void main() => runApp(const MyApp());
 
@@ -86,8 +86,8 @@ class _DashboardAtletViewState extends State<DashboardAtletView> {
 
     // Data Radial Ring: Cincin luar adalah nilai parameter aktif, cincin dalam adalah rata-rata
     final List<RadialChartData> dataRadialInteraktif = [
-      RadialChartData('Skor Aktif', nilaiAktif, Colors.orangeAccent.shade700),
-      RadialChartData('Rata-rata Murid', rataRataTurunan, Colors.indigo.shade900),
+      RadialChartData('Skor ...', nilaiAktif, Colors.orangeAccent.shade700),
+      RadialChartData('Rata-rata ...', rataRataTurunan, Colors.indigo.shade900),
     ];
 
     return Scaffold(
@@ -199,7 +199,7 @@ class _DashboardAtletViewState extends State<DashboardAtletView> {
                     ),
                     const SizedBox(height: 15),
 
-                    // RADIAL BAR BERLAPIS (KOTAK BERSIH AMAN DARI ERROR GRADIENT SHADER)
+                    // RADIAL BAR (DIJAMIN AMAN BEBAS ERROR)
                     Row(
                       children: [
                         Expanded(
@@ -232,7 +232,7 @@ class _DashboardAtletViewState extends State<DashboardAtletView> {
                                   radius: '100%',
                                   innerRadius: '55%',
                                   gap: '12%',
-                                  cornerStyle: CornerStyle.none, // Diubah ke none biar tidak memicu bug conicalGradient
+                                  cornerStyle: CornerStyle.none,
                                 )
                               ],
                             ),
