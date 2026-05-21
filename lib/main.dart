@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart'; // Untuk Boxplot atas
-import 'package:syncfusion_flutter_gauges/gauges.dart';  // Untuk Gauge interaktif bawah
+import 'package:syncfusion_flutter_gauges/gauges.dart';  // Untuk Gauge bawah
 
 void main() => runApp(const MyApp());
 
@@ -140,13 +140,13 @@ class _DashboardAtletViewState extends State<DashboardAtletView> {
                         decoration: BoxDecoration(
                           color: Colors.grey.shade50,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.grey.shade200),
+                          border: Border.all(color: Colors.grey.shade300),
                         ),
-                        child: const Column(
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text("Nilai Rata-Rata Keseluruhan Murid", style: TextStyle(fontSize: 9, color: Colors.black54)),
-                            Text("68.5", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                            const Text("Nilai Rata-Rata Keseluruhan Murid", style: TextStyle(fontSize: 9, color: Colors.black54)),
+                            Text("68.5", style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),
@@ -187,7 +187,7 @@ class _DashboardAtletViewState extends State<DashboardAtletView> {
                     ),
                     const SizedBox(height: 15),
 
-                    // RADIAL GAUGE ASLI DENGAN RANGE POINTER & NEEDLE POINTER
+                    // RADIAL GAUGE DENGAN RANGE POINTER & NEEDLE POINTER
                     Row(
                       children: [
                         Expanded(
@@ -209,3 +209,129 @@ class _DashboardAtletViewState extends State<DashboardAtletView> {
                                     // 1. Batang Melingkar Skor Aktif Parameter Terpilih
                                     RangePointer(
                                       value: nilaiGaugeAktif,
+                                      width: 18,
+                                      color: Colors.orangeAccent.shade700,
+                                      cornerStyle: CornerStyle.bothCurve,
+                                    ),
+                                    // 2. Jarum Pembanding Posisi Rata-Rata Murid
+                                    NeedlePointer(
+                                      value: rataRataTurunan,
+                                      needleLength: 0.75,
+                                      needleColor: Colors.indigo.shade900,
+                                      needleStartWidth: 1,
+                                      needleEndWidth: 4,
+                                      knobStyle: KnobStyle(
+                                        knobRadius: 0.06,
+                                        color: Colors.indigo.shade900,
+                                      ),
+                                    ),
+                                  ],
+                                  annotations: <GaugeAnnotation>[
+                                    GaugeAnnotation(
+                                      widget: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            '${nilaiGaugeAktif.toStringAsFixed(0)}%',
+                                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
+                                          ),
+                                          const Text("SKOR", style: TextStyle(fontSize: 8, color: Colors.grey, fontWeight: FontWeight.bold)),
+                                        ],
+                                      ),
+                                      angle: 90,
+                                      positionFactor: 0,
+                                    )
+                                  ],
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                        // Legenda Info Indikator Jarum vs Batang
+                        Expanded(
+                          flex: 5,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text("INFO INDIKATOR:", style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 6),
+                                _buildLegendRow(Colors.orangeAccent.shade700, "Batang: Skor Aktif"),
+                                const SizedBox(height: 4),
+                                _buildLegendRow(Colors.indigo.shade900, "Jarum: Rata-rata"),
+                                const Divider(height: 16),
+                                const Text("TERPILIH ATLET:", style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold)),
+                                Text(
+                                  parameterTurunanTerpilih,
+                                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.black87),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    const Divider(),
+
+                    // LIST VIEW 10 PARAMETER INTERAKTIF
+                    const Text("Sentuh nama komponen untuk memutar grafik:", style: TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: Colors.grey)),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 160,
+                      child: ListView(
+                        shrinkWrap: true,
+                        children: komponenTurunan.keys.map((String key) {
+                          bool isSelected = parameterTurunanTerpilih == key;
+                          return Card(
+                            color: isSelected ? Colors.orange.shade700 : Colors.grey.shade100,
+                            margin: const EdgeInsets.only(bottom: 6),
+                            child: ListTile(
+                              dense: true,
+                              title: Text(
+                                key,
+                                style: TextStyle(
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                  color: isSelected ? Colors.white : Colors.black87,
+                                  fontSize: 11,
+                                ),
+                              ),
+                              trailing: Text(
+                                '${komponenTurunan[key]?.toStringAsFixed(0)}%',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: isSelected ? Colors.white : Colors.orange.shade900,
+                                  fontSize: 11,
+                                ),
+                              ),
+                              onTap: () {
+                                setState(() {
+                                  parameterTurunanTerpilih = key; // Memicu gauge berputar interaktif
+                                });
+                              },
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLegendRow(Color color, String text) {
+    return Row(
+      children: [
+        Container(width: 12, height: 4, color: color),
+        const SizedBox(width: 6),
+        Expanded(child: Text(text, style: const TextStyle(fontSize: 11, color: Colors.black70))),
+      ],
+    );
+  }
+}
