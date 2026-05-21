@@ -97,7 +97,6 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
 
   @override
   Widget build(BuildContext context) {
-    // FIX: Tipe data dipertegas List<Widget> agar tidak bercampur dengan tipe data lain
     final List<Widget> _halaman = [
       DashboardAtletPage(murid: _muridTerpilih), 
       ManajemenMuridPage( 
@@ -111,7 +110,6 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
         },
         onDaftarUpdated: (listBaru) {
           setState(() {
-            // Pembaruan data lokal
             _daftarMurid.clear();
             _daftarMurid.addAll(listBaru);
             if (!_daftarMurid.contains(_muridTerpilih) && _daftarMurid.isNotEmpty) {
@@ -120,7 +118,7 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
           });
         },
       ),
-      const MateriNunchakuPage(), // Halaman baru ditambahkan di sini dengan aman
+      const MateriNunchakuPage(),
     ];
 
     return Scaffold(
@@ -148,7 +146,7 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
             label: 'MANAJEMEN',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.MenuBookRounded),
+            icon: Icon(Icons.menuBookRounded), // Perbaikan: Huruf m kecil
             label: 'MATERI',
           ),
         ],
@@ -157,13 +155,11 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
   }
 }
 
-// HALAMAN BARU YANG DI-REFF DI ATAS
 class MateriNunchakuPage extends StatelessWidget {
   const MateriNunchakuPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Data Kurikulum Anda dipisah rapi di sini agar tidak merusak struktur List Utama
     final List<Map<String, dynamic>> kurikulumNunchaku = [
       {
         "kategori": "NUNCHAKU BASIC",
@@ -217,7 +213,7 @@ class MateriNunchakuPage extends StatelessWidget {
                           Expanded(
                             child: Text(
                               materiNama,
-                              style: const TextStyle(color: Colors.whiteBF, fontSize: 12, color: Color(0xFFF8FAFC)),
+                              style: const TextStyle(fontSize: 12, color: Color(0xFFF8FAFC)), // Perbaikan: Menghapus Colors.whiteBF yang typo
                             ),
                           ),
                         ],
