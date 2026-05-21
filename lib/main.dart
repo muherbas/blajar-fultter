@@ -1,7 +1,7 @@
+import 'dart:math'; // Diperlukan untuk generate angka acak
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
-// 1. Model Data diperbarui untuk melacak progress
 class ProgressMurid {
   final String nama;
   final double skorAwal;
@@ -34,13 +34,17 @@ class DashboardProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 2. Simulasi 20 data murid dengan progress yang bervariasi
+    final random = Random();
+
+    // Membuat data acak untuk 5 orang murid saja gpp
     final List<ProgressMurid> dataMurid = List.generate(
-      20,
+      5,
       (index) {
-        double awal = 30.0 + (index * 2); // Skor test pertama
-        double sekarang = awal + (index * 2.5); // Skor setelah latihan berkala
-        if (sekarang > 100) sekarang = 100; // Batas maksimal persen
+        // Skor awal acak antara 20 sampai 50
+        double awal = 20.0 + random.nextInt(31); 
+        // Skor sekarang acak dari skor awal sampai maksimal 100
+        double sekarang = awal + random.nextInt(41); 
+        if (sekarang > 100) sekarang = 100;
         
         return ProgressMurid(
           nama: 'Murid ${index + 1}',
@@ -60,8 +64,6 @@ class DashboardProgress extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         itemBuilder: (context, index) {
           final murid = dataMurid[index];
-          
-          // Menghitung peningkatan dalam persen
           double peningkatan = murid.skorSekarang - murid.skorAwal;
 
           return Card(
@@ -70,9 +72,9 @@ class DashboardProgress extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  // Header Informasi Murid
+                  // BAGIAN YANG TYPO SUDAH DIPERBAIKI DI SINI
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.between,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween, // Pake spaceBetween, bukan between
                     children: [
                       Text(
                         murid.nama,
@@ -104,7 +106,6 @@ class DashboardProgress extends StatelessWidget {
                           showLabels: false,
                           showTicks: true,
                           ranges: <GaugeRange>[
-                            // Area Abu-abu: Batas awal kemampuan murid
                             GaugeRange(
                               startValue: 0, 
                               endValue: murid.skorAwal, 
@@ -112,7 +113,6 @@ class DashboardProgress extends StatelessWidget {
                               label: 'AWAL',
                               labelStyle: const GaugeTextStyle(color: Colors.black54),
                             ),
-                            // Area Biru: Zona peningkatan/progress berjalan
                             GaugeRange(
                               startValue: murid.skorAwal, 
                               endValue: 100, 
@@ -122,7 +122,6 @@ class DashboardProgress extends StatelessWidget {
                             ),
                           ],
                           pointers: <GaugePointer>[
-                            // Jarum menunjukkan posisi pencapaian saat ini
                             NeedlePointer(
                               value: murid.skorSekarang,
                               needleLength: 0.75,
@@ -134,7 +133,6 @@ class DashboardProgress extends StatelessWidget {
                             ),
                           ],
                           annotations: <GaugeAnnotation>[
-                            // Keterangan angka saat ini di tengah bawah
                             GaugeAnnotation(
                               widget: Text(
                                 '${murid.skorSekarang.toStringAsFixed(1)}%',
