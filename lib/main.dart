@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
-import 'dart:convert'; // Untuk fitur ekspor/impor JSON
+import 'dart:convert'; 
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
       title: 'Premium Athlete Dashboard',
       theme: ThemeData(
         brightness: Brightness.light,
-        scaffoldBackgroundColor: const Color(0xFF0F172A), // Slate 900
+        scaffoldBackgroundColor: const Color(0xFF0F172A), 
         fontFamily: 'Roboto',
       ),
       home: const MainNavigationContainer(),
@@ -24,12 +24,11 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// Model Data Murid untuk menampung kapasitas 200+ murid
 class Murid {
   final String id;
   final String nama;
-  final List<double> dataBoxplot; // 7 nilai (0.0 - 1.0)
-  final List<double> dataRadar;   // 10 nilai (0.0 - 1.0)
+  final List<double> dataBoxplot; 
+  final List<double> dataRadar;   
 
   Murid({
     required this.id,
@@ -38,7 +37,6 @@ class Murid {
     required this.dataRadar,
   });
 
-  // Konversi ke Map untuk kebutuhan Ekspor JSON
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -48,7 +46,6 @@ class Murid {
     };
   }
 
-  // Konstruktor dari Map untuk kebutuhan Impor JSON
   factory Murid.fromMap(Map<String, dynamic> map) {
     return Murid(
       id: map['id'],
@@ -59,7 +56,6 @@ class Murid {
   }
 }
 
-// CONTAINER UTAMA UNTUK NAVIGASI TAB BAWAH
 class MainNavigationContainer extends StatefulWidget {
   const MainNavigationContainer({Key? key}) : super(key: key);
 
@@ -68,9 +64,8 @@ class MainNavigationContainer extends StatefulWidget {
 }
 
 class _MainNavigationContainerState extends State<MainNavigationContainer> {
-  int _currentIndex = 1; // Default langsung membuka halaman Manajemen Murid biar bisa pilih/tambah dulu
+  int _currentIndex = 1; 
   
-  // Database internal simulasi (Kapasitas bisa menampung lebih dari 200 murid)
   List<Murid> _daftarMurid = [
     Murid(
       id: "001",
@@ -92,32 +87,30 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
     ),
   ];
 
-  // Murid yang saat ini sedang aktif dilihat di Dashboard (Perwakilan 1 Murid)
   late Murid _muridTerpilih;
 
   @override
   void initState() {
     super.initState();
-    _muridTerpilih = _daftarMurid[0]; // Default murid pertama
+    _muridTerpilih = _daftarMurid[0]; 
   }
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> _halaman = [
-      DashboardAtletPage(murid: _muridTerpilih), // Halaman 1: Dashboard Konteks 1 Murid
-      ManajemenMuridPage( // Halaman 2: Panel Kontrol Atlet & Ekspor Impor
+      DashboardAtletPage(murid: _muridTerpilih), 
+      ManajemenMuridPage( 
         daftarMurid: _daftarMurid,
         muridTerpilih: _muridTerpilih,
-        onMuridDipilih: (murid BARU) {
+        onMuridDipilih: (muridBaru) { // SUDAH FIXED: Spasi dibuang
           setState(() {
-            _muridTerpilih = murid BARU;
-            _currentIndex = 0; // Otomatis lompat ke tab dashboard setelah dipilih
+            _muridTerpilih = muridBaru;
+            _currentIndex = 0; 
           });
         },
         onDaftarUpdated: (listBaru) {
           setState(() {
             _daftarMurid = listBaru;
-            // Jaga-jaga jika murid terpilih dihapus, kembalikan ke index 0
             if (!_daftarMurid.contains(_muridTerpilih) && _daftarMurid.isNotEmpty) {
               _muridTerpilih = _daftarMurid[0];
             }
@@ -135,9 +128,9 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
             _currentIndex = index;
           });
         },
-        backgroundColor: const Color(0xFF1E293B), // Slate 800
-        selectedItemColor: const Color(0xFF38BDF8), // Biru terang aktif
-        unselectedItemColor: const Color(0xFF64748B), // Muted text
+        backgroundColor: const Color(0xFF1E293B), 
+        selectedItemColor: const Color(0xFF38BDF8), 
+        unselectedItemColor: const Color(0xFF64748B), 
         selectedFontSize: 11,
         unselectedFontSize: 11,
         fontWeight: FontWeight.bold,
@@ -156,7 +149,6 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
   }
 }
 
-// ==================== HALAMAN 1: DASHBOARD STATISTIK (1 MURID) ====================
 class DashboardAtletPage extends StatelessWidget {
   final Murid murid;
   const DashboardAtletPage({Key? key, required this.murid}) : super(key: key);
@@ -177,7 +169,6 @@ class DashboardAtletPage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
         child: Column(
           children: [
-            // CARD BOXPLOT
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -189,7 +180,7 @@ class DashboardAtletPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'KOMPONENT UTAMA',
+                    'KOMPONEN UTAMA',
                     style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFF38BDF8), letterSpacing: 1.0),
                   ),
                   const SizedBox(height: 24),
@@ -213,7 +204,6 @@ class DashboardAtletPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            // CARD RADAR
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -255,7 +245,6 @@ class DashboardAtletPage extends StatelessWidget {
   }
 }
 
-// ==================== HALAMAN 2: MANAJEMEN DATA MURID (ELIT PANEL) ====================
 class ManajemenMuridPage extends StatefulWidget {
   final List<Murid> daftarMurid;
   final Murid muridTerpilih;
@@ -278,9 +267,8 @@ class _ManajemenMuridPageState extends State<ManajemenMuridPage> {
   String _searchQuery = "";
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _namaController = TextEditingController();
-  final TextEditingController _ioController = TextEditingController(); // Untuk Impor/Ekspor teks string
+  final TextEditingController _ioController = TextEditingController(); 
 
-  // Fungsi Tambah Murid Baru dengan Skor Acak Awal
   void _tambahMurid() {
     if (_idController.text.isEmpty || _namaController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -289,7 +277,6 @@ class _ManajemenMuridPageState extends State<ManajemenMuridPage> {
       return;
     }
     
-    // Validasi Duplikasi ID
     if (widget.daftarMurid.any((m) => m.id == _idController.text)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('ID Murid sudah terdaftar!'))
@@ -297,7 +284,6 @@ class _ManajemenMuridPageState extends State<ManajemenMuridPage> {
       return;
     }
 
-    // Membuat skor dummy acak standar (0.3 - 0.9) untuk data baru
     final rand = math.Random();
     List<double> boxplotBaru = List.generate(7, (_) => 0.2 + rand.nextDouble() * 0.6);
     List<double> radarBaru = List.generate(10, (_) => 0.4 + rand.nextDouble() * 0.5);
@@ -321,7 +307,6 @@ class _ManajemenMuridPageState extends State<ManajemenMuridPage> {
     );
   }
 
-  // Fungsi Hapus Murid (Opsi proteksi konfirmasi dialog)
   void _konfirmasiHapus(Murid m) {
     showDialog(
       context: context,
@@ -344,7 +329,6 @@ class _ManajemenMuridPageState extends State<ManajemenMuridPage> {
     );
   }
 
-  // Fungsi Ekspor Data Keseluruhan ke Bentuk Teks JSON String
   void _eksporData() {
     List<Map<String, dynamic>> rawList = widget.daftarMurid.map((m) => m.toMap()).toList();
     String jsonString = jsonEncode(rawList);
@@ -363,7 +347,6 @@ class _ManajemenMuridPageState extends State<ManajemenMuridPage> {
     );
   }
 
-  // Fungsi Impor Data Kembali dari Teks JSON String Backup
   void _imporData() {
     if (_ioController.text.isEmpty) return;
     try {
@@ -386,7 +369,6 @@ class _ManajemenMuridPageState extends State<ManajemenMuridPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Filter pencarian berdasarkan input ketikan nama murid
     List<Murid> filteredList = widget.daftarMurid.where((m) => m.nama.contains(_searchQuery.toUpperCase())).toList();
 
     return Scaffold(
@@ -401,7 +383,6 @@ class _ManajemenMuridPageState extends State<ManajemenMuridPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. INPUT FORM TAMBAH MURID BARU (KAPASITAS LUAS)
             const Text('TAMBAH ATLET BARU', style: TextStyle(color: Color(0xFF38BDF8), fontSize: 10, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Row(
@@ -443,7 +424,6 @@ class _ManajemenMuridPageState extends State<ManajemenMuridPage> {
             
             const SizedBox(height: 20),
             
-            // 2. KOLOM SEARCH BY NAMA MURID
             const Text('PENCARIAN DATA ATLET', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 10, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             TextField(
@@ -459,7 +439,6 @@ class _ManajemenMuridPageState extends State<ManajemenMuridPage> {
             
             const SizedBox(height: 16),
             
-            // 3. DAFTAR LIST MURID (TAP UNTUK DIOPER KE DASHBOARD, ICON TRASH UNTUK HAPUS)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -484,7 +463,7 @@ class _ManajemenMuridPageState extends State<ManajemenMuridPage> {
                     ),
                     child: ListTile(
                       dense: true,
-                      onTap: () => widget.onMuridDipilih(murid), // Oper perwakilan data ke dashboard utama
+                      onTap: () => widget.onMuridDipilih(murid), 
                       leading: CircleAvatar(
                         backgroundColor: isAktif ? const Color(0xFF38BDF8) : const Color(0xFF334155),
                         radius: 14,
@@ -494,7 +473,7 @@ class _ManajemenMuridPageState extends State<ManajemenMuridPage> {
                       subtitle: const Text('Skor Biomotorik Terarsip', style: TextStyle(color: Colors.white38, fontSize: 9)),
                       trailing: IconButton(
                         icon: const Icon(Icons.delete_outline, color: Color(0xFFF43F5E), size: 18),
-                        onPressed: () => _konfirmasiHapus(murid), // Opsi hapus murid berhenti
+                        onPressed: () => _konfirmasiHapus(murid), 
                       ),
                     ),
                   );
@@ -504,7 +483,6 @@ class _ManajemenMuridPageState extends State<ManajemenMuridPage> {
             
             const SizedBox(height: 12),
             
-            // 4. BACKUP ZONE (IMPORT / EXPORT DATA STRING ANTI-HILANG)
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(12)),
@@ -557,7 +535,6 @@ class _ManajemenMuridPageState extends State<ManajemenMuridPage> {
   }
 }
 
-// ==================== PAINTER GRAFIK BOXPLOT DINAMIS ====================
 class BoxplotChart extends StatelessWidget {
   final List<double> dataValues;
   const BoxplotChart({Key? key, required this.dataValues}) : super(key: key);
@@ -605,7 +582,7 @@ class BoxplotPainter extends CustomPainter {
 
     for (int i = 0; i < dataCount; i++) {
       double x = (spacing * i) + (spacing / 2);
-      double baseVal = dataValues[i]; // Berdasarkan data dinamis murid aktif
+      double baseVal = dataValues[i]; 
       
       double outlier = (baseVal * 0.1) * size.height;
       double topWhisker = (baseVal * 0.5) * size.height;
@@ -631,7 +608,6 @@ class BoxplotPainter extends CustomPainter {
   bool shouldRepaint(covariant BoxplotPainter oldDelegate) => oldDelegate.dataValues != dataValues;
 }
 
-// ==================== PAINTER GRAFIK RADAR SPIDER DINAMIS ====================
 class RadarSpiderChart extends StatelessWidget {
   final List<double> dataValues;
   const RadarSpiderChart({Key? key, required this.dataValues}) : super(key: key);
@@ -693,7 +669,6 @@ class RadarSpiderPainter extends CustomPainter {
       textPainter.paint(canvas, Offset(textX, textY));
     }
 
-    // LAYER JARING A: TEAM AVERAGE BASELINE (STATIC)
     List<double> teamAvgValues = [0.65, 0.70, 0.60, 0.65, 0.68, 0.70, 0.62, 0.65, 0.70, 0.60];
     Path teamPath = Path();
     for (int j = 0; j < numFeatures; j++) {
@@ -707,7 +682,6 @@ class RadarSpiderPainter extends CustomPainter {
     canvas.drawPath(teamPath, Paint()..color = const Color(0xFF0EA5E9).withOpacity(0.12)..style = PaintingStyle.fill);
     canvas.drawPath(teamPath, Paint()..color = const Color(0xFF0EA5E9).withOpacity(0.5)..style = PaintingStyle.stroke..strokeWidth = 1.2);
 
-    // LAYER JARING B: DINAMIS MENGIKUTI MURID AKTIF
     Path studentPath = Path();
     List<Offset> studentPoints = [];
     for (int j = 0; j < numFeatures; j++) {
