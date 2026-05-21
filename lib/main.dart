@@ -2,22 +2,39 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
-// 1. Model Data dengan 3 Parameter Fisik Riil
-class ProgressMurid {
+// 1. Model Data Lengkap 17 Parameter untuk 1 Murid
+class DetailPerformaMurid {
   final String nama;
-  final double kekuatan;   // Parameter 1 (Cincin Luar)
-  final double kecepatan;  // Parameter 2 (Cincin Tengah)
-  final double kelenturan;  // Parameter 3 (Cincin Dalam)
+  
+  // 7 Parameter Komponen Utama (Boxplot / Bar Chart)
+  final double strength;
+  final double endurance;
+  final double speed;
+  final double coordination;
+  final double flexibility;
+  final double balance;
+  final double reactionTime;
 
-  ProgressMurid({
-    required this.nama, 
-    required this.kekuatan, 
-    required this.kecepatan, 
-    required this.kelenturan,
+  // 10 Parameter Komponen Turunan (Gauge / Batang Radial)
+  final Map<String, double> komponenTurunan;
+
+  DetailPerformaMurid({
+    required this.nama,
+    required this.strength,
+    required this.endurance,
+    required this.speed,
+    required this.coordination,
+    required this.flexibility,
+    required this.balance,
+    required this.reactionTime,
+    required this.komponenTurunan,
   });
 
-  // Fungsi menghitung rata-rata untuk perbandingan antar murid
-  double get rataRata => (kekuatan + kecepatan + kelenturan) / 3;
+  // Hitung Rata-rata otomatis untuk 10 parameter turunan
+  double get rataRataTurunan {
+    double total = komponenTurunan.values.fold(0, (sum, item) => sum + item);
+    return total / komponenTurunan.length;
+  }
 }
 
 void main() => runApp(const MyApp());
@@ -29,188 +46,273 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true, 
-        colorSchemeSeed: Colors.indigo,
-      ),
-      home: const DashboardMultiParameter(),
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
+      home: const DashboardAtlet(),
     );
   }
 }
 
-class DashboardMultiParameter extends StatelessWidget {
-  const DashboardMultiParameter({super.key});
+class DashboardAtlet extends StatefulWidget {
+  const DashboardAtlet({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final random = Random();
+  State<DashboardAtlet> createState() => _DashboardAtletState();
+}
 
-    // 2. Data Acak 5 Murid dengan 3 Nilai Parameter Berbeda
-    final List<ProgressMurid> dataMurid = List.generate(5, (index) {
-      return ProgressMurid(
-        nama: 'Murid ${index + 1}',
-        kekuatan: 40.0 + random.nextInt(51),   // Skor acak 40 - 90
-        kecepatan: 35.0 + random.nextInt(56),  // Skor acak 35 - 90
-        kelenturan: 50.0 + random.nextInt(41),  // Skor acak 50 - 90
-      );
-    });
+class _DashboardAtletState extends State<DashboardAtlet> {
+  late DetailPerformaMurid muridAktif;
+  String parameterTurunanTerpilih = "MUSCULAR ENDURANCE"; // Default awal
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Analisis 3 Parameter Murid'),
-        centerTitle: true,
-        backgroundColor: Colors.indigo.shade50,
-      ),
-      body: ListView.builder(
-        itemCount: dataMurid.length,
-        padding: const EdgeInsets.all(16),
-        itemBuilder: (context, index) {
-          final murid = dataMurid[index];
-
-          return Card(
-            margin: const EdgeInsets.only(bottom: 20),
-            elevation: 3,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  // HEADER: Nama Murid & Rata-rata Kemampuan
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween, 
-                    children: [
-                      Text(
-                        murid.nama,
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.indigo.shade700,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          'Rata-rata: ${murid.rataRata.toStringAsFixed(1)}%',
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 15),
-
-                  // 3 PARAMETER GAUGE (Setengah Lingkaran Berlapis)
-                  SizedBox(
-                    height: 160,
-                    child: SfRadialGauge(
-                      axes: <RadialAxis>[
-                        // LAPISAN 1: KEKUATAN (Paling Luar - Merah)
-                        RadialAxis(
-                          minimum: 0, maximum: 100,
-                          showLabels: false, showTicks: false,
-                          startAngle: 180, endAngle: 0,
-                          canScaleToFit: true,
-                          radiusFactor: 0.95, 
-                          axisLineStyle: AxisLineStyle(thickness: 12, color: Colors.red.shade100),
-                          pointers: <GaugePointer>[
-                            RangePointer(
-                              value: murid.kekuatan,
-                              width: 12, color: Colors.redAccent,
-                              cornerStyle: CornerStyle.bothCurve,
-                            )
-                          ],
-                        ),
-                        
-                        // LAPISAN 2: KECEPATAN (Tengah - Hijau)
-                        RadialAxis(
-                          minimum: 0, maximum: 100,
-                          showLabels: false, showTicks: false,
-                          startAngle: 180, endAngle: 0,
-                          canScaleToFit: true,
-                          radiusFactor: 0.78, 
-                          axisLineStyle: AxisLineStyle(thickness: 12, color: Colors.green.shade100),
-                          pointers: <GaugePointer>[
-                            RangePointer(
-                              value: murid.kecepatan,
-                              width: 12, color: Colors.greenAccent.shade700,
-                              cornerStyle: CornerStyle.bothCurve,
-                            )
-                          ],
-                        ),
-                        
-                        // LAPISAN 3: KELENTURAN (Paling Dalam - Biru) + Angka Perbandingan di Tengah
-                        RadialAxis(
-                          minimum: 0, maximum: 100,
-                          showLabels: false, showTicks: false,
-                          startAngle: 180, endAngle: 0,
-                          canScaleToFit: true,
-                          radiusFactor: 0.61, 
-                          axisLineStyle: AxisLineStyle(thickness: 12, color: Colors.blue.shade100),
-                          pointers: <GaugePointer>[
-                            RangePointer(
-                              value: murid.kelenturan,
-                              width: 12, color: Colors.blueAccent,
-                              cornerStyle: CornerStyle.bothCurve,
-                            )
-                          ],
-                          annotations: <GaugeAnnotation>[
-                            GaugeAnnotation(
-                              widget: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const SizedBox(height: 20),
-                                  Text(
-                                    murid.rataRata.toStringAsFixed(0),
-                                    style: const TextStyle(
-                                      fontSize: 32, 
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black87
-                                    ),
-                                  ),
-                                  const Text("OVERALL", style: TextStyle(fontSize: 9, color: Colors.grey, fontWeight: FontWeight.bold)),
-                                ],
-                              ),
-                              angle: 90,
-                              positionFactor: 0.2,
-                            )
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  
-                  // LEGEND / KETERANGAN PARAMETER
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildLegendItem("Kekuatan (Str)", Colors.redAccent),
-                      const SizedBox(width: 12),
-                      _buildLegendItem("Kecepatan (Spd)", Colors.greenAccent.shade700),
-                      const SizedBox(width: 12),
-                      _buildLegendItem("Kelenturan (Flx)", Colors.blueAccent),
-                    ],
-                  )
-                ],
-              ),
-            ),
-          );
-        },
-      ),
+  @override
+  void initState() {
+    super.initState();
+    // 2. Simulasi Data Riil 1 Murid (Misal: Ruri) sesuai contoh parameter Anda
+    muridAktif = DetailPerformaMurid(
+      nama: "Statistik Ruri",
+      strength: 75,
+      endurance: 80,
+      speed: 65,
+      coordination: 85,
+      flexibility: 70,
+      balance: 90,
+      reactionTime: 60,
+      komponenTurunan: {
+        "MUSCULAR ENDURANCE": 78,
+        "POWER": 82,
+        "CORE STABILITY": 70,
+        "DYNAMIC FLEXIBILITY": 65,
+        "SPEED ENDURANCE": 75,
+        "REACTIVE SPEED": 60,
+        "AGILITY": 88,
+        "ANTICIPATION & SPATIAL AWARENESS": 80,
+        "MOBILITY": 72,
+        "OPEN REACTIVE AGILITY": 67,
+      },
     );
   }
 
-  Widget _buildLegendItem(String label, Color color) {
-    return Row(
-      children: [
-        Container(
-          width: 8, height: 8, 
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+  @override
+  Widget build(BuildContext context) {
+    // List data untuk mempermudah pembuatan grafik Bar Chart atas
+    final List<Map<String, dynamic>> dataUtama = [
+      {"label": "Str", "value": muridAktif.strength},
+      {"label": "End", "value": muridAktif.endurance},
+      {"label": "Spd", "value": muridAktif.speed},
+      {"label": "Coord", "value": muridAktif.coordination},
+      {"label": "Flex", "value": muridAktif.flexibility},
+      {"label": "Bal", "value": muridAktif.balance},
+      {"label": "React", "value": muridAktif.reactionTime},
+    ];
+
+    double nilaiGaugeAktif = muridAktif.komponenTurunan[parameterTurunanTerpilih] ?? 0;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(muridAktif.nama, style: const TextStyle(fontWeight: FontWeight.bold)),
+        centerTitle: true,
+        backgroundColor: Colors.indigo.shade50,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ========================================================
+            // SEKSI 1: BOXPLOT / BAR CHART (7 KOMPONEN UTAMA)
+            // ========================================================
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "1 Boxplot Atlet: Komponen Utama",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.indigo),
+                    ),
+                    const SizedBox(height: 20),
+                    // Grafik Batang Sederhana & Ringan untuk HP
+                    SizedBox(
+                      height: 160,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: dataUtama.map((item) {
+                          double tinggiPersen = item["value"] / 100;
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text('${item["value"].toStringAsFixed(0)}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 4),
+                              Container(
+                                width: 24,
+                                height: 110 * tinggiPersen,
+                                decoration: BoxDecoration(
+                                  color: Colors.blueAccent,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(item["label"], style: const TextStyle(fontSize: 11, color: Colors.black54)),
+                            ],
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // ========================================================
+            // SEKSI 2: GAUGE BATANG RADIAL INTERAKTIF (10 KOMPONEN TURUNAN)
+            // ========================================================
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "1 Radar Atlet: Komponen Turunan",
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.purple),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(color: Colors.purple.shade50, borderRadius: BorderRadius.circular(8)),
+                          child: Text(
+                            'Avg: ${muridAktif.rataRataTurunan.toStringAsFixed(1)}',
+                            style: const TextStyle(color: Colors.purple, fontWeight: FontWeight.bold, fontSize: 12),
+                          ),
+                        )
+                      ],
+                    ),
+                    const SizedBox(height: 15),
+
+                    // Tampilan Grafik Batang Radial Tunggal yang Besar & Lega
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 4,
+                          child: SizedBox(
+                            height: 150,
+                            child: SfRadialGauge(
+                              axes: <RadialAxis>[
+                                RadialAxis(
+                                  minimum: 0, maximum: 100,
+                                  showLabels: false, showTicks: false,
+                                  startAngle: 270, endAngle: 270, // 360 Derajat utuh
+                                  radiusFactor: 0.95,
+                                  axisLineStyle: AxisLineStyle(thickness: 16, color: Colors.orange.shade100),
+                                  pointers: <GaugePointer>[
+                                    RangePointer(
+                                      value: nilaiGaugeAktif,
+                                      width: 16,
+                                      color: Colors.orangeAccent.shade700,
+                                      cornerStyle: CornerStyle.bothCurve,
+                                      enableAnimation: true,
+                                    )
+                                  ],
+                                  annotations: <GaugeAnnotation>[
+                                    GaugeAnnotation(
+                                      widget: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            '${nilaiGaugeAktif.toStringAsFixed(0)}%',
+                                            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.black87),
+                                          ),
+                                          const Text("SKOR", style: TextStyle(fontSize: 9, color: Colors.grey, fontWeight: FontWeight.bold)),
+                                        ],
+                                      ),
+                                      angle: 90, positionFactor: 0,
+                                    )
+                                  ],
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                        // Detail Singkat Parameter yang Sedang Dipilih
+                        Expanded(
+                          flex: 5,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text("PARAMETER TERPILIH:", style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 4),
+                                Text(
+                                  parameterTurunanTerpilih,
+                                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    const SizedBox(height: 15),
+                    const Divider(),
+                    const SizedBox(height: 5),
+
+                    // LIST TOMBOL INTERAKTIF UNTUK MEMILIH 10 PARAMETER
+                    const Text("Sentuh parameter untuk melihat skor grafik:", style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Colors.grey)),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      height: 130, // Area scroll list parameter
+                      child: ListView(
+                        shrinkWrap: true,
+                        children: muridAktif.komponenTurunan.keys.map((String key) {
+                          bool isSelected = parameterTurunanTerpilih == key;
+                          return Card(
+                            color: isSelected ? Colors.orange.shade700 : Colors.grey.shade100,
+                            elevation: isSelected ? 2 : 0,
+                            margin: const EdgeInsets.only(bottom: 6),
+                            child: ListTile(
+                              dense: true,
+                              title: Text(
+                                key,
+                                style: TextStyle(
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                  color: isSelected ? Colors.white : Colors.black87,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              trailing: Text(
+                                '${muridAktif.komponenTurunan[key]?.toStringAsFixed(0)}%',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: isSelected ? Colors.white : Colors.orange.shade900,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              onTap: () {
+                                setState(() {
+                                  parameterTurunanTerpilih = key; // Grafik otomatis berputar menyesuaikan data baru
+                                });
+                              },
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 4),
-        Text(
-          label, 
-          style: const TextStyle(fontSize: 11, color: Colors.black54, fontWeight: FontWeight.w500),
-        ),
-      ],
+      ),
     );
   }
 }
