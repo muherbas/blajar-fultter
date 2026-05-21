@@ -66,7 +66,7 @@ class MainNavigationContainer extends StatefulWidget {
 class _MainNavigationContainerState extends State<MainNavigationContainer> {
   int _currentIndex = 1; 
   
-  List<Murid> _daftarMurid = [
+  final List<Murid> _daftarMurid = [
     Murid(
       id: "001",
       nama: "BUDI SANTOSO",
@@ -97,7 +97,7 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
 
   @override
   Widget build(BuildContext context) {
-    // Di sini Anda bebas menambah widget halaman baru ke dalam List tanpa takut error tipe data lagi
+    // FIX: Tipe data dipertegas List<Widget> agar tidak bercampur dengan tipe data lain
     final List<Widget> _halaman = [
       DashboardAtletPage(murid: _muridTerpilih), 
       ManajemenMuridPage( 
@@ -111,13 +111,16 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
         },
         onDaftarUpdated: (listBaru) {
           setState(() {
-            _daftarMurid = listBaru;
+            // Pembaruan data lokal
+            _daftarMurid.clear();
+            _daftarMurid.addAll(listBaru);
             if (!_daftarMurid.contains(_muridTerpilih) && _daftarMurid.isNotEmpty) {
               _muridTerpilih = _daftarMurid[0];
             }
           });
         },
       ),
+      const MateriNunchakuPage(), // Halaman baru ditambahkan di sini dengan aman
     ];
 
     return Scaffold(
@@ -142,9 +145,90 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.group_add_rounded),
-            label: 'MANAJEMEN MURID',
+            label: 'MANAJEMEN',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.MenuBookRounded),
+            label: 'MATERI',
           ),
         ],
+      ),
+    );
+  }
+}
+
+// HALAMAN BARU YANG DI-REFF DI ATAS
+class MateriNunchakuPage extends StatelessWidget {
+  const MateriNunchakuPage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // Data Kurikulum Anda dipisah rapi di sini agar tidak merusak struktur List Utama
+    final List<Map<String, dynamic>> kurikulumNunchaku = [
+      {
+        "kategori": "NUNCHAKU BASIC",
+        "materi": ["BARBEL SEBAGAI GADA", "BASIC MOVEMENT NUNCHAKU"]
+      },
+      {
+        "kategori": "NUNCHAKU INTERMEDIATE",
+        "materi": ["NUNCHAKU SWITCH HAND"]
+      },
+      {
+        "kategori": "NUNCHAKU EXPERT",
+        "materi": ["NUNCHAKU TECHNIQUE / KOMBINASI MOVEMENT"]
+      }
+    ];
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('KURIKULUM MATERI NUNCHAKU', style: TextStyle(color: Color(0xFFF8FAFC), fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1.0)),
+        centerTitle: true,
+        backgroundColor: const Color(0xFF1E293B),
+        elevation: 0,
+      ),
+      body: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: kurikulumNunchaku.length,
+        itemBuilder: (context, index) {
+          final item = kurikulumNunchaku[index];
+          return Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E293B),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item["kategori"],
+                  style: const TextStyle(color: Color(0xFF38BDF8), fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                ),
+                const Divider(color: Colors.white10, height: 20),
+                Column(
+                  children: (item["materi"] as List<String>).map((materiNama) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.check_circle_outline_rounded, color: Color(0xFFF43F5E), size: 16),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              materiNama,
+                              style: const TextStyle(color: Colors.whiteBF, fontSize: 12, color: Color(0xFFF8FAFC)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                )
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -181,7 +265,7 @@ class DashboardAtletPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'KOMKOMPONEN UTAMA',
+                    'KOMPONEN UTAMA',
                     style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFF38BDF8), letterSpacing: 1.0),
                   ),
                   const SizedBox(height: 24),
@@ -249,8 +333,6 @@ class DashboardAtletPage extends StatelessWidget {
 class ManajemenMuridPage extends StatefulWidget {
   final List<Murid> daftarMurid;
   final Murid muridTerpilih;
-  
-  // PERBAIKAN UTAMA: Definisi tipe fungsi diperketat agar tidak bisa menjadi 'dynamic' lagi
   final void Function(Murid murid) onMuridDipilih;
   final void Function(List<Murid> listBaru) onDaftarUpdated;
 
@@ -316,7 +398,7 @@ class _ManajemenMuridPageState extends State<ManajemenMuridPage> {
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF1E293B),
         title: const Text('Hapus Data Murid?', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-        content: Text('Apakah Anda yakin ingin menghapus ${m.nama} dari sistem? Murid yang berhenti akan dihapus selamanya.', style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13)),
+        content: Text('Apakah Anda yakin ingin menghapus ${m.nama} dari sistem?', style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13)),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('BATAL', style: TextStyle(color: Colors.white54))),
           TextButton(
@@ -375,17 +457,12 @@ class _ManajemenMuridPageState extends State<ManajemenMuridPage> {
     List<Murid> filteredList = widget.daftarMurid.where((m) => m.nama.contains(_searchQuery.toUpperCase())).toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('PANEL KONTROL DATA ATLET', style: TextStyle(color: Color(0xFFF8FAFC), fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1.0)),
-        centerTitle: true,
-        backgroundColor: const Color(0xFF1E293B),
-        elevation: 0,
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const SizedBox(height: 24),
             const Text('TAMBAH ATLET BARU', style: TextStyle(color: Color(0xFF38BDF8), fontSize: 10, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Row(
@@ -424,32 +501,18 @@ class _ManajemenMuridPageState extends State<ManajemenMuridPage> {
                 ),
               ],
             ),
-            
-            const SizedBox(height: 20),
-            
-            const Text('PENCARIAN DATA ATLET', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 10, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
             TextField(
               onChanged: (val) => setState(() => _searchQuery = val),
               style: const TextStyle(color: Colors.white, fontSize: 12),
               decoration: const InputDecoration(
-                hintText: 'Ketik nama murid untuk menyaring...', hintStyle: TextStyle(color: Colors.white24),
+                hintText: 'Saring nama murid...', hintStyle: TextStyle(color: Colors.white24),
                 prefixIcon: Icon(Icons.search, color: Colors.white54, size: 18),
                 filled: true, fillColor: Color(0xFF1E293B),
                 border: OutlineInputBorder(borderSide: BorderSide.none),
               ),
             ),
-            
-            const SizedBox(height: 16),
-            
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('TOTAL DATA: ${widget.daftarMurid.length} ATLET', style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 9, fontWeight: FontWeight.bold)),
-                const Text('ℹ️ Klik nama untuk buka Dashboard', style: TextStyle(color: Colors.white38, fontSize: 8)),
-              ],
-            ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 12),
             Expanded(
               child: ListView.builder(
                 itemCount: filteredList.length,
@@ -462,7 +525,6 @@ class _ManajemenMuridPageState extends State<ManajemenMuridPage> {
                     decoration: BoxDecoration(
                       color: isAktif ? const Color(0xFF0284C7).withOpacity(0.3) : const Color(0xFF1E293B),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: isAktif ? const Color(0xFF38BDF8) : Colors.transparent, width: 1),
                     ),
                     child: ListTile(
                       dense: true,
@@ -473,7 +535,6 @@ class _ManajemenMuridPageState extends State<ManajemenMuridPage> {
                         child: Text(murid.id, style: TextStyle(color: isAktif ? const Color(0xFF0F172A) : Colors.white70, fontSize: 9, fontWeight: FontWeight.bold)),
                       ),
                       title: Text(murid.nama, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
-                      subtitle: const Text('Skor Biomotorik Terarsip', style: TextStyle(color: Colors.white38, fontSize: 9)),
                       trailing: IconButton(
                         icon: const Icon(Icons.delete_outline, color: Color(0xFFF43F5E), size: 18),
                         onPressed: () => _konfirmasiHapus(murid), 
@@ -483,45 +544,37 @@ class _ManajemenMuridPageState extends State<ManajemenMuridPage> {
                 },
               ),
             ),
-            
-            const SizedBox(height: 12),
-            
+            const SizedBox(height: 10),
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(12)),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('SISTEM BACKUP DATA (ANTI DATA HILANG)', style: TextStyle(color: Colors.amber, fontSize: 8, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 6),
                   Row(
                     children: [
                       Expanded(
-                        child: ElevatedButton.icon(
+                        child: ElevatedButton(
                           onPressed: _eksporData,
-                          icon: const Icon(Icons.download_rounded, size: 14, color: Color(0xFF0F172A)),
-                          label: const Text('GENERATE CODE BACKUP', style: TextStyle(fontSize: 9, color: Color(0xFF0F172A), fontWeight: FontWeight.bold)),
                           style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF38BDF8)),
+                          child: const Text('BACKUP CODE', style: TextStyle(fontSize: 9, color: Color(0xFF0F172A), fontWeight: FontWeight.bold)),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: ElevatedButton.icon(
+                        child: ElevatedButton(
                           onPressed: _imporData,
-                          icon: const Icon(Icons.upload_rounded, size: 14, color: Colors.white),
-                          label: const Text('PULIHKAN DATA', style: TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.bold)),
                           style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF475569)),
+                          child: const Text('PULIHKAN DATA', style: TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.bold)),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
                   TextField(
                     controller: _ioController,
-                    maxLines: 1,
                     style: const TextStyle(color: Colors.greenAccent, fontSize: 9),
                     decoration: const InputDecoration(
-                      hintText: 'Teks kode JSON backup akan muncul/ditempel di sini...',
+                      hintText: 'Kolom impor/ekspor data...',
                       hintStyle: TextStyle(color: Colors.white12, fontSize: 9),
                       filled: true, fillColor: Color(0xFF0F172A),
                       border: OutlineInputBorder(borderSide: BorderSide.none),
@@ -547,22 +600,13 @@ class BoxplotChart extends StatelessWidget {
     final List<String> labels = ['STRENGTH', 'ENDURANCE', 'SPEED', 'COORD', 'FLEX', 'BALANCE', 'REACTION'];
     return Column(
       children: [
-        Expanded(
-          child: CustomPaint(
-            size: Size.infinite,
-            painter: BoxplotPainter(dataValues: dataValues),
-          ),
-        ),
+        Expanded(child: CustomPaint(size: Size.infinite, painter: BoxplotPainter(dataValues: dataValues))),
         const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: labels.map((label) => SizedBox(
             width: 44,
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 8, color: Color(0xFF94A3B8), fontWeight: FontWeight.bold),
-            ),
+            child: Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 8, color: Color(0xFF94A3B8), fontWeight: FontWeight.bold)),
           )).toList(),
         ),
       ],
@@ -578,15 +622,12 @@ class BoxplotPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint linePaint = Paint()..color = const Color(0xFF475569)..strokeWidth = 1.0..style = PaintingStyle.stroke;
     final Paint boxPaint = Paint()..color = const Color(0xFF0284C7)..style = PaintingStyle.fill;
-
     canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), linePaint);
-    int dataCount = 7;
-    double spacing = size.width / dataCount;
+    double spacing = size.width / 7;
 
-    for (int i = 0; i < dataCount; i++) {
+    for (int i = 0; i < 7; i++) {
       double x = (spacing * i) + (spacing / 2);
       double baseVal = dataValues[i]; 
-      
       double outlier = (baseVal * 0.1) * size.height;
       double topWhisker = (baseVal * 0.5) * size.height;
       double q3 = (baseVal * 0.7) * size.height;
@@ -596,3 +637,101 @@ class BoxplotPainter extends CustomPainter {
       double boxWidth = spacing * 0.35;
 
       canvas.drawCircle(Offset(x, outlier), 2.5, Paint()..color = const Color(0xFF38BDF8));
+      canvas.drawLine(Offset(x, topWhisker), Offset(x, q3), linePaint);
+      canvas.drawLine(Offset(x - boxWidth/3, topWhisker), Offset(x + boxWidth/3, topWhisker), linePaint);
+      canvas.drawLine(Offset(x, q1), Offset(x, bottomWhisker), linePaint);
+      canvas.drawLine(Offset(x - boxWidth/3, bottomWhisker), Offset(x + boxWidth/3, bottomWhisker), linePaint);
+
+      Rect boxRect = Rect.fromLTRB(x - boxWidth / 2, q3, x + boxWidth / 2, q1);
+      canvas.drawRect(boxRect, boxPaint);
+      canvas.drawRect(boxRect, Paint()..color = const Color(0xFF38BDF8)..style = PaintingStyle.stroke..strokeWidth = 1);
+      canvas.drawLine(Offset(x - boxWidth / 2, median), Offset(x + boxWidth / 2, median), Paint()..color = const Color(0xFFF8FAFC)..strokeWidth = 1.5);
+    }
+  }
+  @override
+  bool shouldRepaint(covariant BoxplotPainter oldDelegate) => oldDelegate.dataValues != dataValues;
+}
+
+class RadarSpiderChart extends StatelessWidget {
+  final List<double> dataValues;
+  const RadarSpiderChart({Key? key, required this.dataValues}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(size: Size.infinite, painter: RadarSpiderPainter(dataValues: dataValues));
+  }
+}
+
+class RadarSpiderPainter extends CustomPainter {
+  final List<double> dataValues;
+  RadarSpiderPainter({required this.dataValues});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Offset center = Offset(size.width / 2, size.height / 2);
+    double maxRadius = math.min(size.width, size.height) / 2.7; 
+    int numFeatures = 10;
+    List<String> labels = ['MUSCULAR END.', 'POWER', 'CORE STAB.', 'DYN. FLEX', 'SPEED END.', 'REACTIVE SP.', 'AGILITY', 'ANTICIPATION', 'MOBILITY', 'REACT AGILITY'];
+
+    Paint gridPaint = Paint()..color = const Color(0xFF334155)..style = PaintingStyle.stroke..strokeWidth = 1.0;
+    for (int i = 1; i <= 4; i++) {
+      double currentRadius = maxRadius * (i / 4);
+      Path gridPath = Path();
+      for (int j = 0; j < numFeatures; j++) {
+        double angle = (j * 2 * math.pi / numFeatures) - (math.pi / 2);
+        double x = center.dx + currentRadius * math.cos(angle);
+        double y = center.dy + currentRadius * math.sin(angle);
+        if (j == 0) gridPath.moveTo(x, y); else gridPath.lineTo(x, y);
+      }
+      gridPath.close();
+      canvas.drawPath(gridPath, gridPaint);
+    }
+
+    for (int j = 0; j < numFeatures; j++) {
+      double angle = (j * 2 * math.pi / numFeatures) - (math.pi / 2);
+      double x = center.dx + maxRadius * math.cos(angle);
+      double y = center.dy + maxRadius * math.sin(angle);
+      canvas.drawLine(center, Offset(x, y), gridPaint);
+      
+      TextPainter textPainter = TextPainter(
+        text: TextSpan(text: labels[j], style: const TextStyle(fontSize: 7.5, fontWeight: FontWeight.w800, color: Color(0xFF94A3B8))),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      double textX = center.dx + (maxRadius + 14) * math.cos(angle) - (textPainter.width / 2);
+      double textY = center.dy + (maxRadius + 10) * math.sin(angle) - (textPainter.height / 2);
+      textPainter.paint(canvas, Offset(textX, textY));
+    }
+
+    List<double> teamAvgValues = [0.65, 0.70, 0.60, 0.65, 0.68, 0.70, 0.62, 0.65, 0.70, 0.60];
+    Path teamPath = Path();
+    for (int j = 0; j < numFeatures; j++) {
+      double angle = (j * 2 * math.pi / numFeatures) - (math.pi / 2);
+      double currentRadius = maxRadius * teamAvgValues[j];
+      if (j == 0) teamPath.moveTo(center.dx + currentRadius * math.cos(angle), center.dy + currentRadius * math.sin(angle));
+      else teamPath.lineTo(center.dx + currentRadius * math.cos(angle), center.dy + currentRadius * math.sin(angle));
+    }
+    teamPath.close();
+    canvas.drawPath(teamPath, Paint()..color = const Color(0xFF0EA5E9).withOpacity(0.12)..style = PaintingStyle.fill);
+
+    Path studentPath = Path();
+    List<Offset> studentPoints = [];
+    for (int j = 0; j < numFeatures; j++) {
+      double angle = (j * 2 * math.pi / numFeatures) - (math.pi / 2);
+      double currentRadius = maxRadius * dataValues[j];
+      double x = center.dx + currentRadius * math.cos(angle);
+      double y = center.dy + currentRadius * math.sin(angle);
+      studentPoints.add(Offset(x, y));
+      if (j == 0) studentPath.moveTo(x, y); else studentPath.lineTo(x, y);
+    }
+    studentPath.close();
+    canvas.drawPath(studentPath, Paint()..color = const Color(0xFFF43F5E).withOpacity(0.28)..style = PaintingStyle.fill);
+    canvas.drawPath(studentPath, Paint()..color = const Color(0xFFF43F5E)..style = PaintingStyle.stroke..strokeWidth = 2.0);
+
+    for (Offset point in studentPoints) {
+      canvas.drawCircle(point, 3, Paint()..color = const Color(0xFFFFF1F2));
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant RadarSpiderPainter oldDelegate) => oldDelegate.dataValues != dataValues;
+}
