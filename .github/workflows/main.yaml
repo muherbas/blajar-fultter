@@ -1,3 +1,5 @@
+.github/workflows/main.yaml
+setting public dan gh-pages/root/save 
 name: Preview UI via GitHub Pages
 
 on:
@@ -7,13 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  contents: write
 
 jobs:
   build-and-deploy:
@@ -32,17 +28,12 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
+      # Di sini tanda kutipnya sudah dirapikan dan ditambahkan renderer html langsung
       - name: Build Web
         run: flutter build web --release --base-href "/blajar-fultter/" --web-renderer html
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload Artifacts
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy ke Branch gh-pages
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          path: 'build/web'
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          folder: build/web
+          branch: gh-pages
