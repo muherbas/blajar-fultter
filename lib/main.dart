@@ -34,7 +34,7 @@ class DashboardAtletPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'DASHBOARD PERFORMANCE [001 - BUDI SANTOSO]',
+          'DASHBOARD PERFORMANCE [$idMurid - $namaMurid]',
           style: TextStyle(
             color: Color(0xFFF8FAFC), 
             fontSize: 13, 
@@ -79,7 +79,7 @@ class DashboardAtletPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   const SizedBox(
-                    height: 220, // Ruang ekstra untuk teks value boxplot
+                    height: 220,
                     child: BoxplotChart(),
                   ),
                   const SizedBox(height: 16),
@@ -105,8 +105,127 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             
             const SizedBox(height: 20),
+
+            // ==================== BARU: TABEL ANALISIS KOMPONEN UTAMA ====================
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E293B),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  )
+                ],
+              ),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'MATRIKS EVALUASI BOXPLOT',
+                    style: TextStyle(
+                      fontSize: 11, 
+                      fontWeight: FontWeight.w900, 
+                      color: Color(0xFF10B981), // Emerald Green Elit
+                      letterSpacing: 1.0
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: SizedBox(
+                      width: 650, // Mengunci lebar tabel agar scannable via horizontal scroll di HP
+                      child: Table(
+                        border: TableBorder.all(color: const Color(0xFF334155), width: 1), // Slate 700 border
+                        columnWidths: const {
+                          0: FlexColumnWidth(1.2), // Komponen
+                          1: FlexColumnWidth(1.3), // Makna Statistik
+                          2: FlexColumnWidth(1.5), // Kekurangan
+                          3: FlexColumnWidth(1.5), // Kelebihan
+                          4: FlexColumnWidth(2.0), // Saran Dinamis
+                        },
+                        children: [
+                          // HEADER TABEL
+                          TableRow(
+                            decoration: const BoxDecoration(color: Color(0xFF0F172A)),
+                            children: [
+                              _buildHeaderCell('KOMPONEN'),
+                              _buildHeaderCell('MAKNA STATISTIK'),
+                              _buildHeaderCell('KEKURANGAN'),
+                              _buildHeaderCell('KELEBIHAN'),
+                              _buildHeaderCell('SARAN DINAMIS'),
+                            ],
+                          ),
+                          // DATA BARIS 1: STRENGTH
+                          _buildDataRow(
+                            'STRENGTH',
+                            'Median 48, Outlier Atas (82)',
+                            'Kekuatan dasar tim masih di bawah standar rata-rata global.',
+                            'Ada satu murid yang memiliki bakat kekuatan ekstrem.',
+                            'Fokus ke latihan beban fundamental (Hypertrophy) untuk menaikkan baseline tim.',
+                          ),
+                          // DATA BARIS 2: ENDURANCE
+                          _buildDataRow(
+                            'ENDURANCE',
+                            'Box Seimbang, Outlier (88)',
+                            'Distribusi lelah merata, fondasi aerobik belum merata.',
+                            'Daya tahan puncak beberapa individu sangat tinggi.',
+                            'Tambahkan sesi interval training intensitas rendah berdurasi panjang.',
+                          ),
+                          // DATA BARIS 3: SPEED
+                          _buildDataRow(
+                            'SPEED',
+                            'Box Panjang (IQR Tinggi)',
+                            'Kesenjangan kecepatan antar murid terlalu jauh (tidak konsisten).',
+                            'Beberapa murid sudah memiliki kecepatan murni yang matang.',
+                            'Kelompokkan latihan sprint berdasarkan klaster kecepatan agar efisien.',
+                          ),
+                          // DATA BARIS 4: COORD
+                          _buildDataRow(
+                            'COORD',
+                            'Box Mampat / Sempit',
+                            'Kemampuan motorik tim seragam namun stagnan di angka menengah.',
+                            'Sangat konsisten, tidak ada murid yang tertinggal jauh.',
+                            'Berikan variasi gerakan kompleks baru untuk memicu adaptasi saraf.',
+                          ),
+                          // DATA BARIS 5: FLEX
+                          _buildDataRow(
+                            'FLEX',
+                            'Median Mendekati Q3',
+                            'Sebagian kecil murid memiliki fleksibilitas sangat kaku.',
+                            'Mayoritas tim memiliki kelenturan di atas rata-rata.',
+                            'Berikan porsi peregangan (stretching) ekstra khusus bagi murid di IQR bawah.',
+                          ),
+                          // DATA BARIS 6: BALANCE
+                          _buildDataRow(
+                            'BALANCE',
+                            'Median Mendekati Q1',
+                            'Sebagian besar murid memiliki stabilitas yang buruk.',
+                            'Batas atas pencapaian kestabilan tim cukup potensial.',
+                            'Integrasikan latihan core stability (plank, bosu ball) di awal sesi.',
+                          ),
+                          // DATA BARIS 7: REACTION
+                          _buildDataRow(
+                            'REACTION',
+                            'Whisker Bawah Panjang',
+                            'Ada penurunan respons motorik drastis pada beberapa murid.',
+                            'Kecepatan reaksi puncak (Q3) sudah sangat responsif.',
+                            'Lakukan tes reaksi dalam kondisi segar (bukan di akhir sesi latihan).',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             
-            // ==================== CARD 2: RADAR SPIDER (KOMPONEN TURUNAN) ====================
+            const SizedBox(height: 20),
+            
+            // ==================== CARD 3: RADAR SPIDER (KOMPONEN TURUNAN) ====================
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -147,13 +266,59 @@ class DashboardAtletPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   const SizedBox(
-                    height: 360, // Ruang ekstra untuk teks value radar
+                    height: 360, 
                     child: RadarSpiderChart(),
                   ),
                 ],
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // Fungsi pembantu untuk membuat Cell Header Tabel
+  Widget _buildHeaderCell(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 6.0),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: Color(0xFF38BDF8),
+          fontSize: 8.5,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+
+  // Fungsi pembantu untuk membuat Baris Data Tabel
+  TableRow _buildDataRow(String comp, String stat, String minus, String plus, String advice) {
+    return TableRow(
+      children: [
+        _buildDataCell(comp, isBold: true, textColor: const Color(0xFFF8FAFC)),
+        _buildDataCell(stat, textColor: const Color(0xFF94A3B8)),
+        _buildDataCell(minus, textColor: const Color(0xFFF43F5E)), // Merah soft untuk kekurangan
+        _buildDataCell(plus, textColor: const Color(0xFF34D399)),  // Hijau soft untuk kelebihan
+        _buildDataCell(advice, textColor: const Color(0xFFE2E8F0)), // Putih abu untuk saran
+      ],
+    );
+  }
+
+  // Fungsi pembantu untuk membuat isi Cell Data Tabel
+  Widget _buildDataCell(String text, {bool isBold = false, required Color textColor}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: textColor,
+          fontSize: 8.5,
+          fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+          height: 1.3,
         ),
       ),
     );
@@ -222,8 +387,6 @@ class BoxplotPainter extends CustomPainter {
     int dataCount = 7;
     double spacing = size.width / dataCount;
 
-    // Nilai skala asli (0 - 100)
-    // Format indeks: [outlier, bottomWhisker, q1, median, q3, topWhisker]
     List<List<double>> rawBoxData = [
       [82.0, 20.0, 35.0, 48.0, 60.0, 80.0], 
       [88.0, 25.0, 40.0, 52.0, 65.0, 82.0], 
@@ -246,28 +409,23 @@ class BoxplotPainter extends CustomPainter {
       double topWhiskerY = size.height - ((raw[5] / 100) * size.height);
       double boxWidth = spacing * 0.35;
 
-      // Outlier
       if (raw[0] > 0) {
         canvas.drawCircle(Offset(x, outlierY), 2.5, Paint()..color = const Color(0xFF38BDF8));
         drawValueText(canvas, Offset(x + 5, outlierY - 4), raw[0].toStringAsFixed(0), const Color(0xFF38BDF8));
       }
       
-      // Whisker Atas
       canvas.drawLine(Offset(x, q3Y), Offset(x, topWhiskerY), linePaint);
       canvas.drawLine(Offset(x - boxWidth/3, topWhiskerY), Offset(x + boxWidth/3, topWhiskerY), linePaint);
       drawValueText(canvas, Offset(x + boxWidth/2 + 2, topWhiskerY - 4), raw[5].toStringAsFixed(0), const Color(0xFF94A3B8));
       
-      // Whisker Bawah
       canvas.drawLine(Offset(x, q1Y), Offset(x, bottomWhiskerY), linePaint);
       canvas.drawLine(Offset(x - boxWidth/3, bottomWhiskerY), Offset(x + boxWidth/3, bottomWhiskerY), linePaint);
       drawValueText(canvas, Offset(x + boxWidth/2 + 2, bottomWhiskerY - 4), raw[1].toStringAsFixed(0), const Color(0xFF94A3B8));
 
-      // Box Utama
       Rect boxRect = Rect.fromLTRB(x - boxWidth / 2, q3Y, x + boxWidth / 2, q1Y);
       canvas.drawRect(boxRect, boxPaint);
       canvas.drawRect(boxRect, Paint()..color = const Color(0xFF38BDF8)..style = PaintingStyle.stroke..strokeWidth = 1);
       
-      // Median
       canvas.drawLine(Offset(x - boxWidth / 2, medianY), Offset(x + boxWidth / 2, medianY), Paint()..color = const Color(0xFFF8FAFC)..strokeWidth = 1.5);
       drawValueText(canvas, Offset(x + boxWidth/2 + 2, medianY - 4), raw[3].toStringAsFixed(0), const Color(0xFFF8FAFC));
     }
@@ -367,7 +525,6 @@ class RadarSpiderPainter extends CustomPainter {
     canvas.drawPath(studentPath, Paint()..color = const Color(0xFFF43F5E).withOpacity(0.28)..style = PaintingStyle.fill);
     canvas.drawPath(studentPath, Paint()..color = const Color(0xFFF43F5E)..style = PaintingStyle.stroke..strokeWidth = 2.0);
 
-    // Render Titik Sudut & Angka Skor Murid
     Paint pointPaint = Paint()..color = const Color(0xFFFFF1F2);
     for (int j = 0; j < studentPoints.length; j++) {
       Offset point = studentPoints[j];
