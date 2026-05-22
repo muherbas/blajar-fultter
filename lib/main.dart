@@ -58,7 +58,6 @@ class Murid {
       var catLogs = logs.where((l) => l.kategori.contains(cat)).toList();
       double avgVolume = catLogs.isEmpty ? 30.0 : (catLogs.map((e) => e.volume).reduce((a, b) => a + b) / catLogs.length).clamp(10, 100).toDouble();
       
-      // Mengembalikan sebaran boxplot dinamis [outlier, min, q1, median, q3, max] berdasarkan volume inputan
       return [
         avgVolume > 85 ? avgVolume + 8 : 0.0, 
         (avgVolume - 15).clamp(5, 100), 
@@ -80,7 +79,7 @@ class Murid {
       var catLogs = logs.where((l) => l.kategori == cat).toList();
       if (catLogs.isEmpty) return 0.5; // Baseline default sebelum ada latihan
       double avgVolume = catLogs.map((e) => e.volume).reduce((a, b) => a + b) / catLogs.length;
-      return (avgVolume / 50).clamp(0.2, 1.0); // Normalisasi volume ke skala grafik radar
+      return (avgVolume / 50).clamp(0.2, 1.0); 
     }).toList();
   }
 }
@@ -96,14 +95,13 @@ class MainNavigationHolder extends StatefulWidget {
 
 class _MainNavigationHolderState extends State<MainNavigationHolder> {
   int _currentIndex = 1; // Membuka halaman Input Latihan terlebih dahulu
-  String _selectedMuridId = "001"; // ID Murid yang aktif dipantau di dashboard
+  String _selectedMuridId = "001"; 
   
   late List<Murid> _daftarMurid;
 
   @override
   void initState() {
     super.initState();
-    // Data Master Awal Atlet
     _daftarMurid = [
       Murid(id: "001", nama: "BUDI SANTOSO", logs: []),
       Murid(id: "100", nama: "RURI", logs: []),
@@ -117,7 +115,6 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     );
   }
 
-  // Fungsi callback real-time untuk menyuntikkan log latihan baru ke database atlet
   void _tambahLogLatihan(String idMurid, LogLatihan newLog) {
     setState(() {
       _daftarMurid.firstWhere((m) => m.id == idMurid).logs.add(newLog);
@@ -165,7 +162,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
   }
 }
 
-// ==================== HALAMAN: INPUT LATIHAN (FIXED & REAL-TIME) ====================
+// ==================== HALAMAN: INPUT LATIHAN ====================
 
 class InputLatihanPage extends StatefulWidget {
   final List<Murid> daftarMurid;
@@ -195,28 +192,12 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
   
   String _searchQuery = "";
 
-  // 17 Pilihan Klasifikasi Biomotorik Lengkap Sesuai Permintaan
   final List<String> _kategoriList = [
-    "STRENGTH",
-    "ENDURANCE",
-    "SPEED",
-    "COORDINATION",
-    "FLEXIBILITY",
-    "BALANCE",
-    "REACTION TIME",
-    "MUSCULAR ENDURANCE",
-    "POWER",
-    "CORE STABILITY",
-    "DYNAMIC FLEXIBILITY",
-    "SPEED ENDURANCE",
-    "REACTIVE SPEED / QUICKNESS",
-    "AGILITY",
-    "ANTICIPATION & SPATIAL AWARENESS",
-    "MOBILITY",
-    "OPEN/REACTIVE AGILITY"
+    "STRENGTH", "ENDURANCE", "SPEED", "COORDINATION", "FLEXIBILITY", "BALANCE", "REACTION TIME",
+    "MUSCULAR ENDURANCE", "POWER", "CORE STABILITY", "DYNAMIC FLEXIBILITY", "SPEED ENDURANCE",
+    "REACTIVE SPEED / QUICKNESS", "AGILITY", "ANTICIPATION & SPATIAL AWARENESS", "MOBILITY", "OPEN/REACTIVE AGILITY"
   ];
 
-  // Helper Pengganti 'intl' library untuk format tanggal DD/MM/YYYY secara manual & aman
   String _formatTanggalAman(DateTime dt) {
     String day = dt.day.toString().padLeft(2, '0');
     String month = dt.month.toString().padLeft(2, '0');
@@ -232,12 +213,10 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Menyaring daftar pencarian murid secara real-time
     List<Murid> filteredMurid = widget.daftarMurid.where((m) {
       return m.nama.toLowerCase().contains(_searchQuery.toLowerCase()) || m.id.contains(_searchQuery);
     }).toList();
 
-    // Mengambil data murid terpilih saat ini untuk ditampilkan kalkulasi riwayatnya
     Murid? activeMuridData = _selectedId != null 
         ? widget.daftarMurid.firstWhere((m) => m.id == _selectedId) 
         : null;
@@ -255,7 +234,7 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
           ),
           const SizedBox(height: 16),
 
-          // 1. TOOLS SEARCH ATLET
+          // Search Tools
           TextField(
             controller: _searchController,
             onChanged: (val) => setState(() => _searchQuery = val),
@@ -272,10 +251,10 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
           ),
           const SizedBox(height: 12),
 
-          // 2. DROPDOWN SELEKSI ATLET TERFILTER
+          // Dropdown
           DropdownButtonFormField<String>(
             value: _selectedId,
-            hint: const Text("Pilih Murid", style: TextStyle(color: Color(0xFF64748B), fontSize: 13)),
+            hint: const Text("Pilih ID Murid", style: TextStyle(color: Color(0xFF64748B), fontSize: 13)),
             decoration: _buildInputDecoration("Pilih Murid"),
             dropdownColor: const Color(0xFF1E293B),
             items: filteredMurid.map((m) => DropdownMenuItem(
@@ -286,12 +265,12 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
               setState(() {
                 _selectedId = v;
               });
-              if (v != null) widget.onSelectForDashboard(v); // Otomatis mengaitkan ke halaman dashboard target
+              if (v != null) widget.onSelectForDashboard(v); 
             },
           ),
           const SizedBox(height: 16),
 
-          // 3. TIMELINE TANGGAL PELAKSANAAN
+          // Timeline Tanggal
           InkWell(
             onTap: () async {
               DateTime? picked = await showDatePicker(
@@ -318,7 +297,7 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
           ),
           const SizedBox(height: 16),
 
-          // 4. MANUAL INPUT NAMA JENIS LATIHAN
+          // Jenis Latihan
           TextField(
             controller: _latihanController,
             style: const TextStyle(color: Colors.white, fontSize: 13),
@@ -326,7 +305,7 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
           ),
           const SizedBox(height: 16),
 
-          // 5. OPSI KLASIFIKASI 17 BIOMOTORIK
+          // Klasifikasi Biomotorik
           DropdownButtonFormField<String>(
             value: _kategoriBiomotor,
             decoration: _buildInputDecoration("Opsi Klasifikasi Biomotorik"),
@@ -339,7 +318,7 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
           ),
           const SizedBox(height: 16),
 
-          // 6. INPUT REPETISI X SET
+          // Repetisi x Set
           Row(
             children: [
               Expanded(
@@ -365,12 +344,12 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
           ),
           const SizedBox(height: 24),
 
-          // 7. TOMBOL SIMPAN DATA (KONEKSI REAL-TIME)
+          // Button Simpan
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF8B5CF6), // Purple Premium Accent
+                backgroundColor: const Color(0xFF8B5CF6), 
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
@@ -384,7 +363,6 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
                   return;
                 }
 
-                // Push ke Callback penampung state utama
                 widget.onSave(
                   _selectedId!,
                   LogLatihan(
@@ -396,7 +374,6 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
                   ),
                 );
 
-                // Reset Form parsial setelah sukses entry data
                 _latihanController.clear();
                 _repsController.clear();
                 _setsController.clear();
@@ -411,7 +388,7 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
           ),
           const SizedBox(height: 24),
 
-          // 8. KOMPONEN KALKULASI REAL-TIME TERKINI
+          // Real-time Calculation Card
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -436,7 +413,7 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
             ),
           ),
           
-          // 9. MINI TIMELINE LOGS (DI BAWAH FORM)
+          // History Timeline
           if (activeMuridData != null && activeMuridData.logs.isNotEmpty) ...[
             const SizedBox(height: 24),
             Text("TIMELINE RIWAYAT LATIHAN (${activeMuridData.nama})", style: const TextStyle(color: Color(0xFF64748B), fontSize: 10, fontWeight: FontWeight.w900)),
@@ -497,7 +474,7 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
   }
 }
 
-// ==================== HALAMAN: DASHBOARD PERFORMANCE ====================
+// ==================== HALAMAN: DASHBOARD PERFORMANCE (FIXED SCROLL) ====================
 
 class DashboardAtletPage extends StatelessWidget {
   final Murid activeMurid;
@@ -508,6 +485,7 @@ class DashboardAtletPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(), // Memastikan halaman bisa di-scroll dengan aman tanpa overflow
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
@@ -518,38 +496,39 @@ class DashboardAtletPage extends StatelessWidget {
               child: Text(
                 'DASHBOARD PERFORMANCE [${activeMurid.id} - ${activeMurid.nama}]',
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Color(0xFFF8FAFC), fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 0.8),
+                style: const TextStyle(color: Color(0xFFF8FAFC), fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 0.8),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
             // Card Boxplot (Komponen Utama)
             Container(
               width: double.infinity,
               decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(16)),
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('KOMPONEN UTAMA', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: Color(0xFF38BDF8))),
-                  const SizedBox(height: 20),
-                  SizedBox(height: 210, child: BoxplotChart(boxData: activeMurid.calculatedBoxData)),
+                  const Text('KOMPONEN UTAMA', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFF38BDF8))),
+                  const SizedBox(height: 16),
+                  SizedBox(height: 200, child: BoxplotChart(boxData: activeMurid.calculatedBoxData)),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
-            // Card Radar Spider (Komponen Turunan)
+            // Card Radar Spider (Komponen Turunan - RESIZED & RESPONSIVE)
             Container(
               width: double.infinity,
               decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(16)),
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('KOMPONEN TURUNAN (REAL-TIME)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: Color(0xFFF43F5E))),
-                  const SizedBox(height: 20),
-                  SizedBox(height: 340, child: RadarSpiderChart(studentValues: activeMurid.calculatedRadarData)),
+                  const Text('KOMPONEN TURUNAN (REAL-TIME)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFFF43F5E))),
+                  const SizedBox(height: 16),
+                  // Diperkecil dari 340 ke 280 agar pas di layar device mobile
+                  SizedBox(height: 280, child: RadarSpiderChart(studentValues: activeMurid.calculatedRadarData)),
                 ],
               ),
             ),
@@ -688,7 +667,7 @@ class RadarSpiderPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     Offset center = Offset(size.width / 2, size.height / 2);
-    double maxRadius = math.min(size.width, size.height) / 2.6; 
+    double maxRadius = math.min(size.width, size.height) / 2.5; 
     int numFeatures = 10;
     
     List<String> labels = ['MUSCULAR END.', 'POWER', 'CORE STAB.', 'DYN. FLEX', 'SPEED END.', 'REACTIVE SP.', 'AGILITY', 'ANTICIPATION', 'MOBILITY', 'REACT AGILITY'];
@@ -714,7 +693,7 @@ class RadarSpiderPainter extends CustomPainter {
       canvas.drawLine(center, Offset(x, y), gridPaint);
       
       TextPainter textPainter = TextPainter(
-        text: TextSpan(text: labels[j], style: const TextStyle(fontSize: 6.5, fontWeight: FontWeight.w800, color: Color(0xFF94A3B8))), 
+        text: TextSpan(text: labels[j], style: const TextStyle(fontSize: 6.0, fontWeight: FontWeight.w800, color: Color(0xFF94A3B8))), 
         textDirection: TextDirection.ltr
       )..layout();
       
@@ -723,15 +702,12 @@ class RadarSpiderPainter extends CustomPainter {
       textPainter.paint(canvas, Offset(textX, textY));
     }
 
-    // STUDENT DATABASE DATA INTERSECTION
     Path studentPath = Path();
-    List<Offset> studentPoints = [];
     for (int j = 0; j < numFeatures; j++) {
       double angle = (j * 2 * math.pi / numFeatures) - (math.pi / 2);
       double currentRadius = maxRadius * studentValues[j];
       double x = center.dx + currentRadius * math.cos(angle);
       double y = center.dy + currentRadius * math.sin(angle);
-      studentPoints.add(Offset(x, y));
       if (j == 0) studentPath.moveTo(x, y); else studentPath.lineTo(x, y);
     }
     studentPath.close();
