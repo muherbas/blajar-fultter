@@ -74,7 +74,7 @@ class MainNavigationHolder extends StatefulWidget {
 }
 
 class _MainNavigationHolderState extends State<MainNavigationHolder> {
-  int _currentIndex = 0; // Langsung fokus terbuka di DASHBOARD
+  int _currentIndex = 0; // Tetap fokus terkunci di DASHBOARD
   String _selectedMuridId = "001"; 
 
   final TextEditingController _namaController = TextEditingController();
@@ -86,34 +86,35 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
   @override
   void initState() {
     super.initState();
+    // RESET VALUE KE NOL: Budi Santoso dan Ruri diinisialisasi dengan CurrentScore = 0.0 & Radar = 0.0
     _daftarMurid = [
       Murid(
         id: "001",
         nama: "BUDI SANTOSO",
         boxData: [
-          [20.0, 35.0, 48.0, 75.0, 60.0, 85.0], // STRENGTH
-          [25.0, 40.0, 52.0, 68.0, 65.0, 88.0], // ENDURANCE
-          [30.0, 42.0, 65.0, 82.0, 75.0, 90.0], // SPEED
-          [18.0, 32.0, 45.0, 50.0, 58.0, 76.0], // COORDINATION
-          [22.0, 48.0, 52.0, 40.0, 56.0, 78.0], // FLEXIBILITY
-          [12.0, 38.0, 40.0, 65.0, 42.0, 72.0], // BALANCE
-          [28.0, 42.0, 56.0, 80.0, 68.0, 92.0], // REACTION TIME
+          [20.0, 35.0, 48.0, 0.0, 60.0, 85.0], // STRENGTH (Skor awal 0.0)
+          [25.0, 40.0, 52.0, 0.0, 65.0, 88.0], // ENDURANCE (Skor awal 0.0)
+          [30.0, 42.0, 65.0, 0.0, 75.0, 90.0], // SPEED (Skor awal 0.0)
+          [18.0, 32.0, 45.0, 0.0, 58.0, 76.0], // COORDINATION (Skor awal 0.0)
+          [22.0, 48.0, 52.0, 0.0, 56.0, 78.0], // FLEXIBILITY (Skor awal 0.0)
+          [12.0, 38.0, 40.0, 0.0, 42.0, 72.0], // BALANCE (Skor awal 0.0)
+          [28.0, 42.0, 56.0, 0.0, 68.0, 92.0], // REACTION TIME (Skor awal 0.0)
         ],
-        radarData: [0.75, 0.68, 0.82, 0.50, 0.40, 0.65, 0.80, 0.70, 0.75, 0.60],
+        radarData: List.generate(10, (_) => 0.0), // Radar awal 0.0
       ),
       Murid(
         id: "100",
         nama: "RURI",
         boxData: [
-          [20.0, 35.0, 50.0, 45.0, 65.0, 85.0],
-          [25.0, 40.0, 55.0, 72.0, 70.0, 90.0],
-          [22.0, 38.0, 48.0, 60.0, 62.0, 86.0],
-          [15.0, 30.0, 42.0, 55.0, 58.0, 75.0],
-          [20.0, 35.0, 50.0, 78.0, 65.0, 88.0],
-          [18.0, 32.0, 46.0, 50.0, 60.0, 78.0],
-          [25.0, 40.0, 52.0, 58.0, 66.0, 90.0],
+          [20.0, 35.0, 50.0, 0.0, 65.0, 85.0],
+          [25.0, 40.0, 55.0, 0.0, 70.0, 90.0],
+          [22.0, 38.0, 48.0, 0.0, 62.0, 86.0],
+          [15.0, 30.0, 42.0, 0.0, 58.0, 75.0],
+          [20.0, 35.0, 50.0, 0.0, 65.0, 88.0],
+          [18.0, 32.0, 46.0, 0.0, 60.0, 78.0],
+          [25.0, 40.0, 52.0, 0.0, 66.0, 90.0],
         ],
-        radarData: [0.45, 0.72, 0.60, 0.55, 0.78, 0.50, 0.58, 0.65, 0.52, 0.70],
+        radarData: List.generate(10, (_) => 0.0), // Radar awal 0.0
       ),
     ];
   }
@@ -165,11 +166,12 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
       }
       String nextId = (maxId + 1).toString().padLeft(3, '0');
 
+      // Atlet baru otomatis dikunci mulai dari nol (0.0)
       _daftarMurid.add(Murid(
         id: nextId,
         nama: _namaController.text.trim().toUpperCase(),
-        boxData: List.generate(7, (_) => [20.0, 35.0, 50.0, 50.0, 65.0, 85.0]),
-        radarData: List.generate(10, (_) => 0.5),
+        boxData: List.generate(7, (_) => [20.0, 35.0, 50.0, 0.0, 65.0, 85.0]),
+        radarData: List.generate(10, (_) => 0.0),
       ));
       _namaController.clear();
       FocusScope.of(context).unfocus();
@@ -197,6 +199,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     return -1;
   }
 
+  // Menyesuaikan nilai dashboard berdasarkan inputan Halaman Reps (Halaman ke-3)
   void _simpanDataKuantitatif(String idMurid, String jenis, String klasifikasi, double reps, double sets, DateTime tgl) {
     setState(() {
       int idx = _daftarMurid.indexWhere((m) => m.id == idMurid);
@@ -224,6 +227,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     });
   }
 
+  // Menyesuaikan nilai dashboard berdasarkan inputan Halaman Waktu (Halaman ke-4)
   void _simpanDataDurasi(String idMurid, String jenis, String klasifikasi, double waktu, double sets, DateTime tgl) {
     setState(() {
       int idx = _daftarMurid.indexWhere((m) => m.id == idMurid);
@@ -368,7 +372,7 @@ class DashboardAtletPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('PROFIL BIOMOTORIK METRIKS RADAR (10 DIMENSI)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFFA855F7))),
+                  const Text('PROFIL BIOMOTORIK METRIKS RADAR (10 DIMENSI)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFFDashboardAtletPage.radarColor))),
                   const SizedBox(height: 10),
                   SizedBox(
                     height: 240,
@@ -382,7 +386,7 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // ==================== MATRIKS KONTROL EVALUASI DENGAN KOLOM ARTI POLA ====================
+            // Matriks Kontrol Evaluasi
             Container(
               width: double.infinity,
               decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(12)),
@@ -395,13 +399,13 @@ class DashboardAtletPage extends StatelessWidget {
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: SizedBox(
-                      width: 1050, // Diperluas untuk menampung kolom ARTI POLA secara proposional
+                      width: 1050,
                       child: Table(
                         border: TableBorder.all(color: const Color(0xFF334155), width: 1),
                         columnWidths: const {
                           0: FlexColumnWidth(1.8), // KOMPONEN
                           1: FlexColumnWidth(2.2), // POLA BOXPLOT
-                          2: FlexColumnWidth(2.5), // ARTI POLA (Kolom Baru)
+                          2: FlexColumnWidth(2.5), // ARTI POLA
                           3: FlexColumnWidth(2.3), // KELEBIHAN
                           4: FlexColumnWidth(2.3), // KEKURANGAN
                           5: FlexColumnWidth(3.4), // REKOMENDASI
@@ -451,17 +455,23 @@ class DashboardAtletPage extends StatelessWidget {
     );
   }
 
+  static const Color radarColor = Color(0xFFA855F7);
+
   Widget _buildHeaderCell(String text) {
     return Padding(padding: const EdgeInsets.all(8.0), child: Text(text, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF38BDF8), fontSize: 9, fontWeight: FontWeight.bold)));
   }
 
-  // Engine Otomasi Rekam Masuk Komposisi 40 Jenis Pola Boxplot Kombinasi Matematika Teoretis Komplet
   Map<String, String> _analisisKomplet40Pola(int idx) {
     if (idx >= activeMurid.boxData.length) return {"pola": "Symmetrical Normal", "arti": "Sebaran ideal rata seimbang."};
     
+    // Jika data inputan masih kosong / bernilai 0, kembalikan status inisialisasi awal yang bersih
+    if (activeMurid.boxData[idx][3] == 0.0) {
+      return {"pola": "Belum Ada Data", "arti": "Menunggu input performa fungsional dari latihan."};
+    }
+
     double min = activeMurid.boxData[idx][0];
     double q1 = activeMurid.boxData[idx][1];
-    double q2 = activeMurid.boxData[idx][2]; // Median
+    double q2 = activeMurid.boxData[idx][2];
     double q3 = activeMurid.boxData[idx][4];
     double max = activeMurid.boxData[idx][5];
     
@@ -475,7 +485,6 @@ class DashboardAtletPage extends StatelessWidget {
     String kurtosis = "";
     String outlier = "";
 
-    // 1. Klasifikasi Komponen Skewness (5 Tingkat Kedalaman)
     if ((dUpper - dLower).abs() <= 2.0 && (wUpper - wLower).abs() <= 3.0) {
       skew = "Symmetrical";
     } else if (dUpper > dLower && wUpper > wLower) {
@@ -488,7 +497,6 @@ class DashboardAtletPage extends StatelessWidget {
       skew = "Mildly Skewed Left";
     }
 
-    // 2. Klasifikasi Komponen Kurtosis (4 Tingkat Lebar Distribusi)
     if (iqr < 10) {
       kurtosis = "Leptokurtic (Narrow)";
     } else if (iqr > 38) {
@@ -499,14 +507,12 @@ class DashboardAtletPage extends StatelessWidget {
       kurtosis = "Moderate Dispersion";
     }
 
-    // 3. Klasifikasi Deteksi Batas Outlier (2 Tingkat Kepastian)
     if (max > (q3 + (1.5 * iqr)) || min < (q1 - (1.5 * iqr))) {
       outlier = "with Outliers Deteksi";
     } else {
       outlier = "No Outliers";
     }
 
-    // Menggabungkan Kombinasi Menjadi Bagian Dari Matrix 40 Pola Struktural
     String polaFinal = "$skew - $kurtosis";
     String artiFinal = "";
 
@@ -533,6 +539,7 @@ class DashboardAtletPage extends StatelessWidget {
 
   TableRow _buildEvaluasiRow(String namaKomponen, String tipeGrafik, int dataIdx) {
     bool diAtasRataTim = false;
+    bool belumAdaData = false;
     String labelPola = "-";
     String labelArti = "-";
     
@@ -543,38 +550,44 @@ class DashboardAtletPage extends StatelessWidget {
       
       if (dataIdx < activeMurid.boxData.length && activeMurid.boxData[dataIdx].length >= 4) {
         double sk = activeMurid.boxData[dataIdx][3];
+        if (sk == 0.0) belumAdaData = true;
         double avg = dataIdx < teamBoxAverages.length ? teamBoxAverages[dataIdx] : 0.0;
         diAtasRataTim = sk >= avg;
       }
     } else {
-      labelPola = "-"; // Komponen Murni Tipe Radar dikunci strip total sesuai request
+      labelPola = "-"; // Komponen Radar murni terkunci strip sesuai amanah
       labelArti = "-";
       if (dataIdx < activeMurid.radarData.length) {
         double radVal = activeMurid.radarData[dataIdx];
+        if (radVal == 0.0) belumAdaData = true;
         double avg = dataIdx < teamRadarAverages.length ? teamRadarAverages[dataIdx] : 0.0;
         diAtasRataTim = radVal >= avg;
       }
     }
 
-    String kelebihanText = diAtasRataTim ? "Kapasitas fungsional optimal di atas target rata-rata." : "Stabilitas gerak dasar atlet konsisten.";
-    String kekuranganText = !diAtasRataTim ? "Defisit volume energi dibanding target rata-rata tim." : "Memerlukan variasi stimulus beban lanjutan.";
+    String kelebihanText = belumAdaData ? "Data rekam kosong." : (diAtasRataTim ? "Kapasitas fungsional optimal di atas target rata-rata." : "Stabilitas gerak dasar atlet konsisten.");
+    String kekuranganText = belumAdaData ? "Menunggu uji fisik." : (!diAtasRataTim ? "Defisit volume energi dibanding target rata-rata tim." : "Memerlukan variasi stimulus beban lanjutan.");
     
-    String rekomendasiText = diAtasRataTim 
-        ? "UPGRADE: Naikkan intensitas sirkuit fungsional untuk menjaga keunggulan dominan."
-        : "BALANCING: Tambahkan porsi latihan beban terarah area $namaKomponen untuk mengejar ketertinggalan.";
+    String rekomendasiText = belumAdaData 
+        ? "Silakan masukkan data latihan siswa di tab INPUT REPS / INPUT WAKTU."
+        : (diAtasRataTim 
+            ? "UPGRADE: Naikkan intensitas sirkuit fungsional untuk menjaga keunggulan dominan."
+            : "BALANCING: Tambahkan porsi latihan beban terarah area $namaKomponen untuk mengejar ketertinggalan.");
 
     return TableRow(
       children: [
         Padding(padding: const EdgeInsets.all(6.0), child: Text(namaKomponen, style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold))),
-        Padding(padding: const EdgeInsets.all(6.0), child: Text(labelPola, style: TextStyle(color: labelPola == '-' ? Colors.white30 : Colors.amber[400], fontSize: 7, fontWeight: FontWeight.w600))),
-        Padding(padding: const EdgeInsets.all(6.0), child: Text(labelArti, style: TextStyle(color: labelArti == '-' ? Colors.white30 : Colors.teal[300], fontSize: 7, fontWeight: FontWeight.w500))),
-        Padding(padding: const EdgeInsets.all(6.0), child: Text(kelebihanText, style: const TextStyle(color: Color(0xFF10B981), fontSize: 8))),
-        Padding(padding: const EdgeInsets.all(6.0), child: Text(kekuranganText, style: const TextStyle(color: Color(0xFFEF4444), fontSize: 8))),
-        Padding(padding: const EdgeInsets.all(6.0), child: Text(rekomendasiText, style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 8))),
+        Padding(padding: const EdgeInsets.all(6.0), child: Text(labelPola, style: TextStyle(color: (labelPola == '-' || belumAdaData) ? Colors.white30 : Colors.amber[400], fontSize: 7, fontWeight: FontWeight.w600))),
+        Padding(padding: const EdgeInsets.all(6.0), child: Text(labelArti, style: TextStyle(color: (labelArti == '-' || belumAdaData) ? Colors.white30 : Colors.teal[300], fontSize: 7, fontWeight: FontWeight.w500))),
+        Padding(padding: const EdgeInsets.all(6.0), child: Text(kelebihanText, style: TextStyle(color: belumAdaData ? Colors.white30 : const Color(0xFF10B981), fontSize: 8))),
+        Padding(padding: const EdgeInsets.all(6.0), child: Text(kekuranganText, style: TextStyle(color: belumAdaData ? Colors.white30 : const Color(0xFFOpenAgility), fontSize: 8))),
+        Padding(padding: const EdgeInsets.all(6.0), child: Text(rekomendasiText, style: TextStyle(color: belumAdaData ? Colors.amber.withOpacity(0.6) : const Color(0xFF94A3B8), fontSize: 8))),
       ],
     );
   }
 }
+
+const int _OpenAgility = 0xFFEF4444;
 
 // ==================== HALAMAN 2: DAFTAR MURID ====================
 class DaftarMuridPage extends StatelessWidget {
@@ -737,6 +750,9 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
                   double s = double.tryParse(_setsController.text) ?? 0;
                   widget.onSimpan(widget.selectedMuridId, _jenisLatihanController.text, _selectedKlasifikasi, r, s, DateTime.now());
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data $_selectedKlasifikasi Sukses Terkalkulasi!')));
+                  _jenisLatihanController.clear();
+                  _repsController.clear();
+                  _setsController.clear();
                 },
                 child: const Text('SIMPAN & KALKULASI DATA REPS', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
@@ -813,6 +829,9 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
                   double s = double.tryParse(_setsController.text) ?? 0;
                   widget.onSimpan(widget.selectedMuridId, _jenisLatihanController.text, _selectedKlasifikasi, w, s, DateTime.now());
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Kalkulasi Durasi $_selectedKlasifikasi Masuk Dashboard!')));
+                  _jenisLatihanController.clear();
+                  _waktuController.clear();
+                  _setsController.clear();
                 },
                 child: const Text('SIMPAN & KALKULASI DATA WAKTU', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
@@ -861,7 +880,6 @@ class _MetaBoxplotPainter extends CustomPainter {
       return (chartHeight - (val.clamp(0, 100) * (chartHeight / 100))) + 15;
     }
 
-    // Grid Indikator Belakang
     for (int grid = 0; grid <= 100; grid += 25) {
       double gy = getY(grid.toDouble());
       canvas.drawLine(Offset(colWidth - 10, gy), Offset(size.width - 10, gy), Paint()..color = const Color(0xFF1E293B));
@@ -874,25 +892,18 @@ class _MetaBoxplotPainter extends CustomPainter {
       double x = (i + 1) * colWidth + 10;
       double personalScore = boxData[i][3];
 
-      // Gambar Garis Whiskers (Batas Atas dan Bawah)
       canvas.drawLine(Offset(x, getY(boxData[i][0])), Offset(x, getY(boxData[i][5])), linePaint);
-      
-      // Batas Atas & Bawah Horizontal Tick
       canvas.drawLine(Offset(x - 6, getY(boxData[i][0])), Offset(x + 6, getY(boxData[i][0])), linePaint);
       canvas.drawLine(Offset(x - 6, getY(boxData[i][5])), Offset(x + 6, getY(boxData[i][5])), linePaint);
 
-      // Kotak Interkuartil (Q1 ke Q3)
       canvas.drawRect(Rect.fromLTRB(x - 12, getY(boxData[i][4]), x + 12, getY(boxData[i][1])), boxPaint);
       canvas.drawRect(Rect.fromLTRB(x - 12, getY(boxData[i][4]), x + 12, getY(boxData[i][1])), borderBoxPaint);
-      
-      // Garis Median Tengah (Hijau Emerald)
       canvas.drawLine(Offset(x - 12, getY(boxData[i][2])), Offset(x + 12, getY(boxData[i][2])), medianPaint);
       
-      // FIX: Render Titik Skor Personal Aktif yang Terdeteksi Nilainya
+      // Plot titik lingkaran personal (hanya merender lingkaran jika nilai > 0 agar grafik bersih saat reset)
       double py = getY(personalScore);
       canvas.drawCircle(Offset(x, py), 5.5, personalScorePaint);
       
-      // Cetak Teks Skor Tepat di Atas Titik Sensor
       textPainter.text = TextSpan(
         text: personalScore.toStringAsFixed(0),
         style: const TextStyle(color: Color(0xFF00E5FF), fontSize: 8, fontWeight: FontWeight.bold),
@@ -900,11 +911,9 @@ class _MetaBoxplotPainter extends CustomPainter {
       textPainter.layout();
       textPainter.paint(canvas, Offset(x - (textPainter.width / 2), py - 12));
       
-      // Rata-rata Tim (Merah)
       double teamAvgValue = i < teamAverages.length ? teamAverages[i] : 0.0;
       canvas.drawRect(Rect.fromCenter(center: Offset(x, getY(teamAvgValue)), width: 7, height: 7), teamMeanPaint);
 
-      // Label Nama Komponen Bawah Berputar Miring
       canvas.save();
       canvas.translate(x, chartHeight + 22);
       canvas.rotate(0.35);
@@ -930,12 +939,10 @@ class MetaRadarChartPainter extends CustomPainter {
     final radius = math.min(centerX, centerY) * 0.75;
     final baseGridPaint = Paint()..color = const Color(0xFF334155)..style = PaintingStyle.stroke;
     
-    // Konfigurasi Brush Isian Poligon Personal Mendukung Rendering Terbuka
     final personalFillPaint = Paint()..color = const Color(0xFF00E5FF).withOpacity(0.22)..style = PaintingStyle.fill;
     final personalBorderPaint = Paint()..color = const Color(0xFF00E5FF)..style = PaintingStyle.stroke..strokeWidth = 2.5;
     final teamBorderPaint = Paint()..color = const Color(0xFFFF1744)..style = PaintingStyle.stroke..strokeWidth = 1.5;
 
-    // Gambar Lapisan Grid Belakang (Lingkaran Konsentris)
     for (int g = 1; g <= 4; g++) canvas.drawCircle(Offset(centerX, centerY), radius * (g / 4), baseGridPaint);
 
     final teamPath = Path();
@@ -946,20 +953,16 @@ class MetaRadarChartPainter extends CustomPainter {
     for (int i = 0; i < loopBound; i++) {
       final angle = (i * 2 * math.pi / 10) - (math.pi / 2);
       
-      // Titik Struktur Tim
       double tx = centerX + radius * teamRadar[i] * math.cos(angle);
       double ty = centerY + radius * teamRadar[i] * math.sin(angle);
       if (i == 0) teamPath.moveTo(tx, ty); else teamPath.lineTo(tx, ty);
 
-      // Titik Struktur Personal Atlet
       double px = centerX + radius * activeRadar[i] * math.cos(angle);
       double py = centerY + radius * activeRadar[i] * math.sin(angle);
       if (i == 0) personalPath.moveTo(px, py); else personalPath.lineTo(px, py);
 
-      // Tarik Garis Sumbu Radial
       canvas.drawLine(Offset(centerX, centerY), Offset(centerX + radius * math.cos(angle), centerY + radius * math.sin(angle)), baseGridPaint);
       
-      // Render Teks Nilai Skor Desimal di Ujung Titik Sensor Radar Personal
       final textPainter = TextPainter(textDirection: TextDirection.ltr);
       textPainter.text = TextSpan(
         text: (activeRadar[i] * 100).toStringAsFixed(0),
@@ -974,7 +977,6 @@ class MetaRadarChartPainter extends CustomPainter {
       teamPath.close(); 
       personalPath.close();
       
-      // Jalankan Rendering Path Lapisan Atas Grafis
       canvas.drawPath(teamPath, teamBorderPaint);
       canvas.drawPath(personalPath, personalFillPaint);
       canvas.drawPath(personalPath, personalBorderPaint);
