@@ -53,7 +53,6 @@ class Murid {
 
   // Pemetaan Volume latihan masuk ke 7 Komponen Utama Boxplot (Skala 0-100)
   List<List<double>> get calculatedBoxData {
-    // Pemetaan label grafik singkat ke teks input dropdown asli secara akurat
     List<Map<String, String>> categories = [
       {'label': 'STRENGTH', 'key': 'STRENGTH'},
       {'label': 'ENDURANCE', 'key': 'ENDURANCE'},
@@ -65,26 +64,25 @@ class Murid {
     ];
 
     return categories.map((cat) {
-      // Menyaring log berdasarkan kategori utama ataupun kategori turunan yang relevan
       var catLogs = logs.where((l) => 
-        l.kategori.contains(cat['key']!) || 
-        (cat['label'] == 'STRENGTH' && l.kategori.contains('POWER')) ||
-        (cat['label'] == 'COORD' && (l.kategori.contains('AGILITY') || l.kategori.contains('ANTICIPATION') || l.kategori.contains('MOBILITY')))
+        l.kategori.toUpperCase().contains(cat['key']!) || 
+        (cat['label'] == 'STRENGTH' && l.kategori.toUpperCase().contains('POWER')) ||
+        (cat['label'] == 'COORD' && (l.kategori.toUpperCase().contains('AGILITY') || l.kategori.toUpperCase().contains('ANTICIPATION') || l.kategori.toUpperCase().contains('MOBILITY')))
       ).toList();
 
-      // Jika data kosong diberi baseline 25, jika ada dihitung rata-rata volumenya
       double avgVolume = catLogs.isEmpty 
           ? 25.0 
           : (catLogs.map((e) => e.volume).reduce((a, b) => a + b) / catLogs.length).clamp(15, 90).toDouble();
       
-      // Mengembalikan bentuk struktur Boxplot seimbang: [outlier, min, q1, median, q3, max]
+      // FIX: Semua kalkulasi angka wajib diakhiri .toDouble() secara eksplisit 
+      // agar tidak dibaca sebagai tipe data 'num' oleh Compiler Dart
       return [
-        avgVolume > 80 ? avgVolume + 8 : 0.0, 
-        (avgVolume - 15).clamp(5, 100), 
-        (avgVolume - 6).clamp(10, 100), 
-        avgVolume, 
-        (avgVolume + 6).clamp(12, 95), 
-        (avgVolume + 14).clamp(15, 100)
+        (avgVolume > 80 ? avgVolume + 8.0 : 0.0).toDouble(), 
+        (avgVolume - 15.0).clamp(5.0, 100.0).toDouble(), 
+        (avgVolume - 6.0).clamp(10.0, 100.0).toDouble(), 
+        avgVolume.toDouble(), 
+        (avgVolume + 6.0).clamp(12.0, 95.0).toDouble(), 
+        (avgVolume + 14.0).clamp(15.0, 100.0).toDouble()
       ];
     }).toList();
   }
@@ -96,10 +94,10 @@ class Murid {
       'REACTIVE SPEED / QUICKNESS', 'AGILITY', 'ANTICIPATION & SPATIAL AWARENESS', 'MOBILITY', 'OPEN/REACTIVE AGILITY'
     ];
     return categories.map((cat) {
-      var catLogs = logs.where((l) => l.kategori == cat).toList();
-      if (catLogs.isEmpty) return 0.3; // Baseline default titik tengah radar sebelum latihan diinput
+      var catLogs = logs.where((l) => l.kategori.toUpperCase().contains(cat)).toList();
+      if (catLogs.isEmpty) return 0.3; 
       double avgVolume = catLogs.map((e) => e.volume).reduce((a, b) => a + b) / catLogs.length;
-      return (avgVolume / 50).clamp(0.2, 1.0); 
+      return (avgVolume / 50.0).clamp(0.2, 1.0).toDouble(); 
     }).toList();
   }
 }
@@ -114,7 +112,7 @@ class MainNavigationHolder extends StatefulWidget {
 }
 
 class _MainNavigationHolderState extends State<MainNavigationHolder> {
-  int _currentIndex = 1; // Membuka halaman Input Latihan terlebih dahulu
+  int _currentIndex = 1; 
   String _selectedMuridId = "001"; 
   
   late List<Murid> _daftarMurid;
@@ -203,7 +201,7 @@ class InputLatihanPage extends StatefulWidget {
 class _InputLatihanPageState extends State<InputLatihanPage> {
   String? _selectedId;
   DateTime _selectedDate = DateTime.now();
-  String _kategoriBiomotor = "STRENGTH";
+  String _kategoriBiomotor = "1. STRENGTH (KEKUATAN)";
   
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _latihanController = TextEditingController();
@@ -213,9 +211,23 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
   String _searchQuery = "";
 
   final List<String> _kategoriList = [
-    "STRENGTH", "ENDURANCE", "SPEED", "COORDINATION", "FLEXIBILITY", "BALANCE", "REACTION TIME",
-    "MUSCULAR ENDURANCE", "POWER", "CORE STABILITY", "DYNAMIC FLEXIBILITY", "SPEED ENDURANCE",
-    "REACTIVE SPEED / QUICKNESS", "AGILITY", "ANTICIPATION & SPATIAL AWARENESS", "MOBILITY", "OPEN/REACTIVE AGILITY"
+    "1. STRENGTH (KEKUATAN)", 
+    "2. ENDURANCE (DAYA TAHAN)", 
+    "3. SPEED (KECEPATAN)", 
+    "4. COORDINATION (KOORDINASI)", 
+    "5. FLEXIBILITY (KELENTURAN)", 
+    "6. BALANCE (KESEIMBANGAN)", 
+    "7. REACTION TIME (WAKTU REAKSI)",
+    "8. MUSCULAR ENDURANCE", 
+    "9. POWER", 
+    "10. CORE STABILITY", 
+    "11. DYNAMIC FLEXIBILITY", 
+    "12. SPEED ENDURANCE",
+    "13. REACTIVE SPEED / QUICKNESS", 
+    "14. AGILITY", 
+    "15. ANTICIPATION & SPATIAL AWARENESS", 
+    "16. MOBILITY", 
+    "17. OPEN/REACTIVE AGILITY"
   ];
 
   String _formatTanggalAman(DateTime dt) {
@@ -254,7 +266,6 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
           ),
           const SizedBox(height: 16),
 
-          // Search Tools
           TextField(
             controller: _searchController,
             onChanged: (val) => setState(() => _searchQuery = val),
@@ -271,7 +282,6 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
           ),
           const SizedBox(height: 12),
 
-          // Dropdown
           DropdownButtonFormField<String>(
             value: _selectedId,
             hint: const Text("Pilih ID Murid", style: TextStyle(color: Color(0xFF64748B), fontSize: 13)),
@@ -290,7 +300,6 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
           ),
           const SizedBox(height: 16),
 
-          // Timeline Tanggal
           InkWell(
             onTap: () async {
               DateTime? picked = await showDatePicker(
@@ -317,7 +326,6 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
           ),
           const SizedBox(height: 16),
 
-          // Jenis Latihan
           TextField(
             controller: _latihanController,
             style: const TextStyle(color: Colors.white, fontSize: 13),
@@ -325,7 +333,6 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
           ),
           const SizedBox(height: 16),
 
-          // Klasifikasi Biomotorik
           DropdownButtonFormField<String>(
             value: _kategoriBiomotor,
             decoration: _buildInputDecoration("Opsi Klasifikasi Biomotorik"),
@@ -338,7 +345,6 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
           ),
           const SizedBox(height: 16),
 
-          // Repetisi x Set
           Row(
             children: [
               Expanded(
@@ -364,7 +370,6 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
           ),
           const SizedBox(height: 24),
 
-          // Button Simpan
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -408,7 +413,6 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
           ),
           const SizedBox(height: 24),
 
-          // Real-time Calculation Card
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -417,7 +421,7 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
               border: Border.all(color: const Color(0xFF334155)),
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              cross CrossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text("Kalkulasi Real-time Terkini:", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12, color: Colors.white)),
                 const SizedBox(height: 12),
@@ -433,7 +437,6 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
             ),
           ),
           
-          // History Timeline
           if (activeMuridData != null && activeMuridData.logs.isNotEmpty) ...[
             const SizedBox(height: 24),
             Text("TIMELINE RIWAYAT LATIHAN (${activeMuridData.nama})", style: const TextStyle(color: Color(0xFF64748B), fontSize: 10, fontWeight: FontWeight.w900)),
@@ -521,7 +524,6 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 14),
 
-            // Card Boxplot (Komponen Utama)
             Container(
               width: double.infinity,
               decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(16)),
@@ -537,7 +539,6 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 14),
 
-            // Card Radar Spider (Komponen Turunan)
             Container(
               width: double.infinity,
               decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(16)),
@@ -635,104 +636,4 @@ class BoxplotPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint linePaint = Paint()..color = const Color(0xFF475569)..strokeWidth = 1.0..style = PaintingStyle.stroke;
-    final Paint boxPaint = Paint()..color = const Color(0xFF0284C7)..style = PaintingStyle.fill;
-    double spacing = size.width / 7;
-
-    for (int i = 0; i < 7; i++) {
-      double x = (spacing * i) + (spacing / 2);
-      var raw = boxData[i];
-      
-      double outlierY = size.height - ((raw[0] / 100) * size.height);
-      double bottomWhiskerY = size.height - ((raw[1] / 100) * size.height);
-      double q1Y = size.height - ((raw[2] / 100) * size.height);
-      double medianY = size.height - ((raw[3] / 100) * size.height);
-      double q3Y = size.height - ((raw[4] / 100) * size.height);
-      double topWhiskerY = size.height - ((raw[5] / 100) * size.height);
-      double boxWidth = spacing * 0.35;
-
-      if (raw[0] > 0) {
-        canvas.drawCircle(Offset(x, outlierY), 2.5, Paint()..color = const Color(0xFF38BDF8));
-      }
-      canvas.drawLine(Offset(x, q3Y), Offset(x, topWhiskerY), linePaint);
-      canvas.drawLine(Offset(x - boxWidth/3, topWhiskerY), Offset(x + boxWidth/3, topWhiskerY), linePaint);
-      canvas.drawLine(Offset(x, q1Y), Offset(x, bottomWhiskerY), linePaint);
-      canvas.drawLine(Offset(x - boxWidth/3, bottomWhiskerY), Offset(x + boxWidth/3, bottomWhiskerY), linePaint);
-
-      Rect boxRect = Rect.fromLTRB(x - boxWidth / 2, q3Y, x + boxWidth / 2, q1Y);
-      canvas.drawRect(boxRect, boxPaint);
-      canvas.drawRect(boxRect, Paint()..color = const Color(0xFF38BDF8)..style = PaintingStyle.stroke..strokeWidth = 1);
-      canvas.drawLine(Offset(x - boxWidth / 2, medianY), Offset(x + boxWidth / 2, medianY), Paint()..color = const Color(0xFFF8FAFC)..strokeWidth = 1.5);
-    }
-  }
-
-  @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
-
-class RadarSpiderChart extends StatelessWidget {
-  final List<double> studentValues;
-  const RadarSpiderChart({Key? key, required this.studentValues}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(size: Size.infinite, painter: RadarSpiderPainter(studentValues: studentValues));
-  }
-}
-
-class RadarSpiderPainter extends CustomPainter {
-  final List<double> studentValues;
-  RadarSpiderPainter({required this.studentValues});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    Offset center = Offset(size.width / 2, size.height / 2);
-    double maxRadius = math.min(size.width, size.height) / 2.5; 
-    int numFeatures = 10;
-    
-    List<String> labels = ['MUSCULAR END.', 'POWER', 'CORE STAB.', 'DYN. FLEX', 'SPEED END.', 'REACTIVE SP.', 'AGILITY', 'ANTICIPATION', 'MOBILITY', 'REACT AGILITY'];
-
-    Paint gridPaint = Paint()..color = const Color(0xFF334155)..style = PaintingStyle.stroke..strokeWidth = 1.0;
-    for (int i = 1; i <= 4; i++) {
-      double currentRadius = maxRadius * (i / 4);
-      Path gridPath = Path();
-      for (int j = 0; j < numFeatures; j++) {
-        double angle = (j * 2 * math.pi / numFeatures) - (math.pi / 2);
-        double x = center.dx + currentRadius * math.cos(angle);
-        double y = center.dy + currentRadius * math.sin(angle);
-        if (j == 0) gridPath.moveTo(x, y); else gridPath.lineTo(x, y);
-      }
-      gridPath.close();
-      canvas.drawPath(gridPath, gridPaint);
-    }
-
-    for (int j = 0; j < numFeatures; j++) {
-      double angle = (j * 2 * math.pi / numFeatures) - (math.pi / 2);
-      double x = center.dx + maxRadius * math.cos(angle);
-      double y = center.dy + maxRadius * math.sin(angle);
-      canvas.drawLine(center, Offset(x, y), gridPaint);
-      
-      TextPainter textPainter = TextPainter(
-        text: TextSpan(text: labels[j], style: const TextStyle(fontSize: 6.0, fontWeight: FontWeight.w800, color: Color(0xFF94A3B8))), 
-        textDirection: TextDirection.ltr
-      )..layout();
-      
-      double textX = center.dx + (maxRadius + 12) * math.cos(angle) - (textPainter.width / 2);
-      double textY = center.dy + (maxRadius + 10) * math.sin(angle) - (textPainter.height / 2);
-      textPainter.paint(canvas, Offset(textX, textY));
-    }
-
-    Path studentPath = Path();
-    for (int j = 0; j < numFeatures; j++) {
-      double angle = (j * 2 * math.pi / numFeatures) - (math.pi / 2);
-      double currentRadius = maxRadius * studentValues[j];
-      double x = center.dx + currentRadius * math.cos(angle);
-      double y = center.dy + currentRadius * math.sin(angle);
-      if (j == 0) studentPath.moveTo(x, y); else studentPath.lineTo(x, y);
-    }
-    studentPath.close();
-    canvas.drawPath(studentPath, Paint()..color = const Color(0xFFF43F5E).withOpacity(0.25)..style = PaintingStyle.fill);
-    canvas.drawPath(studentPath, Paint()..color = const Color(0xFFF43F5E)..style = PaintingStyle.stroke..strokeWidth = 1.8);
-  }
-
-  @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
+    final Paint linePaint = Paint()..color = const Color(0xFF
