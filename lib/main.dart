@@ -59,9 +59,9 @@ class Murid {
     required this.nama,
     required this.boxData,
     required this.radarData,
-    List<Map<String, dynamic>>? riwayatLatihanKuatitatif,
+    List<Map<String, dynamic>>? riwayatLatihanKuantitatif,
     List<Map<String, dynamic>>? riwayatLatihanDurasi,
-  })  : this.riwayatLatihanKuantitatif = riwayatLatihanKuatitatif ?? [],
+  })  : this.riwayatLatihanKuantitatif = riwayatLatihanKuantitatif ?? [],
         this.riwayatLatihanDurasi = riwayatLatihanDurasi ?? [];
 }
 
@@ -74,7 +74,7 @@ class MainNavigationHolder extends StatefulWidget {
 }
 
 class _MainNavigationHolderState extends State<MainNavigationHolder> {
-  int _currentIndex = 0; // Fokus utama langsung terbuka di DASHBOARD
+  int _currentIndex = 0; // Langsung fokus terbuka di DASHBOARD
   String _selectedMuridId = "001"; 
 
   final TextEditingController _namaController = TextEditingController();
@@ -99,7 +99,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
           [12.0, 38.0, 40.0, 65.0, 42.0, 72.0], // BALANCE
           [28.0, 42.0, 56.0, 80.0, 68.0, 92.0], // REACTION TIME
         ],
-        radarData: [0.85, 0.68, 0.82, 0.50, 0.40, 0.65, 0.80, 0.70, 0.75, 0.60],
+        radarData: [0.75, 0.68, 0.82, 0.50, 0.40, 0.65, 0.80, 0.70, 0.75, 0.60],
       ),
       Murid(
         id: "100",
@@ -329,7 +329,7 @@ class DashboardAtletPage extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
-            // Identitas Atlet Atas
+            // Identitas Atlet
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(12),
@@ -354,7 +354,7 @@ class DashboardAtletPage extends StatelessWidget {
                 children: [
                   const Text('DISTRIBUSI MOTORIK TIM VS INDIVIDU (BOXPLOT)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFF38BDF8))),
                   const SizedBox(height: 12),
-                  SizedBox(height: 250, child: MetaBoxplotChart(boxData: activeMurid.boxData, teamAverages: teamBoxAverages)),
+                  SizedBox(height: 260, child: MetaBoxplotChart(boxData: activeMurid.boxData, teamAverages: teamBoxAverages)),
                 ],
               ),
             ),
@@ -382,7 +382,7 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // ==================== MATRIKS KONTROL EVALUASI (BERSIH TANPA KOLOM SKOR) ====================
+            // ==================== MATRIKS KONTROL EVALUASI DENGAN KOLOM ARTI POLA ====================
             Container(
               width: double.infinity,
               decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(12)),
@@ -395,15 +395,16 @@ class DashboardAtletPage extends StatelessWidget {
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: SizedBox(
-                      width: 880, // Ukuran ideal pasca pembuangan kolom skor harian
+                      width: 1050, // Diperluas untuk menampung kolom ARTI POLA secara proposional
                       child: Table(
                         border: TableBorder.all(color: const Color(0xFF334155), width: 1),
                         columnWidths: const {
-                          0: FlexColumnWidth(2.3), // KOMPONEN
-                          1: FlexColumnWidth(2.2), // POLA BOXPLOT (Dinamis Sesuai Gambar Referensi)
-                          2: FlexColumnWidth(2.5), // KELEBIHAN
-                          3: FlexColumnWidth(2.5), // KEKURANGAN
-                          4: FlexColumnWidth(3.5), // REKOMENDASI
+                          0: FlexColumnWidth(1.8), // KOMPONEN
+                          1: FlexColumnWidth(2.2), // POLA BOXPLOT
+                          2: FlexColumnWidth(2.5), // ARTI POLA (Kolom Baru)
+                          3: FlexColumnWidth(2.3), // KELEBIHAN
+                          4: FlexColumnWidth(2.3), // KEKURANGAN
+                          5: FlexColumnWidth(3.4), // REKOMENDASI
                         },
                         children: [
                           TableRow(
@@ -411,6 +412,7 @@ class DashboardAtletPage extends StatelessWidget {
                             children: [
                               _buildHeaderCell('KOMPONEN'),
                               _buildHeaderCell('POLA BOXPLOT'),
+                              _buildHeaderCell('ARTI POLA'),
                               _buildHeaderCell('KELEBIHAN'),
                               _buildHeaderCell('KEKURANGAN'),
                               _buildHeaderCell('REKOMENDASI'),
@@ -453,9 +455,9 @@ class DashboardAtletPage extends StatelessWidget {
     return Padding(padding: const EdgeInsets.all(8.0), child: Text(text, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF38BDF8), fontSize: 9, fontWeight: FontWeight.bold)));
   }
 
-  // Kalkulator Deteksi Pola Boxplot Berdasarkan Gambar Referensi Baru Sabeumnim
-  String _hitungPolaBoxplot(int idx) {
-    if (idx >= activeMurid.boxData.length) return "Symmetrical / Normal";
+  // Engine Otomasi Rekam Masuk Komposisi 40 Jenis Pola Boxplot Kombinasi Matematika Teoretis Komplet
+  Map<String, String> _analisisKomplet40Pola(int idx) {
+    if (idx >= activeMurid.boxData.length) return {"pola": "Symmetrical Normal", "arti": "Sebaran ideal rata seimbang."};
     
     double min = activeMurid.boxData[idx][0];
     double q1 = activeMurid.boxData[idx][1];
@@ -463,38 +465,90 @@ class DashboardAtletPage extends StatelessWidget {
     double q3 = activeMurid.boxData[idx][4];
     double max = activeMurid.boxData[idx][5];
     
-    double jarakBawah = q2 - q1;
-    double jarakAtas = q3 - q2;
+    double dLower = q2 - q1;
+    double dUpper = q3 - q2;
     double iqr = q3 - q1;
-    double totalRange = max - min;
+    double wLower = q1 - min;
+    double wUpper = max - q3;
 
-    // 1. Deteksi Variabilitas Rentang Kurva (Kurtosis / Sebaran data)
-    if (iqr < 12) return "Leptokurtic (Narrow)";
-    if (iqr > 38) return "Platykurtic (Wide)";
-    
-    // 2. Deteksi Kemiringan Distribusi (Skewness Posisi Median)
-    if ((jarakAtas - jarakBawah).abs() <= 2.5) {
-      return "Symmetrical / Normal";
-    } else if (jarakAtas > jarakBawah) {
-      return "Skewed Right (Top Heavy)";
+    String skew = "";
+    String kurtosis = "";
+    String outlier = "";
+
+    // 1. Klasifikasi Komponen Skewness (5 Tingkat Kedalaman)
+    if ((dUpper - dLower).abs() <= 2.0 && (wUpper - wLower).abs() <= 3.0) {
+      skew = "Symmetrical";
+    } else if (dUpper > dLower && wUpper > wLower) {
+      skew = "Extremely Skewed Right";
+    } else if (dUpper > dLower) {
+      skew = "Mildly Skewed Right";
+    } else if (dLower > dUpper && wLower > wUpper) {
+      skew = "Extremely Skewed Left";
     } else {
-      return "Skewed Left (Down)";
+      skew = "Mildly Skewed Left";
     }
+
+    // 2. Klasifikasi Komponen Kurtosis (4 Tingkat Lebar Distribusi)
+    if (iqr < 10) {
+      kurtosis = "Leptokurtic (Narrow)";
+    } else if (iqr > 38) {
+      kurtosis = "Platykurtic (Wide)";
+    } else if (iqr >= 10 && iqr <= 24) {
+      kurtosis = "Mesokurtic (Optimal)";
+    } else {
+      kurtosis = "Moderate Dispersion";
+    }
+
+    // 3. Klasifikasi Deteksi Batas Outlier (2 Tingkat Kepastian)
+    if (max > (q3 + (1.5 * iqr)) || min < (q1 - (1.5 * iqr))) {
+      outlier = "with Outliers Deteksi";
+    } else {
+      outlier = "No Outliers";
+    }
+
+    // Menggabungkan Kombinasi Menjadi Bagian Dari Matrix 40 Pola Struktural
+    String polaFinal = "$skew - $kurtosis";
+    String artiFinal = "";
+
+    if (polaFinal.contains("Symmetrical") && polaFinal.contains("Mesokurtic")) {
+      artiFinal = "Performa tim konsisten, homogen & merata standard.";
+    } else if (polaFinal.contains("Skewed Right")) {
+      artiFinal = "Dominasi skor kelompok berada di rentang bawah fungsional.";
+    } else if (polaFinal.contains("Skewed Left")) {
+      artiFinal = "Mayoritas atlet berhasil menyentuh kapasitas volume atas.";
+    } else if (polaFinal.contains("Leptokurtic")) {
+      artiFinal = "Variabilitas sangat kecil, fokus grup seragam stagnan.";
+    } else if (polaFinal.contains("Platykurtic")) {
+      artiFinal = "Kesenjangan gap tinggi, sebaran kemampuan tim timpang.";
+    } else {
+      artiFinal = "Kombinasi fluktuatif dinamis adaptasi fisik.";
+    }
+
+    if (outlier.contains("with Outliers")) {
+      artiFinal += " (+Ada Capaian Ekstrem)";
+    }
+
+    return {"pola": polaFinal, "arti": artiFinal};
   }
 
   TableRow _buildEvaluasiRow(String namaKomponen, String tipeGrafik, int dataIdx) {
     bool diAtasRataTim = false;
     String labelPola = "-";
+    String labelArti = "-";
     
     if (tipeGrafik == "BOXPLOT") {
-      labelPola = _hitungPolaBoxplot(dataIdx);
+      Map<String, String> hasilPola = _analisisKomplet40Pola(dataIdx);
+      labelPola = hasilPola["pola"]!;
+      labelArti = hasilPola["arti"]!;
+      
       if (dataIdx < activeMurid.boxData.length && activeMurid.boxData[dataIdx].length >= 4) {
         double sk = activeMurid.boxData[dataIdx][3];
         double avg = dataIdx < teamBoxAverages.length ? teamBoxAverages[dataIdx] : 0.0;
         diAtasRataTim = sk >= avg;
       }
     } else {
-      labelPola = "-"; // Murni Tipe Radar: Dikunci strip '-' total sesuai request
+      labelPola = "-"; // Komponen Murni Tipe Radar dikunci strip total sesuai request
+      labelArti = "-";
       if (dataIdx < activeMurid.radarData.length) {
         double radVal = activeMurid.radarData[dataIdx];
         double avg = dataIdx < teamRadarAverages.length ? teamRadarAverages[dataIdx] : 0.0;
@@ -502,17 +556,18 @@ class DashboardAtletPage extends StatelessWidget {
       }
     }
 
-    String kelebihanText = diAtasRataTim ? "Kapasitas fungsional optimal di atas target tim harian." : "Stabilitas gerak dasar atlet konsisten.";
+    String kelebihanText = diAtasRataTim ? "Kapasitas fungsional optimal di atas target rata-rata." : "Stabilitas gerak dasar atlet konsisten.";
     String kekuranganText = !diAtasRataTim ? "Defisit volume energi dibanding target rata-rata tim." : "Memerlukan variasi stimulus beban lanjutan.";
     
     String rekomendasiText = diAtasRataTim 
-        ? "UPGRADE: Naikkan intensitas sirkuit gerakan fungsional bervariasi untuk menjaga keunggulan fisik dominan."
-        : "BALANCING: Tambahkan porsi latihan beban terarah khusus area $namaKomponen untuk menyeimbangkan ketertinggalan.";
+        ? "UPGRADE: Naikkan intensitas sirkuit fungsional untuk menjaga keunggulan dominan."
+        : "BALANCING: Tambahkan porsi latihan beban terarah area $namaKomponen untuk mengejar ketertinggalan.";
 
     return TableRow(
       children: [
         Padding(padding: const EdgeInsets.all(6.0), child: Text(namaKomponen, style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold))),
-        Padding(padding: const EdgeInsets.all(6.0), child: Text(labelPola, style: TextStyle(color: labelPola == '-' ? Colors.white30 : Colors.amber[400], fontSize: 8, fontWeight: FontWeight.w600))),
+        Padding(padding: const EdgeInsets.all(6.0), child: Text(labelPola, style: TextStyle(color: labelPola == '-' ? Colors.white30 : Colors.amber[400], fontSize: 7, fontWeight: FontWeight.w600))),
+        Padding(padding: const EdgeInsets.all(6.0), child: Text(labelArti, style: TextStyle(color: labelArti == '-' ? Colors.white30 : Colors.teal[300], fontSize: 7, fontWeight: FontWeight.w500))),
         Padding(padding: const EdgeInsets.all(6.0), child: Text(kelebihanText, style: const TextStyle(color: Color(0xFF10B981), fontSize: 8))),
         Padding(padding: const EdgeInsets.all(6.0), child: Text(kekuranganText, style: const TextStyle(color: Color(0xFFEF4444), fontSize: 8))),
         Padding(padding: const EdgeInsets.all(6.0), child: Text(rekomendasiText, style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 8))),
@@ -778,7 +833,7 @@ class MetaBoxplotChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(size: const Size(double.infinity, 250), painter: _MetaBoxplotPainter(boxData: boxData, teamAverages: teamAverages));
+    return CustomPaint(size: const Size(double.infinity, 260), painter: _MetaBoxplotPainter(boxData: boxData, teamAverages: teamAverages));
   }
 }
 
@@ -800,12 +855,13 @@ class _MetaBoxplotPainter extends CustomPainter {
 
     final List<String> longLabels = ['STRENGTH', 'ENDURANCE', 'SPEED', 'COORDINATION', 'FLEXIBILITY', 'BALANCE', 'REACTION TIME'];
     double colWidth = size.width / 8;
-    double chartHeight = size.height - 60;
+    double chartHeight = size.height - 65;
 
     double getY(double val) {
       return (chartHeight - (val.clamp(0, 100) * (chartHeight / 100))) + 15;
     }
 
+    // Grid Indikator Belakang
     for (int grid = 0; grid <= 100; grid += 25) {
       double gy = getY(grid.toDouble());
       canvas.drawLine(Offset(colWidth - 10, gy), Offset(size.width - 10, gy), Paint()..color = const Color(0xFF1E293B));
@@ -816,15 +872,39 @@ class _MetaBoxplotPainter extends CustomPainter {
     for (int i = 0; i < 7; i++) {
       if (i >= boxData.length || boxData[i].length < 6) continue;
       double x = (i + 1) * colWidth + 10;
+      double personalScore = boxData[i][3];
+
+      // Gambar Garis Whiskers (Batas Atas dan Bawah)
       canvas.drawLine(Offset(x, getY(boxData[i][0])), Offset(x, getY(boxData[i][5])), linePaint);
+      
+      // Batas Atas & Bawah Horizontal Tick
+      canvas.drawLine(Offset(x - 6, getY(boxData[i][0])), Offset(x + 6, getY(boxData[i][0])), linePaint);
+      canvas.drawLine(Offset(x - 6, getY(boxData[i][5])), Offset(x + 6, getY(boxData[i][5])), linePaint);
+
+      // Kotak Interkuartil (Q1 ke Q3)
       canvas.drawRect(Rect.fromLTRB(x - 12, getY(boxData[i][4]), x + 12, getY(boxData[i][1])), boxPaint);
       canvas.drawRect(Rect.fromLTRB(x - 12, getY(boxData[i][4]), x + 12, getY(boxData[i][1])), borderBoxPaint);
-      canvas.drawLine(Offset(x - 12, getY(boxData[i][2])), Offset(x + 12, getY(boxData[i][2])), medianPaint);
-      canvas.drawCircle(Offset(x, getY(boxData[i][3])), 4.5, personalScorePaint);
       
+      // Garis Median Tengah (Hijau Emerald)
+      canvas.drawLine(Offset(x - 12, getY(boxData[i][2])), Offset(x + 12, getY(boxData[i][2])), medianPaint);
+      
+      // FIX: Render Titik Skor Personal Aktif yang Terdeteksi Nilainya
+      double py = getY(personalScore);
+      canvas.drawCircle(Offset(x, py), 5.5, personalScorePaint);
+      
+      // Cetak Teks Skor Tepat di Atas Titik Sensor
+      textPainter.text = TextSpan(
+        text: personalScore.toStringAsFixed(0),
+        style: const TextStyle(color: Color(0xFF00E5FF), fontSize: 8, fontWeight: FontWeight.bold),
+      );
+      textPainter.layout();
+      textPainter.paint(canvas, Offset(x - (textPainter.width / 2), py - 12));
+      
+      // Rata-rata Tim (Merah)
       double teamAvgValue = i < teamAverages.length ? teamAverages[i] : 0.0;
       canvas.drawRect(Rect.fromCenter(center: Offset(x, getY(teamAvgValue)), width: 7, height: 7), teamMeanPaint);
 
+      // Label Nama Komponen Bawah Berputar Miring
       canvas.save();
       canvas.translate(x, chartHeight + 22);
       canvas.rotate(0.35);
@@ -849,9 +929,13 @@ class MetaRadarChartPainter extends CustomPainter {
     final centerY = size.height / 2;
     final radius = math.min(centerX, centerY) * 0.75;
     final baseGridPaint = Paint()..color = const Color(0xFF334155)..style = PaintingStyle.stroke;
-    final personalBorderPaint = Paint()..color = const Color(0xFF00E5FF)..style = PaintingStyle.stroke..strokeWidth = 2.0;
-    final teamBorderPaint = Paint()..color = const Color(0xFFFF1744)..style = PaintingStyle.stroke..strokeWidth = 1.2;
+    
+    // Konfigurasi Brush Isian Poligon Personal Mendukung Rendering Terbuka
+    final personalFillPaint = Paint()..color = const Color(0xFF00E5FF).withOpacity(0.22)..style = PaintingStyle.fill;
+    final personalBorderPaint = Paint()..color = const Color(0xFF00E5FF)..style = PaintingStyle.stroke..strokeWidth = 2.5;
+    final teamBorderPaint = Paint()..color = const Color(0xFFFF1744)..style = PaintingStyle.stroke..strokeWidth = 1.5;
 
+    // Gambar Lapisan Grid Belakang (Lingkaran Konsentris)
     for (int g = 1; g <= 4; g++) canvas.drawCircle(Offset(centerX, centerY), radius * (g / 4), baseGridPaint);
 
     final teamPath = Path();
@@ -861,21 +945,38 @@ class MetaRadarChartPainter extends CustomPainter {
 
     for (int i = 0; i < loopBound; i++) {
       final angle = (i * 2 * math.pi / 10) - (math.pi / 2);
+      
+      // Titik Struktur Tim
       double tx = centerX + radius * teamRadar[i] * math.cos(angle);
       double ty = centerY + radius * teamRadar[i] * math.sin(angle);
       if (i == 0) teamPath.moveTo(tx, ty); else teamPath.lineTo(tx, ty);
 
+      // Titik Struktur Personal Atlet
       double px = centerX + radius * activeRadar[i] * math.cos(angle);
       double py = centerY + radius * activeRadar[i] * math.sin(angle);
       if (i == 0) personalPath.moveTo(px, py); else personalPath.lineTo(px, py);
 
+      // Tarik Garis Sumbu Radial
       canvas.drawLine(Offset(centerX, centerY), Offset(centerX + radius * math.cos(angle), centerY + radius * math.sin(angle)), baseGridPaint);
+      
+      // Render Teks Nilai Skor Desimal di Ujung Titik Sensor Radar Personal
+      final textPainter = TextPainter(textDirection: TextDirection.ltr);
+      textPainter.text = TextSpan(
+        text: (activeRadar[i] * 100).toStringAsFixed(0),
+        style: const TextStyle(color: Color(0xFF00E5FF), fontSize: 7, fontWeight: FontWeight.bold),
+      );
+      textPainter.layout();
+      canvas.drawCircle(Offset(px, py), 2.5, Paint()..color = const Color(0xFF00E5FF));
+      textPainter.paint(canvas, Offset(px + 4, py - 4));
     }
     
     if (loopBound > 0) {
       teamPath.close(); 
       personalPath.close();
+      
+      // Jalankan Rendering Path Lapisan Atas Grafis
       canvas.drawPath(teamPath, teamBorderPaint);
+      canvas.drawPath(personalPath, personalFillPaint);
       canvas.drawPath(personalPath, personalBorderPaint);
     }
   }
