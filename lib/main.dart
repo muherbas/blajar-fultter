@@ -62,34 +62,34 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
   @override
   void initState() {
     super.initState();
-    // Di sini kita berikan skor awal (> 0) pada indeks ke-3 masing-masing komponen 
-    // dan nilai rasio (0.0 - 1.0) untuk Radar agar langsung tampil grafik indahnya.
+    // Kembali murni bersih dari nol sesuai logika real-time Sabeumnim.
+    // Titik awal atlet (indeks ke-3) berada di angka 0.0 sampai ada inputan masuk.
     _daftarMurid = [
       Murid(
         id: "001", nama: "BUDI SANTOSO",
         boxData: [
-          [20.0, 35.0, 48.0, 55.0, 60.0, 85.0], // STR -> Skor awal 55.0
-          [25.0, 40.0, 52.0, 48.0, 65.0, 88.0], // END -> Skor awal 48.0
-          [30.0, 42.0, 65.0, 60.0, 75.0, 90.0], // SPD -> Skor awal 60.0
-          [18.0, 32.0, 45.0, 38.0, 58.0, 76.0], // CRD -> Skor awal 38.0
-          [22.0, 48.0, 52.0, 50.0, 56.0, 78.0], // FLX -> Skor awal 50.0
-          [12.0, 38.0, 40.0, 42.0, 42.0, 72.0], // BAL -> Skor awal 42.0
-          [28.0, 42.0, 56.0, 65.0, 68.0, 92.0], // REA -> Skor awal 65.0
+          [20.0, 35.0, 48.0, 0.0, 60.0, 85.0],
+          [25.0, 40.0, 52.0, 0.0, 65.0, 88.0],
+          [30.0, 42.0, 65.0, 0.0, 75.0, 90.0],
+          [18.0, 32.0, 45.0, 0.0, 58.0, 76.0],
+          [22.0, 48.0, 52.0, 0.0, 56.0, 78.0],
+          [12.0, 38.0, 40.0, 0.0, 42.0, 72.0],
+          [28.0, 42.0, 56.0, 0.0, 68.0, 92.0],
         ],
-        radarData: [0.55, 0.48, 0.60, 0.38, 0.50, 0.42, 0.65, 0.50, 0.55, 0.60],
+        radarData: List.generate(10, (_) => 0.0),
       ),
       Murid(
         id: "100", nama: "RURI",
         boxData: [
-          [20.0, 35.0, 50.0, 40.0, 65.0, 85.0],
-          [25.0, 40.0, 55.0, 52.0, 70.0, 90.0],
-          [22.0, 38.0, 48.0, 46.0, 62.0, 86.0],
-          [15.0, 30.0, 42.0, 35.0, 58.0, 75.0],
-          [20.0, 35.0, 50.0, 58.0, 65.0, 88.0],
-          [18.0, 32.0, 46.0, 40.0, 60.0, 78.0],
-          [25.0, 40.0, 52.0, 62.0, 66.0, 90.0],
+          [20.0, 35.0, 50.0, 0.0, 65.0, 85.0],
+          [25.0, 40.0, 55.0, 0.0, 70.0, 90.0],
+          [22.0, 38.0, 48.0, 0.0, 62.0, 86.0],
+          [15.0, 30.0, 42.0, 0.0, 58.0, 75.0],
+          [20.0, 35.0, 50.0, 0.0, 65.0, 88.0],
+          [18.0, 32.0, 46.0, 0.0, 60.0, 78.0],
+          [25.0, 40.0, 52.0, 0.0, 66.0, 90.0],
         ],
-        radarData: [0.40, 0.52, 0.46, 0.35, 0.58, 0.40, 0.62, 0.45, 0.50, 0.52],
+        radarData: List.generate(10, (_) => 0.0),
       ),
     ];
   }
@@ -101,12 +101,16 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     if (_daftarMurid.isEmpty) return averages;
     for (int i = 0; i < 7; i++) {
       double sum = 0;
+      int count = 0;
       for (var murid in _daftarMurid) {
         if (i < murid.boxData.length && murid.boxData[i].length > 3) {
-          sum += murid.boxData[i][3];
+          if (murid.boxData[i][3] > 0) { // Hanya menghitung rata-rata tim dari murid yang sudah latihan
+            sum += murid.boxData[i][3];
+            count++;
+          }
         }
       }
-      averages[i] = sum / _daftarMurid.length;
+      averages[i] = count > 0 ? sum / count : 0.0;
     }
     return averages;
   }
@@ -116,12 +120,16 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     if (_daftarMurid.isEmpty) return averages;
     for (int i = 0; i < 10; i++) {
       double sum = 0;
+      int count = 0;
       for (var murid in _daftarMurid) {
         if (i < murid.radarData.length) {
-          sum += murid.radarData[i];
+          if (murid.radarData[i] > 0) {
+            sum += murid.radarData[i];
+            count++;
+          }
         }
       }
-      averages[i] = sum / _daftarMurid.length;
+      averages[i] = count > 0 ? sum / count : 0.0;
     }
     return averages;
   }
@@ -344,7 +352,7 @@ class DashboardAtletPage extends StatelessWidget {
   Map<String, String> _analisisKomplet40Pola(int idx, String namaKomponen) {
     bool adaDataInput = activeMurid.riwayatLatihanKuantitatif.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == idx) ||
                         activeMurid.riwayatLatihanDurasi.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == idx) ||
-                        (activeMurid.boxData[idx][3] > 0); // Termasuk jika ada nilai inisialisasi awal
+                        (activeMurid.boxData[idx][3] > 0);
 
     if (!adaDataInput || idx >= activeMurid.boxData.length) {
       return {"pola": "Belum Ada Data", "arti": "Menunggu input performa fungsional dari latihan."};
@@ -782,32 +790,4 @@ class MetaRadarChartPainter extends CustomPainter {
       if (val > 0) hasDataAtlet = true;
       double angle = (j * 2 * math.pi / kDimensi) - (math.pi / 2);
       double r = maxRadius * val.clamp(0.0, 1.0);
-      Offset pt = Offset(center.dx + r * math.cos(angle), center.dy + r * math.sin(angle));
-      if (j == 0) pathAtlet.moveTo(pt.dx, pt.dy);
-      else pathAtlet.lineTo(pt.dx, pt.dy);
-    }
-    pathAtlet.close();
-    if (hasDataAtlet) {
-      canvas.drawPath(pathAtlet, pAtlet);
-      canvas.drawPath(pathAtlet, pBorderAtlet);
-    }
-
-    Path pathTim = Path();
-    bool hasDataTim = false;
-    for (int j = 0; j < kDimensi; j++) {
-      double val = j < teamRadar.length ? teamRadar[j] : 0.0;
-      if (val > 0) hasDataTim = true;
-      double angle = (j * 2 * math.pi / kDimensi) - (math.pi / 2);
-      double r = maxRadius * val.clamp(0.0, 1.0);
-      Offset pt = Offset(center.dx + r * math.cos(angle), center.dy + r * math.sin(angle));
-      if (j == 0) pathTim.moveTo(pt.dx, pt.dy);
-      else pathTim.lineTo(pt.dx, pt.dy);
-    }
-    pathTim.close();
-    if (hasDataTim) {
-      canvas.drawPath(pathTim, pTim);
-    }
-  }
-
-  @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
+      Offset pt = Offset(center.dx + r * math.cos
