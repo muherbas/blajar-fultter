@@ -28,7 +28,7 @@ class Murid {
   final String id;
   final String nama;
   final List<List<double>> boxData; // Index 0-6 untuk komponen biomotorik utama di Boxplot
-  final List<double> radarData;
+  final List<double> radarData; // 10 Dimensi Biomotorik Komprehensif
   
   // Riwayat latihan kuantitatif (Halaman 3)
   List<Map<String, dynamic>> riwayatLatihanKuantitatif;
@@ -165,7 +165,6 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     );
   }
 
-  // Fungsi Pemetaan indeks Biomotorik Boxplot
   int _dapatkanBoxIndex(String klasifikasi) {
     String upper = klasifikasi.toUpperCase();
     if (upper.contains("STRENGTH") || upper.contains("MUSCULAR") || upper.contains("POWER")) return 0;
@@ -290,7 +289,7 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             
-            // Card Boxplot
+            // 1. Card Boxplot
             Container(
               width: double.infinity,
               decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(16)),
@@ -306,7 +305,29 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Tabel Real-time Evaluasi Matriks
+            // 2. Card Radar Chart (KEMBALI DIMASUKKAN DI SINI)
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(16)),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('PROFIL BIOMOTORIK (10 DIMENSI RADAR)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: Color(0xFFA855F7))),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    height: 220,
+                    child: CustomPaint(
+                      size: const Size(double.infinity, 220),
+                      painter: RadarChartPainter(radarData: activeMurid.radarData),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // 3. Tabel Real-time Evaluasi Matriks
             Container(
               width: double.infinity,
               decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(16)),
@@ -671,7 +692,7 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
           ),
           const SizedBox(height: 14),
 
-          // Timeline Picker Tanggal Pelaksanaan (BUG FIXED: Backslash dihapus)
+          // Timeline Picker Tanggal Pelaksanaan
           InkWell(
             onTap: () async {
               DateTime? picked = await showDatePicker(context: context, initialDate: _selectedDate, firstDate: DateTime(2020), lastDate: DateTime(2030));
@@ -830,7 +851,7 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
   }
 }
 
-// ==================== CUSTOM PAINTER PLOT CHART ====================
+// ==================== CUSTOM PAINTER BOXPLOT CHART ====================
 class BoxplotChart extends StatelessWidget {
   final List<List<double>> boxData;
   const BoxplotChart({Key? key, required this.boxData}) : super(key: key);
@@ -864,4 +885,69 @@ class _BoxplotPainter extends CustomPainter {
     }
   }
   @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+// ==================== CUSTOM PAINTER RADAR CHART ====================
+class RadarChartPainter extends CustomPainter {
+  final List<double> radarData;
+  RadarChartPainter({required this.radarData});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final centerX = size.width / 2;
+    final centerY = size.height / 2;
+    final radius = math.min(centerX, centerY) * 0.8;
+
+    final outlinePaint = Paint()..color = const Color(0xFF334155)..style = PaintingStyle.stroke..strokeWidth = 1;
+    final webPaint = Paint()..color = const Color(0xFF1E293B)..style = PaintingStyle.stroke..strokeWidth = 1;
+    final dataPaint = Paint()..color = const Color(0xFFA855F7).withOpacity(0.4)..style = PaintingStyle.fill;
+    final dataBorderPaint = Paint()..color = const Color(0xFFA855F7)..style = PaintingStyle.stroke..strokeWidth = 2;
+
+    final List<String> labels = ['STR', 'END', 'SPD', 'CRD', 'FLX', 'BAL', 'REA', 'PWR', 'AGI', 'MOB'];
+    final int numPoints = labels.length;
+
+    // Gambar Web Grid Lingkaran Dalam
+    for (int i = 1; i <= 4; i++) {
+      canvas.drawCircle(Offset(centerX, centerY), radius * (i / 4), webPaint);
+    }
+
+    // Gambar Sumbu Jari-Jari (Ruji) dan Label
+    final textPainter = TextPainter(textDirection: TextDirection.ltr);
+    for (int i = 0; i < numPoints; i++) {
+      final angle = (i * 2 * math.pi / numPoints) - (math.pi / 2);
+      final rx = centerX + radius * math.cos(angle);
+      final ry = centerY + radius * math.sin(angle);
+      canvas.drawLine(Offset(centerX, centerY), Offset(rx, ry), outlinePaint);
+
+      // Render Text Ringkas Singkatan Komponen
+      textPainter.text = TextSpan(text: labels[i], style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 9, fontWeight: FontWeight.bold));
+      textPainter.layout();
+      final tx = centerX + (radius + 12) * math.cos(angle) - (textPainter.width / 2);
+      final ty = centerY + (radius + 12) * math.sin(angle) - (textPainter.height / 2);
+      textPainter.paint(canvas, Offset(tx, ty));
+    }
+
+    // Plot Poligon Data Utama Dinamis Murid
+    if (radarData.isNotEmpty) {
+      final path = Path();
+      for (int i = 0; i < numPoints; i++) {
+        final angle = (i * 2 * math.pi / numPoints) - (math.pi / 2);
+        final value = i < radarData.length ? radarData[i] : 0.5;
+        final dx = centerX + radius * value * math.cos(angle);
+        final dy = centerY + radius * value * math.sin(angle);
+
+        if (i == 0) {
+          path.moveTo(dx, dy);
+        } else {
+          path.lineTo(dx, dy);
+        }
+      }
+      path.close();
+      canvas.drawPath(path, dataPaint);
+      canvas.drawPath(path, dataBorderPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant RadarChartPainter oldDelegate) => oldDelegate.radarData != radarData;
 }
