@@ -135,7 +135,9 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
         unselectedItemColor: const Color(0xFF64748B), 
         selectedFontSize: 11,
         unselectedFontSize: 11,
-        fontWeight: FontWeight.bold,
+        // Perbaikan: Memindahkan parameter fontWeight ke dalam labelStyle agar kompatibel lintas versi
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
+        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.analytics_rounded),
@@ -146,7 +148,7 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
             label: 'MANAJEMEN',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.menuBookRounded), // Perbaikan: Huruf m kecil
+            icon: Icon(Icons.book_rounded), // Perbaikan: Mengganti ke ikon universal yang aman di web
             label: 'MATERI',
           ),
         ],
@@ -195,7 +197,7 @@ class MateriNunchakuPage extends StatelessWidget {
             ),
             padding: const EdgeInsets.all(16),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              cross CrossAxisAlignment.start,
               children: [
                 Text(
                   item["kategori"],
@@ -213,7 +215,7 @@ class MateriNunchakuPage extends StatelessWidget {
                           Expanded(
                             child: Text(
                               materiNama,
-                              style: const TextStyle(fontSize: 12, color: Color(0xFFF8FAFC)), // Perbaikan: Menghapus Colors.whiteBF yang typo
+                              style: const TextStyle(fontSize: 12, color: Color(0xFFF8FAFC)), 
                             ),
                           ),
                         ],
