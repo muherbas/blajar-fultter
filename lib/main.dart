@@ -62,32 +62,34 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
   @override
   void initState() {
     super.initState();
+    // Di sini kita berikan skor awal (> 0) pada indeks ke-3 masing-masing komponen 
+    // dan nilai rasio (0.0 - 1.0) untuk Radar agar langsung tampil grafik indahnya.
     _daftarMurid = [
       Murid(
         id: "001", nama: "BUDI SANTOSO",
         boxData: [
-          [20.0, 35.0, 48.0, 0.0, 60.0, 85.0],
-          [25.0, 40.0, 52.0, 0.0, 65.0, 88.0],
-          [30.0, 42.0, 65.0, 0.0, 75.0, 90.0],
-          [18.0, 32.0, 45.0, 0.0, 58.0, 76.0],
-          [22.0, 48.0, 52.0, 0.0, 56.0, 78.0],
-          [12.0, 38.0, 40.0, 0.0, 42.0, 72.0],
-          [28.0, 42.0, 56.0, 0.0, 68.0, 92.0],
+          [20.0, 35.0, 48.0, 55.0, 60.0, 85.0], // STR -> Skor awal 55.0
+          [25.0, 40.0, 52.0, 48.0, 65.0, 88.0], // END -> Skor awal 48.0
+          [30.0, 42.0, 65.0, 60.0, 75.0, 90.0], // SPD -> Skor awal 60.0
+          [18.0, 32.0, 45.0, 38.0, 58.0, 76.0], // CRD -> Skor awal 38.0
+          [22.0, 48.0, 52.0, 50.0, 56.0, 78.0], // FLX -> Skor awal 50.0
+          [12.0, 38.0, 40.0, 42.0, 42.0, 72.0], // BAL -> Skor awal 42.0
+          [28.0, 42.0, 56.0, 65.0, 68.0, 92.0], // REA -> Skor awal 65.0
         ],
-        radarData: List.generate(10, (_) => 0.0),
+        radarData: [0.55, 0.48, 0.60, 0.38, 0.50, 0.42, 0.65, 0.50, 0.55, 0.60],
       ),
       Murid(
         id: "100", nama: "RURI",
         boxData: [
-          [20.0, 35.0, 50.0, 0.0, 65.0, 85.0],
-          [25.0, 40.0, 55.0, 0.0, 70.0, 90.0],
-          [22.0, 38.0, 48.0, 0.0, 62.0, 86.0],
-          [15.0, 30.0, 42.0, 0.0, 58.0, 75.0],
-          [20.0, 35.0, 50.0, 0.0, 65.0, 88.0],
-          [18.0, 32.0, 46.0, 0.0, 60.0, 78.0],
-          [25.0, 40.0, 52.0, 0.0, 66.0, 90.0],
+          [20.0, 35.0, 50.0, 40.0, 65.0, 85.0],
+          [25.0, 40.0, 55.0, 52.0, 70.0, 90.0],
+          [22.0, 38.0, 48.0, 46.0, 62.0, 86.0],
+          [15.0, 30.0, 42.0, 35.0, 58.0, 75.0],
+          [20.0, 35.0, 50.0, 58.0, 65.0, 88.0],
+          [18.0, 32.0, 46.0, 40.0, 60.0, 78.0],
+          [25.0, 40.0, 52.0, 62.0, 66.0, 90.0],
         ],
-        radarData: List.generate(10, (_) => 0.0),
+        radarData: [0.40, 0.52, 0.46, 0.35, 0.58, 0.40, 0.62, 0.45, 0.50, 0.52],
       ),
     ];
   }
@@ -341,7 +343,8 @@ class DashboardAtletPage extends StatelessWidget {
 
   Map<String, String> _analisisKomplet40Pola(int idx, String namaKomponen) {
     bool adaDataInput = activeMurid.riwayatLatihanKuantitatif.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == idx) ||
-                        activeMurid.riwayatLatihanDurasi.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == idx);
+                        activeMurid.riwayatLatihanDurasi.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == idx) ||
+                        (activeMurid.boxData[idx][3] > 0); // Termasuk jika ada nilai inisialisasi awal
 
     if (!adaDataInput || idx >= activeMurid.boxData.length) {
       return {"pola": "Belum Ada Data", "arti": "Menunggu input performa fungsional dari latihan."};
@@ -351,7 +354,7 @@ class DashboardAtletPage extends StatelessWidget {
     double min = data[0]; double q1 = data[1]; double q2 = data[2]; double q3 = data[4]; double max = data[5];
     double dLower = q2 - q1; double dUpper = q3 - q2; double iqr = q3 - q1; double wLower = q1 - min; double wUpper = max - q3;
 
-    String skew = ""; String kurtosis = ""; String outlier = "";
+    String skew = ""; String kurtosis = "";
     if ((dUpper - dLower).abs() <= 2.0 && (wUpper - wLower).abs() <= 3.0) skew = "Symmetrical";
     else if (dUpper > dLower && wUpper > wLower) skew = "Extremely Skewed Right";
     else if (dUpper > dLower) skew = "Mildly Skewed Right";
@@ -362,9 +365,6 @@ class DashboardAtletPage extends StatelessWidget {
     else if (iqr > 38) kurtosis = "Platykurtic (Wide)";
     else kurtosis = "Mesokurtic (Optimal)";
 
-    if (max > (q3 + (1.5 * iqr)) || min < (q1 - (1.5 * iqr))) outlier = "with Outliers Deteksi";
-    else outlier = "No Outliers";
-
     String polaFinal = "$skew - $kurtosis";
     String artiFinal = polaFinal.contains("Symmetrical") ? "Performa tim konsisten, homogen & merata standard." : "Kombinasi fluktuatif dinamis adaptasi fisik.";
     return {"pola": polaFinal, "arti": artiFinal};
@@ -373,7 +373,9 @@ class DashboardAtletPage extends StatelessWidget {
   TableRow _buildEvaluasiRow(String namaKomponen, String tipeGrafik, int dataIdx) {
     bool diAtasRataTim = false; bool belumAdaData = true; String labelPola = "-"; String labelArti = "-";
     bool adaDataDiInput = activeMurid.riwayatLatihanKuantitatif.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == dataIdx) ||
-                        activeMurid.riwayatLatihanDurasi.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == dataIdx);
+                        activeMurid.riwayatLatihanDurasi.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == dataIdx) ||
+                        (tipeGrafik == "BOXPLOT" && dataIdx < activeMurid.boxData.length && activeMurid.boxData[dataIdx][3] > 0) ||
+                        (tipeGrafik == "RADAR" && dataIdx < activeMurid.radarData.length && activeMurid.radarData[dataIdx] > 0);
 
     if (tipeGrafik == "BOXPLOT") {
       Map<String, String> hasilPola = _analisisKomplet40Pola(dataIdx, namaKomponen);
@@ -424,7 +426,7 @@ class TimelineHistoryPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text("HISTORY TIMELINE: ${activeMurid.nama}", style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)), backgroundColor: const Color(0xFF1E293B), centerTitle: true),
       body: allHistory.isEmpty
-          ? const Center(child: Text("Belum ada riwayat latihan.", style: TextStyle(color: Colors.white54)))
+          ? const Center(child: Text("Belum ada riwayat latihan manual.", style: TextStyle(color: Colors.white54)))
           : ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: allHistory.length,
@@ -622,4 +624,190 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
           Row(children: [
             Expanded(child: TextField(controller: _menitController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Menit", border: OutlineInputBorder()))),
             const SizedBox(width: 8),
-            Expanded(child: TextField(controller: _detikController, keyboardType: TextInputType.number, decoration: const
+            Expanded(child: TextField(controller: _detikController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Detik", border: OutlineInputBorder()))),
+            const SizedBox(width: 8),
+            Expanded(child: TextField(controller: _setsController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Sets", border: OutlineInputBorder()))),
+          ]),
+          const SizedBox(height: 20),
+          SizedBox(width: double.infinity, height: 45, child: ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+            onPressed: () {
+              double mnt = double.tryParse(_menitController.text) ?? 0.0;
+              double dtk = double.tryParse(_detikController.text) ?? 0.0;
+              double sets = double.tryParse(_setsController.text) ?? 0.0;
+              double totalDetik = (mnt * 60) + dtk;
+              if (_jenisController.text.isNotEmpty && totalDetik > 0 && sets > 0) {
+                widget.onSimpan(widget.selectedMuridId, _jenisController.text, _selectedKlasifikasi, totalDetik, sets, DateTime.now());
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Data Durasi Berhasil Disimpan!")));
+                _jenisController.clear(); _menitController.clear(); _detikController.clear(); _setsController.clear();
+              }
+            },
+            child: const Text("SIMPAN PERFORMANCE DATA", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+          ))
+        ]),
+      ),
+    );
+  }
+}
+
+// ==================== ENGINE GRAFIK 1: BOXPLOT CUSTOM PAINT ====================
+class MetaBoxplotChart extends StatelessWidget {
+  final List<List<double>> boxData;
+  final List<double> teamAverages;
+
+  const MetaBoxplotChart({Key? key, required this.boxData, required this.teamAverages}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: CustomPaint(
+        size: const Size(double.infinity, 240),
+        painter: _BoxplotPainter(boxData: boxData, teamAverages: teamAverages),
+      ),
+    );
+  }
+}
+
+class _BoxplotPainter extends CustomPainter {
+  final List<List<double>> boxData;
+  final List<double> teamAverages;
+
+  _BoxplotPainter({required this.boxData, required this.teamAverages});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final int itemLength = boxData.length;
+    if (itemLength == 0) return;
+
+    double chartWidth = size.width - 50;
+    double chartHeight = size.height - 40;
+    double spacing = chartWidth / itemLength;
+
+    final Paint pGaris = Paint()..color = const Color(0xFF334155)..strokeWidth = 1.0;
+    final Paint pBox = Paint()..color = const Color(0xFF38BDF8).withOpacity(0.3)..style = PaintingStyle.fill;
+    final Paint pBorderBox = Paint()..color = const Color(0xFF38BDF8)..strokeWidth = 1.2..style = PaintingStyle.stroke;
+    final Paint pMedian = Paint()..color = Colors.amber..strokeWidth = 2.0;
+    final Paint pSkorKini = Paint()..color = const Color(0xFFF43F5E)..style = PaintingStyle.fill;
+    final Paint pRataTim = Paint()..color = const Color(0xFF10B981)..strokeWidth = 1.5..style = PaintingStyle.stroke;
+
+    for (int i = 0; i <= 4; i++) {
+      double y = 10 + (chartHeight / 4) * i;
+      canvas.drawLine(Offset(40, y), Offset(size.width, y), pGaris);
+    }
+
+    for (int i = 0; i < itemLength; i++) {
+      double x = 55 + (spacing * i) + (spacing / 4);
+      List<double> d = boxData[i];
+      if (d.length < 6) continue;
+
+      double mapY(double val) => 10 + (chartHeight * (1.0 - (val / 100.0))).clamp(0.0, chartHeight);
+
+      double yMin = mapY(d[0]);
+      double yQ1 = mapY(d[1]);
+      double yQ2 = mapY(d[2]);
+      double yScore = mapY(d[3]);
+      double yQ3 = mapY(d[4]);
+      double yMax = mapY(d[5]);
+
+      canvas.drawLine(Offset(x, yMin), Offset(x, yMax), pBorderBox);
+      canvas.drawLine(Offset(x - 5, yMin), Offset(x + 5, yMin), pBorderBox);
+      canvas.drawLine(Offset(x - 5, yMax), Offset(x + 5, yMax), pBorderBox);
+
+      Rect rectBox = Rect.fromLTRB(x - 12, yQ3, x + 12, yQ1);
+      canvas.drawRect(rectBox, pBox);
+      canvas.drawRect(rectBox, pBorderBox);
+
+      canvas.drawLine(Offset(x - 12, yQ2), Offset(x + 12, yQ2), pMedian);
+
+      if (i < teamAverages.length && teamAverages[i] > 0) {
+        double yAvg = mapY(teamAverages[i]);
+        canvas.drawLine(Offset(x - 15, yAvg), Offset(x + 15, yAvg), pRataTim);
+      }
+
+      if (d[3] > 0) {
+        canvas.drawCircle(Offset(x, yScore), 5.0, pSkorKini);
+      }
+
+      final List<String> labels = ["STR", "END", "SPD", "CRD", "FLX", "BAL", "REA"];
+      final txt = TextPainter(text: TextSpan(text: labels[i], style: const TextStyle(fontSize: 8, color: Colors.white60)), textDirection: TextDirection.ltr)..layout();
+      txt.paint(canvas, Offset(x - (txt.width / 2), size.height - 22));
+    }
+  }
+
+  @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+// ==================== ENGINE GRAFIK 2: RADAR CHART PAINTER ====================
+class MetaRadarChartPainter extends CustomPainter {
+  final List<double> activeRadar;
+  final List<double> teamRadar;
+
+  MetaRadarChartPainter({required this.activeRadar, required this.teamRadar});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Offset center = Offset(size.width / 2, size.height / 2);
+    double maxRadius = math.min(size.width, size.height) / 2.3;
+    int kDimensi = 10;
+
+    final Paint pGrid = Paint()..color = const Color(0xFF334155)..style = PaintingStyle.stroke..strokeWidth = 1.0;
+    final Paint pAtlet = Paint()..color = const Color(0xFFA855F7).withOpacity(0.35)..style = PaintingStyle.fill;
+    final Paint pBorderAtlet = Paint()..color = const Color(0xFFA855F7)..style = PaintingStyle.stroke..strokeWidth = 2.0;
+    final Paint pTim = Paint()..color = const Color(0xFF10B981)..style = PaintingStyle.stroke..strokeWidth = 1.2;
+
+    for (int i = 1; i <= 5; i++) {
+      double r = maxRadius * (i / 5.0);
+      Path pJaring = Path();
+      for (int j = 0; j < kDimensi; j++) {
+        double angle = (j * 2 * math.pi / kDimensi) - (math.pi / 2);
+        Offset pPoint = Offset(center.dx + r * math.cos(angle), center.dy + r * math.sin(angle));
+        if (j == 0) pJaring.moveTo(pPoint.dx, pPoint.dy);
+        else pJaring.lineTo(pPoint.dx, pPoint.dy);
+      }
+      pJaring.close();
+      canvas.drawPath(pJaring, pGrid);
+    }
+
+    for (int j = 0; j < kDimensi; j++) {
+      double angle = (j * 2 * math.pi / kDimensi) - (math.pi / 2);
+      Offset endPoint = Offset(center.dx + maxRadius * math.cos(angle), center.dy + maxRadius * math.sin(angle));
+      canvas.drawLine(center, endPoint, pGrid);
+    }
+
+    Path pathAtlet = Path();
+    bool hasDataAtlet = false;
+    for (int j = 0; j < kDimensi; j++) {
+      double val = j < activeRadar.length ? activeRadar[j] : 0.0;
+      if (val > 0) hasDataAtlet = true;
+      double angle = (j * 2 * math.pi / kDimensi) - (math.pi / 2);
+      double r = maxRadius * val.clamp(0.0, 1.0);
+      Offset pt = Offset(center.dx + r * math.cos(angle), center.dy + r * math.sin(angle));
+      if (j == 0) pathAtlet.moveTo(pt.dx, pt.dy);
+      else pathAtlet.lineTo(pt.dx, pt.dy);
+    }
+    pathAtlet.close();
+    if (hasDataAtlet) {
+      canvas.drawPath(pathAtlet, pAtlet);
+      canvas.drawPath(pathAtlet, pBorderAtlet);
+    }
+
+    Path pathTim = Path();
+    bool hasDataTim = false;
+    for (int j = 0; j < kDimensi; j++) {
+      double val = j < teamRadar.length ? teamRadar[j] : 0.0;
+      if (val > 0) hasDataTim = true;
+      double angle = (j * 2 * math.pi / kDimensi) - (math.pi / 2);
+      double r = maxRadius * val.clamp(0.0, 1.0);
+      Offset pt = Offset(center.dx + r * math.cos(angle), center.dy + r * math.sin(angle));
+      if (j == 0) pathTim.moveTo(pt.dx, pt.dy);
+      else pathTim.lineTo(pt.dx, pt.dy);
+    }
+    pathTim.close();
+    if (hasDataTim) {
+      canvas.drawPath(pathTim, pTim);
+    }
+  }
+
+  @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
