@@ -397,7 +397,7 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // 3. FITUR BARU: KOLOM PENILAIAN DINAMIS AI
+            // 3. FITUR: KOLOM PENILAIAN DINAMIS AI
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -583,7 +583,7 @@ class DaftarMuridPage extends StatelessWidget {
   }
 }
 
-// ==================== HALAMAN 3 & 4 (INPUT FORM CODE STABLE) ====================
+// ==================== HALAMAN 3 & 4 (FIXED: SIZEDBOX REPLACEMENT FOR WIDTH PARAM) ====================
 class InputLatihanKuantitatifPage extends StatefulWidget {
   final List<Murid> daftarMurid;
   final String selectedMuridId;
@@ -626,15 +626,19 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
               ],
             ),
             const SizedBox(height: 16),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFA855F7), width: double.infinity),
-              onPressed: () {
-                double r = double.tryParse(_repsController.text) ?? 0;
-                double s = double.tryParse(_setsController.text) ?? 0;
-                widget.onSimpan(widget.selectedMuridId, _jenisLatihanController.text, _selectedKlasifikasi, r, s, DateTime.now());
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Berhasil Ditambahkan ke Boxplot!')));
-              },
-              child: const Text('SUBMIT REPS ATLET'),
+            // FIX: Menggunakan SizedBox untuk membungkus lebar tombol penuh tanpa memicu parameter width error
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFA855F7)),
+                onPressed: () {
+                  double r = double.tryParse(_repsController.text) ?? 0;
+                  double s = double.tryParse(_setsController.text) ?? 0;
+                  widget.onSimpan(widget.selectedMuridId, _jenisLatihanController.text, _selectedKlasifikasi, r, s, DateTime.now());
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Berhasil Ditambahkan ke Boxplot!')));
+                },
+                child: const Text('SUBMIT REPS ATLET'),
+              ),
             )
           ],
         ),
@@ -685,15 +689,19 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
               ],
             ),
             const SizedBox(height: 16),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF06B6D4), width: double.infinity),
-              onPressed: () {
-                double w = double.tryParse(_waktuController.text) ?? 0;
-                double s = double.tryParse(_setsController.text) ?? 0;
-                widget.onSimpan(widget.selectedMuridId, _jenisLatihanController.text, _selectedKlasifikasi, w, s, DateTime.now());
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Data Durasi Terintegrasi Dashboard!')));
-              },
-              child: const Text('SUBMIT WAKTU ATLET'),
+            // FIX: Menggunakan SizedBox untuk membungkus lebar tombol penuh tanpa memicu parameter width error
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF06B6D4)),
+                onPressed: () {
+                  double w = double.tryParse(_waktuController.text) ?? 0;
+                  double s = double.tryParse(_setsController.text) ?? 0;
+                  widget.onSimpan(widget.selectedMuridId, _jenisLatihanController.text, _selectedKlasifikasi, w, s, DateTime.now());
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Data Durasi Terintegrasi Dashboard!')));
+                },
+                child: const Text('SUBMIT WAKTU ATLET'),
+              ),
             )
           ],
         ),
