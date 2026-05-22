@@ -16,11 +16,31 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF0F172A),
+        primaryColor: Colors.cyan,
         fontFamily: 'Roboto',
       ),
       home: const MainNavigationHolder(),
     );
   }
+}
+
+// ========================================================
+// MODEL DATA & DATABASE LOKAL (KOSONG DI AWAL)
+// ========================================================
+class Murid {
+  final String id;
+  final String nama;
+  final List<double> radarData; 
+  final List<Map<String, dynamic>> riwayatReps;
+  final List<Map<String, dynamic>> riwayatWaktu;
+
+  Murid({
+    required this.id,
+    required this.nama,
+    required this.radarData,
+    required this.riwayatReps,
+    required this.riwayatWaktu,
+  });
 }
 
 const List<String> kDaftarKlasifikasiLatihan = [
@@ -29,22 +49,30 @@ const List<String> kDaftarKlasifikasiLatihan = [
   "REACTIVE SPEED / QUICKNESS", "AGILITY", "ANTICIPATION & SPATIAL AWARENESS", "MOBILITY", "OPEN/REACTIVE AGILITY"
 ];
 
-class Murid {
-  final String id;
-  final String nama;
-  final List<List<double>> boxData; 
-  final List<double> radarData; 
-  List<Map<String, dynamic>> riwayatLatihanKuantitatif;
-  List<Map<String, dynamic>> riwayatLatihanDurasi;
+// DATA AWAL KOSONG (Tanpa Simulasi)
+List<Murid> daftarMuridGlobal = [];
+int indeksMuridTerpilih = 0;
 
-  Murid({
-    required this.id, required this.nama, required this.boxData, required this.radarData,
-    List<Map<String, dynamic>>? riwayatLatihanKuantitatif,
-    List<Map<String, dynamic>>? riwayatLatihanDurasi,
-  })  : this.riwayatLatihanKuantitatif = riwayatLatihanKuantitatif ?? [],
-        this.riwayatLatihanDurasi = riwayatLatihanDurasi ?? [];
+// Fungsi Pengaman (Anti-Crash) jika data kosong
+Murid get muridAktif {
+  if (daftarMuridGlobal.isEmpty) {
+    return Murid(
+      id: "-", 
+      nama: "BELUM ADA SISWA", 
+      radarData: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 
+      riwayatReps: [], 
+      riwayatWaktu: []
+    );
+  }
+  if (indeksMuridTerpilih >= daftarMuridGlobal.length) {
+    indeksMuridTerpilih = 0;
+  }
+  return daftarMuridGlobal[indeksMuridTerpilih];
 }
 
+// ========================================================
+// HOLDER NAVIGASI UTAMA
+// ========================================================
 class MainNavigationHolder extends StatefulWidget {
   const MainNavigationHolder({Key? key}) : super(key: key);
   @override
@@ -52,125 +80,51 @@ class MainNavigationHolder extends StatefulWidget {
 }
 
 class _MainNavigationHolderState extends State<MainNavigationHolder> {
-  int _currentIndex = 0; 
-  String _selectedMuridId = ""; 
-  final TextEditingController _namaController = TextEditingController();
-  final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = "";
-  late List<Murid> _daftarMurid;
+  int _currentIndex = 0;
+
+  void perbaruiHalaman() {
+    setState(() {});
+  }
 
   @override
-  void initState() {
-    super.initState();
-    _daftarMurid = []; 
-  }
+  Widget build(BuildContext context) {
+    final List<Widget> pages = [
+      DashboardPage(onRefresh: perbaruiHalaman),
+      DaftarSiswaPage(onSelect: () {
+        setState(() => _currentIndex = 0);
+      }),
+      InputRepsPage(onSaved: perbaruiHalaman),
+      InputWaktuPage(onSaved: perbaruiHalaman),
+      const AITrainingGeneratorPage(),
+    ];
 
-  Murid get _currentMurid => _daftarMurid.firstWhere(
-        (m) => m.id == _selectedMuridId, 
-        orElse: () => _daftarMurid.isNotEmpty 
-            ? _daftarMurid.first 
-            : Murid(id: "000", nama: "BELUM ADA SISWA", boxData: List.generate(7, (_) => [0,0,0,0,0,0]), radarData: List.generate(10, (_) => 0.0)),
-      );
-
-  List<double> get _teamAverageBoxScores {
-    List<double> averages = List.generate(7, (_) => 0.0);
-    if (_daftarMurid.isEmpty) return averages;
-    for (int i = 0; i < 7; i++) {
-      double sum = 0;
-      int count = 0;
-      for (var murid in _daftarMurid) {
-        if (i < murid.boxData.length && murid.boxData[i].length > 3) {
-          if (murid.boxData[i][3] > 0) { 
-            sum += murid.boxData[i][3];
-            count++;
+    return Scaffold(
+      body: pages[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex >= 4 ? 4 : _currentIndex,
+        onTap: (index) {
+          if (index == 4) {
+            _showMoreBottomSheet();
+          } else {
+            setState(() => _currentIndex = index);
           }
-        }
-      }
-      averages[i] = count > 0 ? sum / count : 0.0;
-    }
-    return averages;
+        },
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: const Color(0xFF1E293B),
+        selectedItemColor: Colors.cyan,
+        unselectedItemColor: Colors.white54,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
+          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Siswa'),
+          BottomNavigationBarItem(icon: Icon(Icons.fitness_center), label: 'Reps'),
+          BottomNavigationBarItem(icon: Icon(Icons.timer), label: 'Waktu'),
+          BottomNavigationBarItem(icon: Icon(Icons.more_horiz), label: 'More'),
+        ],
+      ),
+    );
   }
 
-  List<double> get _teamAverageRadar {
-    List<double> averages = List.generate(10, (_) => 0.0);
-    if (_daftarMurid.isEmpty) return averages;
-    for (int i = 0; i < 10; i++) {
-      double sum = 0;
-      int count = 0;
-      for (var murid in _daftarMurid) {
-        if (i < murid.radarData.length) {
-          if (murid.radarData[i] > 0) {
-            sum += murid.radarData[i];
-            count++;
-          }
-        }
-      }
-      averages[i] = count > 0 ? sum / count : 0.0;
-    }
-    return averages;
-  }
-
-  int _dapatkanBoxIndex(String klasifikasi) {
-    final String upper = klasifikasi.toUpperCase();
-    if (upper == "STRENGTH" || upper == "POWER" || upper == "CORE STABILITY") return 0;
-    if (upper == "ENDURANCE" || upper == "MUSCULAR ENDURANCE") return 1;
-    if (upper == "SPEED" || upper == "SPEED ENDURANCE") return 2;
-    if (upper == "COORDINATION" || upper == "ANTICIPATION & SPATIAL AWARENESS") return 3;
-    if (upper == "FLEXIBILITY" || upper == "DYNAMIC FLEXIBILITY") return 4;
-    if (upper == "BALANCE") return 5;
-    if (upper == "REACTION TIME" || upper == "REACTIVE SPEED / QUICKNESS") return 6;
-    return -1;
-  }
-
-  void _simpanDataKuantitatif(String id, String jenis, String klas, double reps, double sets, DateTime tgl) {
-    setState(() {
-      int idx = _daftarMurid.indexWhere((m) => m.id == id);
-      if (idx != -1) {
-        double skor = reps * sets;
-        _daftarMurid[idx].riwayatLatihanKuantitatif.add({
-          'tanggal': tgl, 'jenis': jenis, 'klasifikasi': klas, 'skor': skor, 'isReps': true
-        });
-
-        int bIdx = _dapatkanBoxIndex(klas);
-        if (bIdx != -1) {
-          _daftarMurid[idx].boxData[bIdx][3] = skor;
-          _daftarMurid[idx].radarData[bIdx] = (skor / 100).clamp(0.0, 1.0);
-        } else {
-          double normalisasi = (skor / 100).clamp(0.0, 1.0);
-          if (klas.contains("AGILITY") && !klas.contains("OPEN")) _daftarMurid[idx].radarData[8] = normalisasi;
-          if (klas.contains("MOBILITY")) _daftarMurid[idx].radarData[9] = normalisasi;
-          if (klas.contains("OPEN")) _daftarMurid[idx].radarData[2] = normalisasi;
-        }
-        _selectedMuridId = id;
-      }
-    });
-  }
-
-  void _simpanDataDurasi(String id, String jenis, String klas, double waktu, double sets, DateTime tgl) {
-    setState(() {
-      int idx = _daftarMurid.indexWhere((m) => m.id == id);
-      if (idx != -1) {
-        double skor = waktu * sets;
-        _daftarMurid[idx].riwayatLatihanDurasi.add({
-          'tanggal': tgl, 'jenis': jenis, 'klasifikasi': klas, 'skor': skor, 'isReps': false
-        });
-
-        int bIdx = _dapatkanBoxIndex(klas);
-        if (bIdx != -1) {
-          _daftarMurid[idx].boxData[bIdx][3] = skor;
-          _daftarMurid[idx].radarData[bIdx] = (skor / 100).clamp(0.0, 1.0);
-        } else {
-          double normalisasi = (skor / 100).clamp(0.0, 1.0);
-          if (klas.contains("AGILITY") && !klas.contains("OPEN")) _daftarMurid[idx].radarData[8] = normalisasi;
-          if (klas.contains("MOBILITY")) _daftarMurid[idx].radarData[9] = normalisasi;
-          if (klas.contains("OPEN")) _daftarMurid[idx].radarData[2] = normalisasi;
-        }
-        _selectedMuridId = id;
-      }
-    });
-  }
-
-  void _showMoreMenu() {
+  void _showMoreBottomSheet() {
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF1E293B),
@@ -180,19 +134,12 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.history, color: Colors.blue),
-              title: const Text("History Timeline", style: TextStyle(color: Colors.white)),
-              onTap: () {
-                setState(() => _currentIndex = 5);
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
               leading: const Icon(Icons.smart_toy, color: Colors.cyan),
-              title: const Text("AI Training Generator", style: TextStyle(color: Colors.white)),
+              title: const Text("AI Training Generator", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              subtitle: const Text("Buat program latihan kustom otomatis", style: TextStyle(color: Colors.white38, fontSize: 12)),
               onTap: () {
-                setState(() => _currentIndex = 6);
                 Navigator.pop(context);
+                setState(() => _currentIndex = 4);
               },
             ),
             const SizedBox(height: 10),
@@ -201,477 +148,89 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
       ),
     );
   }
-
-  @override
-  Widget build(BuildContext context) {
-    List<Murid> filtered = _daftarMurid.where((m) => m.nama.contains(_searchQuery.toUpperCase()) || m.id.contains(_searchQuery)).toList();
-
-    final List<Widget> pages = [
-      DashboardAtletPage(activeMurid: _currentMurid, teamBoxAverages: _teamAverageBoxScores, teamRadarAverages: _teamAverageRadar, dapatkanBoxIndexFunc: _dapatkanBoxIndex),
-      DaftarMuridPage(
-        daftarMurid: filtered, selectedId: _selectedMuridId, namaController: _namaController, searchController: _searchController,
-        onSearchChanged: (v) => setState(() => _searchQuery = v),
-        onSelect: (id) => setState(() { _selectedMuridId = id; _currentIndex = 0; }), 
-        onDelete: (m) => setState(() => _daftarMurid.remove(m)),
-        onAdd: () {
-          if (_namaController.text.trim().isEmpty) return;
-          setState(() {
-            int maxId = 0;
-            for (var m in _daftarMurid) {
-              int? cId = int.tryParse(m.id);
-              if (cId != null && cId > maxId) maxId = cId;
-            }
-            String nextId = (maxId + 1).toString().padLeft(3, '0');
-            _daftarMurid.add(Murid(id: nextId, nama: _namaController.text.trim().toUpperCase(), boxData: List.generate(7, (_) => [20, 35, 50, 0, 65, 85]), radarData: List.generate(10, (_) => 0.0)));
-            if (_selectedMuridId.isEmpty) _selectedMuridId = nextId; // Pasang ID jika ini siswa pertama
-          });
-          _namaController.clear();
-        },
-      ),
-      InputLatihanKuantitatifPage(daftarMurid: _daftarMurid, selectedMuridId: _selectedMuridId, onMuridChanged: (id) => setState(() => _selectedMuridId = id!), onSimpan: _simpanDataKuantitatif),
-      InputLatihanDurasiPage(daftarMurid: _daftarMurid, selectedMuridId: _selectedMuridId, onMuridChanged: (id) => setState(() => _selectedMuridId = id!), onSimpan: _simpanDataDurasi),
-      const SizedBox.shrink(), 
-      TimelineHistoryPage(activeMurid: _currentMurid), 
-      const AITrainingGeneratorPage(), 
-    ];
-
-    return Scaffold(
-      body: SafeArea(child: pages[_currentIndex]),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex >= 4 ? 4 : _currentIndex,
-        onTap: (index) {
-          if (index == 4) {
-            _showMoreMenu();
-          } else {
-            setState(() => _currentIndex = index);
-          }
-        },
-        backgroundColor: const Color(0xFF1E293B),
-        selectedItemColor: const Color(0xFF38BDF8),
-        unselectedItemColor: Colors.white54,
-        type: BottomNavigationBarType.fixed,
-        selectedFontSize: 11,
-        unselectedFontSize: 11,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.analytics), label: 'DASHBOARD'),
-          BottomNavigationBarItem(icon: Icon(Icons.group), label: 'DAFTAR SISWA'),
-          BottomNavigationBarItem(icon: Icon(Icons.edit_note), label: 'INPUT REPS'),
-          BottomNavigationBarItem(icon: Icon(Icons.timer), label: 'INPUT WAKTU'),
-          BottomNavigationBarItem(icon: Icon(Icons.more_horiz), label: 'MORE'),
-        ],
-      ),
-    );
-  }
 }
 
-// ==================== HALAMAN 1: DASHBOARD PERFORMANCE ====================
-class DashboardAtletPage extends StatelessWidget {
-  final Murid activeMurid;
-  final List<double> teamBoxAverages;
-  final List<double> teamRadarAverages;
-  final int Function(String) dapatkanBoxIndexFunc;
-
-  const DashboardAtletPage({Key? key, required this.activeMurid, required this.teamBoxAverages, required this.teamRadarAverages, required this.dapatkanBoxIndexFunc}) : super(key: key);
+// ========================================================
+// HALAMAN 1: DASHBOARD UTAMA
+// ========================================================
+class DashboardPage extends StatelessWidget {
+  final VoidCallback onRefresh;
+  const DashboardPage({Key? key, required this.onRefresh}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    Murid atlet = muridAktif;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A), 
+      appBar: AppBar(
+        title: const Text("Premium Athlete Dashboard", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        backgroundColor: const Color(0xFF1E293B),
+        elevation: 0,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: double.infinity,
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E293B), 
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF334155), width: 1), 
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+              decoration: BorderRadius.circular(12).toBoxDecoration(const Color(0xFF1E293B)),
+              child: Row(
                 children: [
-                  Text(
-                    'COMPREHENSIVE PERFORMANCE DASHBOARD',
-                    style: TextStyle(
-                      color: Colors.blueGrey[300],
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '${activeMurid.id} - ${activeMurid.nama}',
-                    style: const TextStyle(
-                      color: Color(0xFF38BDF8), 
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
+                  CircleAvatar(backgroundColor: Colors.cyan.withOpacity(0.2), radius: 24, child: Text(atlet.id == "-" ? "!" : atlet.id, style: const TextStyle(color: Colors.cyan, fontWeight: FontWeight.bold, fontSize: 12))),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(atlet.nama, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                        Text(daftarMuridGlobal.isEmpty ? "Tambahkan siswa di menu 'Siswa'" : "Status Kondisi: Optimal / Siap Tanding", style: TextStyle(color: daftarMuridGlobal.isEmpty ? Colors.amber : Colors.greenAccent, fontSize: 12)),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E293B),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF334155)),
-              ),
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(width: 4, height: 16, color: const Color(0xFF38BDF8)),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'DISTRIBUSI MOTORIK TIM VS INDIVIDU (BOXPLOT)',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: Color(0xFF38BDF8)),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(height: 250, child: MetaBoxplotChart(boxData: activeMurid.boxData, teamAverages: teamBoxAverages)),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E293B),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF334155)),
-              ),
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(width: 4, height: 16, color: const Color(0xFF22C55E)), 
-                      const SizedBox(width: 8),
-                      const Text(
-                        'PROFIL BIOMOTORIK METRIKS RADAR (10 DIMENSI)',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: Color(0xFF22C55E)),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    height: 240,
-                    child: CustomPaint(
-                      size: const Size(double.infinity, 240),
-                      painter: MetaRadarChartPainter(activeRadar: activeMurid.radarData, teamRadar: teamRadarAverages),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E293B),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF334155)),
-              ),
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(width: 4, height: 16, color: const Color(0xFF10B981)),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'MATRIKS ANALISIS GERAK & REKOMENDASI TAKTIS',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF10B981)),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: SizedBox(
-                      width: 1050, 
-                      child: Table(
-                        border: TableBorder.all(color: const Color(0xFF334155), width: 1), 
-                        columnWidths: const {
-                          0: FlexColumnWidth(1.8),
-                          1: FlexColumnWidth(2.3),
-                          2: FlexColumnWidth(2.5),
-                          3: FlexColumnWidth(2.3),
-                          4: FlexColumnWidth(2.3),
-                          5: FlexColumnWidth(3.4)
-                        },
-                        children: [
-                          TableRow(
-                            decoration: const BoxDecoration(color: Color(0xFF0F172A)), 
-                            children: [
-                              _buildHeaderCell('KOMPONEN'),
-                              _buildHeaderCell('POLA BOXPLOT'),
-                              _buildHeaderCell('ARTI POLA'),
-                              _buildHeaderCell('KELEBIHAN'),
-                              _buildHeaderCell('KEKURANGAN'),
-                              _buildHeaderCell('REKOMENDASI')
-                            ],
-                          ),
-                          _buildEvaluasiRow('STRENGTH', 'BOXPLOT', 0),
-                          _buildEvaluasiRow('ENDURANCE', 'BOXPLOT', 1),
-                          _buildEvaluasiRow('SPEED', 'BOXPLOT', 2),
-                          _buildEvaluasiRow('COORDINATION', 'BOXPLOT', 3),
-                          _buildEvaluasiRow('FLEXIBILITY', 'BOXPLOT', 4),
-                          _buildEvaluasiRow('BALANCE', 'BOXPLOT', 5),
-                          _buildEvaluasiRow('REACTION TIME', 'BOXPLOT', 6),
-                          _buildEvaluasiRow('MUSCULAR ENDURANCE', 'BOXPLOT', 1),
-                          _buildEvaluasiRow('POWER', 'BOXPLOT', 0),
-                          _buildEvaluasiRow('CORE STABILITY', 'BOXPLOT', 0),
-                          _buildEvaluasiRow('DYNAMIC FLEXIBILITY', 'BOXPLOT', 4),
-                          _buildEvaluasiRow('SPEED ENDURANCE', 'BOXPLOT', 2),
-                          _buildEvaluasiRow('REACTIVE SPEED / QUICKNESS', 'BOXPLOT', 6),
-                          _buildEvaluasiRow('ANTICIPATION & SPATIAL AWARENESS', 'BOXPLOT', 3),
-                          _buildEvaluasiRow('AGILITY', 'RADAR', 8),
-                          _buildEvaluasiRow('MOBILITY', 'RADAR', 9),
-                          _buildEvaluasiRow('OPEN/REACTIVE AGILITY', 'RADAR', 2),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeaderCell(String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: const TextStyle(color: Color(0xFF38BDF8), fontSize: 10, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-
-  Map<String, String> _analisisKomplet40Pola(int idx, String namaKomponen) {
-    bool adaDataInput = activeMurid.riwayatLatihanKuantitatif.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == idx) ||
-                        activeMurid.riwayatLatihanDurasi.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == idx) ||
-                        (activeMurid.boxData[idx][3] > 0);
-
-    if (!adaDataInput || idx >= activeMurid.boxData.length) {
-      return {"pola": "Belum Ada Data", "arti": "Menunggu input performa fungsional dari latihan."};
-    }
-
-    final List<double> data = activeMurid.boxData[idx];
-    double min = data[0]; double q1 = data[1]; double q2 = data[2]; double q3 = data[4]; double max = data[5];
-    double dLower = q2 - q1; double dUpper = q3 - q2; double iqr = q3 - q1; double wLower = q1 - min; double wUpper = max - q3;
-
-    String skew = ""; String kurtosis = "";
-    if ((dUpper - dLower).abs() <= 2.0 && (wUpper - wLower).abs() <= 3.0) skew = "Symmetrical";
-    else if (dUpper > dLower && wUpper > wLower) skew = "Extremely Skewed Right";
-    else if (dUpper > dLower) skew = "Mildly Skewed Right";
-    else if (dLower > dUpper && wLower > wUpper) skew = "Extremely Skewed Left";
-    else skew = "Mildly Skewed Left";
-
-    if (iqr < 10) kurtosis = "Leptokurtic (Narrow)";
-    else if (iqr > 38) kurtosis = "Platykurtic (Wide)";
-    else kurtosis = "Mesokurtic (Optimal)";
-
-    return {"pola": "$skew - $kurtosis", "arti": "Kombinasi adaptasi sirkuit & fluktuatif atlet fisik."};
-  }
-
-  TableRow _buildEvaluasiRow(String namaKomponen, String tipeGrafik, int dataIdx) {
-    bool diAtasRataTim = false; bool belumAdaData = true; String labelPola = "-"; String labelArti = "-";
-    bool adaDataDiInput = activeMurid.riwayatLatihanKuantitatif.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == dataIdx) ||
-                        activeMurid.riwayatLatihanDurasi.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == dataIdx) ||
-                        (tipeGrafik == "BOXPLOT" && dataIdx < activeMurid.boxData.length && activeMurid.boxData[dataIdx][3] > 0) ||
-                        (tipeGrafik == "RADAR" && dataIdx < activeMurid.radarData.length && activeMurid.radarData[dataIdx] > 0);
-
-    if (tipeGrafik == "BOXPLOT") {
-      Map<String, String> hasilPola = _analisisKomplet40Pola(dataIdx, namaKomponen);
-      labelPola = hasilPola["pola"]!; labelArti = hasilPola["arti"]!;
-      if (adaDataDiInput && dataIdx < activeMurid.boxData.length) {
-        belumAdaData = false;
-        diAtasRataTim = activeMurid.boxData[dataIdx][3] >= (dataIdx < teamBoxAverages.length ? teamBoxAverages[dataIdx] : 0.0);
-      }
-    } else {
-      if (adaDataDiInput && dataIdx < activeMurid.radarData.length) {
-        belumAdaData = false;
-        diAtasRataTim = activeMurid.radarData[dataIdx] >= (dataIdx < teamRadarAverages.length ? teamRadarAverages[dataIdx] : 0.0);
-      }
-    }
-
-    String kelebihanText = belumAdaData ? "Data rekam kosong." : (diAtasRataTim ? "Kapasitas fungsional optimal di atas target rata-rata." : "Stabilitas gerak dasar atlet konsisten.");
-    String kekuranganText = belumAdaData ? "Menunggu uji fisik." : (!diAtasRataTim ? "Defisit volume energi dibanding target rata-rata tim." : "Memerlukan variasi stimulus beban lanjutan.");
-    String rekomendasiText = belumAdaData ? "Silakan masukkan data latihan siswa di tab REPS / WAKTU." : "UPGRADE / BALANCING program sirkuit.";
-
-    return TableRow(
-      children: [
-        Padding(padding: const EdgeInsets.all(8.0), child: Text(namaKomponen, style: const TextStyle(color: Colors.white, fontSize: 8.5, fontWeight: FontWeight.bold))),
-        Padding(padding: const EdgeInsets.all(8.0), child: Text(labelPola, style: TextStyle(color: belumAdaData ? const Color(0x33FFFFFF) : Colors.amber[400], fontSize: 8))),
-        Padding(padding: const EdgeInsets.all(8.0), child: Text(labelArti, style: TextStyle(color: belumAdaData ? const Color(0x33FFFFFF) : const Color(0xFF34D399), fontSize: 8))),
-        Padding(padding: const EdgeInsets.all(8.0), child: Text(kelebihanText, style: const TextStyle(fontSize: 8.5, color: Colors.white70))),
-        Padding(padding: const EdgeInsets.all(8.0), child: Text(kekuranganText, style: const TextStyle(fontSize: 8.5, color: Colors.white70))),
-        Padding(padding: const EdgeInsets.all(8.0), child: Text(rekomendasiText, style: const TextStyle(fontSize: 8.5, color: Color(0xFF38BDF8)))),
-      ],
-    );
-  }
-}
-
-// ==================== HALAMAN 5: HISTORY TIMELINE ====================
-class TimelineHistoryPage extends StatelessWidget {
-  final Murid activeMurid;
-  const TimelineHistoryPage({Key? key, required this.activeMurid}) : super(key: key);
-
-  String _formatTanggalManual(DateTime dt) {
-    final List<String> bulan = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
-    return "${dt.day.toString().padLeft(2, '0')} ${bulan[dt.month - 1]} ${dt.year} | ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}";
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    List<Map<String, dynamic>> allHistory = [...activeMurid.riwayatLatihanKuantitatif, ...activeMurid.riwayatLatihanDurasi];
-    allHistory.sort((a, b) => (b['tanggal'] as DateTime).compareTo(a['tanggal'] as DateTime));
-
-    return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
-      appBar: AppBar(title: Text("HISTORY TIMELINE: ${activeMurid.nama}", style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)), backgroundColor: const Color(0xFF1E293B), centerTitle: true),
-      body: allHistory.isEmpty
-          ? const Center(child: Text("Belum ada riwayat latihan manual.", style: TextStyle(color: Colors.white54)))
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: allHistory.length,
-              itemBuilder: (context, index) {
-                final item = allHistory[index];
-                final bool isReps = item['isReps'] ?? true;
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Column(children: [
-                      Container(width: 12, height: 12, decoration: BoxDecoration(color: isReps ? Colors.cyan : Colors.orange, shape: BoxShape.circle)),
-                      Container(width: 2, height: 70, color: Colors.blueGrey.withOpacity(0.3)),
-                    ]),
-                    const SizedBox(width: 15),
-                    Expanded(
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 15),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1E293B),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: const Color(0xFF334155)),
-                        ),
-                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                            Text(item['klasifikasi'], style: TextStyle(color: isReps ? Colors.cyan : Colors.orange, fontWeight: FontWeight.bold, fontSize: 11)),
-                            Text(_formatTanggalManual(item['tanggal']), style: const TextStyle(color: Colors.white38, fontSize: 10)),
-                          ]),
-                          const Divider(color: Colors.white10),
-                          Text(item['jenis'].toString().toUpperCase(), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                          const SizedBox(height: 5),
-                          Text("Capaian: ${item['skor'].toStringAsFixed(0)} ${isReps ? 'Reps' : 'Detik'}", style: const TextStyle(fontSize: 12, color: Color(0xFF10B981))),
-                        ]),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-    );
-  }
-}
-
-// ==================== HALAMAN 2: DAFTAR SISWA ====================
-class DaftarMuridPage extends StatelessWidget {
-  final List<Murid> daftarMurid;
-  final String selectedId;
-  final TextEditingController namaController, searchController;
-  final ValueChanged<String> onSearchChanged;
-  final Function(String) onSelect;
-  final Function(Murid) onDelete;
-  final VoidCallback onAdd;
-
-  const DaftarMuridPage({Key? key, required this.daftarMurid, required this.selectedId, required this.namaController, required this.searchController, required this.onSearchChanged, required this.onSelect, required this.onDelete, required this.onAdd}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: searchController, 
-              onChanged: onSearchChanged, 
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: 'Cari Murid...', 
-                hintStyle: const TextStyle(color: Colors.white38),
-                prefixIcon: const Icon(Icons.search, color: Colors.white38), 
-                fillColor: const Color(0xFF1E293B),
-                filled: true,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF334155))),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(children: [
-              Expanded(
-                child: TextField(
-                  controller: namaController, 
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: 'NAMA BARU', 
-                    hintStyle: const TextStyle(color: Colors.white38),
-                    fillColor: const Color(0xFF1E293B),
-                    filled: true,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF334155))),
+            const SizedBox(height: 20),
+            
+            const Text("Analisis Dimensi Fisik Atlet", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            Center(
+              child: Container(
+                width: 260,
+                height: 260,
+                padding: const EdgeInsets.all(10),
+                child: CustomPaint(
+                  painter: RadarChartCustomPainter(
+                    activeRadar: atlet.radarData,
+                    teamRadar: const [0.7, 0.7, 0.7, 0.7, 0.7, 0.7],
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
-              ElevatedButton(
-                onPressed: onAdd, 
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF38BDF8), padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 24), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))), 
-                child: const Text("DAFTAR", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-              )
-            ]),
-            const SizedBox(height: 16),
-            Expanded(
-              child: ListView.builder(
-                itemCount: daftarMurid.length,
-                itemBuilder: (context, i) {
-                  final m = daftarMurid[i];
-                  final bool isSelected = m.id == selectedId;
-                  return Card(
-                    color: const Color(0xFF1E293B),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: BorderSide(color: isSelected ? const Color(0xFF38BDF8) : const Color(0xFF334155), width: isSelected ? 1.5 : 1)),
-                    child: ListTile(
-                      leading: CircleAvatar(backgroundColor: const Color(0xFF0F172A), child: Text(m.id, style: const TextStyle(fontSize: 12, color: Color(0xFF38BDF8), fontWeight: FontWeight.bold))),
-                      title: Text(m.nama, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-                      trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                        IconButton(icon: const Icon(Icons.analytics, color: Colors.cyan), onPressed: () => onSelect(m.id)), 
-                        IconButton(icon: const Icon(Icons.delete, color: Colors.redAccent), onPressed: () => onDelete(m)),
-                      ]),
-                    ),
-                  );
-                },
-              ),
-            )
+            ),
+            
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(width: 12, height: 12, color: Colors.cyan),
+                const SizedBox(width: 6),
+                const Text("Fisik Atlet", style: TextStyle(fontSize: 12)),
+                const SizedBox(width: 20),
+                Container(width: 12, height: 12, color: Colors.amber),
+                const SizedBox(width: 6),
+                const Text("Rata-rata Tim", style: TextStyle(fontSize: 12)),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            const Text("Log Latihan Terakhir", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            if (atlet.riwayatReps.isEmpty && atlet.riwayatWaktu.isEmpty)
+              const Center(child: Padding(padding: EdgeInsets.all(16), child: Text("Belum ada log latihan.", style: TextStyle(color: Colors.white38))))
+            else ...[
+              ...atlet.riwayatReps.map((e) => ListTile(leading: const Icon(Icons.fitness_center, color: Colors.cyan), title: Text(e['latihan']), trailing: Text(e['skor'], style: const TextStyle(color: Colors.greenAccent)), subtitle: Text("Tanggal: ${e['tgl']}"))),
+              ...atlet.riwayatWaktu.map((e) => ListTile(leading: const Icon(Icons.timer, color: Colors.amber), title: Text(e['latihan']), trailing: Text(e['skor'], style: const TextStyle(color: Colors.greenAccent)), subtitle: Text("Tanggal: ${e['tgl']}"))),
+            ]
           ],
         ),
       ),
@@ -679,575 +238,433 @@ class DaftarMuridPage extends StatelessWidget {
   }
 }
 
-// ==================== HALAMAN 3: INPUT REPS ====================
-class InputLatihanKuantitatifPage extends StatefulWidget {
-  final List<Murid> daftarMurid;
-  final String selectedMuridId;
-  final ValueChanged<String?> onMuridChanged;
-  final Function(String, String, String, double, double, DateTime) onSimpan;
-
-  const InputLatihanKuantitatifPage({Key? key, required this.daftarMurid, required this.selectedMuridId, required this.onMuridChanged, required this.onSimpan}) : super(key: key);
-
-  @override
-  State<InputLatihanKuantitatifPage> createState() => _InputLatihanKuantitatifPageState();
-}
-
-class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPage> {
-  final TextEditingController _jenisController = TextEditingController();
-  final TextEditingController _repsController = TextEditingController();
-  final TextEditingController _setsController = TextEditingController();
-  String _selectedKlasifikasi = kDaftarKlasifikasiLatihan.first;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text("INPUT TARGET REPETISI (KUANTITATIF)", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.cyan)),
-            const SizedBox(height: 15),
-            DropdownButtonFormField<String>(
-              value: widget.selectedMuridId.isEmpty ? null : widget.selectedMuridId, 
-              dropdownColor: const Color(0xFF1E293B),
-              items: widget.daftarMurid.map((m) => DropdownMenuItem(value: m.id, child: Text("${m.id} - ${m.nama}", style: const TextStyle(color: Colors.white)))).toList(),
-              onChanged: widget.onMuridChanged, decoration: const InputDecoration(labelText: "Pilih Atlet", border: OutlineInputBorder()),
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              value: _selectedKlasifikasi, 
-              dropdownColor: const Color(0xFF1E293B),
-              items: kDaftarKlasifikasiLatihan.map((k) => DropdownMenuItem(value: k, child: Text(k, style: const TextStyle(color: Colors.white)))).toList(),
-              onChanged: (v) => setState(() => _selectedKlasifikasi = v!), decoration: const InputDecoration(labelText: "Klasifikasi Kemampuan", border: OutlineInputBorder()),
-            ),
-            const SizedBox(height: 12),
-            TextField(controller: _jenisController, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: "Nama Latihan (cth: Push Up, Sit Up)", border: OutlineInputBorder())),
-            const SizedBox(height: 12),
-            Row(children: [
-              Expanded(child: TextField(controller: _repsController, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: "Jumlah Reps", border: OutlineInputBorder()))),
-              const SizedBox(width: 12),
-              Expanded(child: TextField(controller: _setsController, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: "Jumlah Sets", border: OutlineInputBorder()))),
-            ]),
-            const SizedBox(height: 20),
-            SizedBox(width: double.infinity, height: 48, child: ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.cyan, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-              onPressed: () {
-                if (widget.selectedMuridId.isEmpty) return;
-                double reps = double.tryParse(_repsController.text) ?? 0.0;
-                double sets = double.tryParse(_setsController.text) ?? 0.0;
-                if (_jenisController.text.isNotEmpty && reps > 0 && sets > 0) {
-                  widget.onSimpan(widget.selectedMuridId, _jenisController.text, _selectedKlasifikasi, reps, sets, DateTime.now());
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Data Repetisi Berhasil Disimpan!")));
-                  _jenisController.clear(); _repsController.clear(); _setsController.clear();
-                }
-              },
-              child: const Text("SIMPAN PERFORMANCE DATA", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-            ))
-          ]),
-        ),
-      ),
-    );
-  }
-}
-
-// ==================== HALAMAN 4: INPUT WAKTU ====================
-class InputLatihanDurasiPage extends StatefulWidget {
-  final List<Murid> daftarMurid;
-  final String selectedMuridId;
-  final ValueChanged<String?> onMuridChanged;
-  final Function(String, String, String, double, double, DateTime) onSimpan;
-
-  const InputLatihanDurasiPage({Key? key, required this.daftarMurid, required this.selectedMuridId, required this.onMuridChanged, required this.onSimpan}) : super(key: key);
-
-  @override
-  State<InputLatihanDurasiPage> createState() => _InputLatihanDurasiPageState();
-}
-
-class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
-  final TextEditingController _jenisController = TextEditingController();
-  final TextEditingController _menitController = TextEditingController();
-  final TextEditingController _detikController = TextEditingController();
-  final TextEditingController _setsController = TextEditingController();
-  String _selectedKlasifikasi = kDaftarKlasifikasiLatihan.first;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text("INPUT TARGET DURASI WAKTU (TIME-BASED)", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.orange)),
-            const SizedBox(height: 15),
-            DropdownButtonFormField<String>(
-              value: widget.selectedMuridId.isEmpty ? null : widget.selectedMuridId, 
-              dropdownColor: const Color(0xFF1E293B),
-              items: widget.daftarMurid.map((m) => DropdownMenuItem(value: m.id, child: Text("${m.id} - ${m.nama}", style: const TextStyle(color: Colors.white)))).toList(),
-              onChanged: widget.onMuridChanged, decoration: const InputDecoration(labelText: "Pilih Atlet", border: OutlineInputBorder()),
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              value: _selectedKlasifikasi, 
-              dropdownColor: const Color(0xFF1E293B),
-              items: kDaftarKlasifikasiLatihan.map((k) => DropdownMenuItem(value: k, child: Text(k, style: const TextStyle(color: Colors.white)))).toList(),
-              onChanged: (v) => setState(() => _selectedKlasifikasi = v!), decoration: const InputDecoration(labelText: "Klasifikasi Kemampuan", border: OutlineInputBorder()),
-            ),
-            const SizedBox(height: 12),
-            TextField(controller: _jenisController, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: "Nama Latihan (cth: Plank, Kuda-Kuda)", border: OutlineInputBorder())),
-            const SizedBox(height: 12),
-            Row(children: [
-              Expanded(child: TextField(controller: _menitController, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: "Menit", border: OutlineInputBorder()))),
-              const SizedBox(width: 8),
-              Expanded(child: TextField(controller: _detikController, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: "Detik", border: OutlineInputBorder()))),
-              const SizedBox(width: 8),
-              Expanded(child: TextField(controller: _setsController, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: "Sets", border: OutlineInputBorder()))),
-            ]),
-            const SizedBox(height: 20),
-            SizedBox(width: double.infinity, height: 48, child: ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-              onPressed: () {
-                if (widget.selectedMuridId.isEmpty) return;
-                double dtk = double.tryParse(_detikController.text) ?? 0.0;
-                double mnt = double.tryParse(_menitController.text) ?? 0.0;
-                double sets = double.tryParse(_setsController.text) ?? 0.0;
-                double totalDetik = (mnt * 60) + dtk;
-                if (_jenisController.text.isNotEmpty && totalDetik > 0 && sets > 0) {
-                  widget.onSimpan(widget.selectedMuridId, _jenisController.text, _selectedKlasifikasi, totalDetik, sets, DateTime.now());
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Data Durasi Berhasil Disimpan!")));
-                  _jenisController.clear(); _menitController.clear(); _detikController.clear(); _setsController.clear();
-                }
-              },
-              child: const Text("SIMPAN PERFORMANCE DATA", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-            ))
-          ]),
-        ),
-      ),
-    );
-  }
-}
-
-// ==================== ENGINE GRAFIK 1: BOXPLOT CUSTOM PAINT ====================
-class MetaBoxplotChart extends StatelessWidget {
-  final List<List<double>> boxData;
-  final List<double> teamAverages;
-
-  const MetaBoxplotChart({Key? key, required this.boxData, required this.teamAverages}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: CustomPaint(
-        size: const Size(double.infinity, 240),
-        painter: _BoxplotPainter(boxData: boxData, teamAverages: teamAverages),
-      ),
-    );
-  }
-}
-
-class _BoxplotPainter extends CustomPainter {
-  final List<List<double>> boxData;
-  final List<double> teamAverages;
-
-  _BoxplotPainter({required this.boxData, required this.teamAverages});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final int itemLength = boxData.length;
-    if (itemLength == 0) return;
-
-    double chartWidth = size.width - 50;
-    double chartHeight = size.height - 40;
-    double spacing = chartWidth / itemLength;
-
-    final Paint pGaris = Paint()..color = const Color(0xFF334155)..strokeWidth = 1.0;
-    final Paint pBox = Paint()..color = const Color(0xFF38BDF8).withOpacity(0.3)..style = PaintingStyle.fill;
-    final Paint pBorderBox = Paint()..color = const Color(0xFF38BDF8)..strokeWidth = 1.2..style = PaintingStyle.stroke;
-    final Paint pMedian = Paint()..color = Colors.amber..strokeWidth = 2.0;
-    final Paint pSkorKini = Paint()..color = const Color(0xFFF43F5E)..style = PaintingStyle.fill;
-    final Paint pGarisHubungScore = Paint()..color = const Color(0xFFF43F5E).withOpacity(0.4)..strokeWidth = 1.0;
-    final Paint pRataTim = Paint()..color = const Color(0xFF10B981)..strokeWidth = 1.5..style = PaintingStyle.stroke;
-
-    for (int i = 0; i <= 4; i++) {
-      double y = 10 + (chartHeight / 4) * i;
-      canvas.drawLine(Offset(40, y), Offset(size.width, y), pGaris);
-    }
-
-    Offset? prevScoreOffset;
-
-    for (int i = 0; i < itemLength; i++) {
-      double x = 55 + (spacing * i) + (spacing / 4);
-      List<double> d = boxData[i];
-      if (d.length < 6) continue;
-
-      double mapY(double val) {
-        if (val == 0.0) return 10 + chartHeight; 
-        return 10 + (chartHeight * (1.0 - (val / 100.0))).clamp(0.0, chartHeight);
-      }
-
-      double yMin = mapY(d[0]);
-      double yQ1 = mapY(d[1]);
-      double yQ2 = mapY(d[2]);
-      double yScore = mapY(d[3]); 
-      double yQ3 = mapY(d[4]);
-      double yMax = mapY(d[5]);
-
-      canvas.drawLine(Offset(x, yMin), Offset(x, yMax), pBorderBox);
-      canvas.drawLine(Offset(x - 5, yMin), Offset(x + 5, yMin), pBorderBox);
-      canvas.drawLine(Offset(x - 5, yMax), Offset(x + 5, yMax), pBorderBox);
-
-      Rect rectBox = Rect.fromLTRB(x - 12, yQ3, x + 12, yQ1);
-      canvas.drawRect(rectBox, pBox);
-      canvas.drawRect(rectBox, pBorderBox);
-
-      canvas.drawLine(Offset(x - 12, yQ2), Offset(x + 12, yQ2), pMedian);
-
-      if (i < teamAverages.length && teamAverages[i] > 0) {
-        double yAvg = mapY(teamAverages[i]);
-        canvas.drawLine(Offset(x - 15, yAvg), Offset(x + 15, yAvg), pRataTim);
-      }
-
-      Offset currentScoreOffset = Offset(x, yScore);
-      if (prevScoreOffset != null) {
-        canvas.drawLine(prevScoreOffset, currentScoreOffset, pGarisHubungScore);
-      }
-      prevScoreOffset = currentScoreOffset;
-
-      canvas.drawCircle(currentScoreOffset, 5.0, pSkorKini);
-
-      final List<String> labels = ["STR", "END", "SPD", "CRD", "FLX", "BAL", "REA"];
-      final txt = TextPainter(text: TextSpan(text: labels[i], style: const TextStyle(fontSize: 8, color: Colors.white60)), textDirection: TextDirection.ltr)..layout();
-      txt.paint(canvas, Offset(x - (txt.width / 2), size.height - 22));
-    }
-  }
-
-  @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
-
-// ==================== ENGINE GRAFIK 2: RADAR CHART PAINTER ====================
-class MetaRadarChartPainter extends CustomPainter {
+// PAINTER GRAFIK RADAR KUSTOM
+class RadarChartCustomPainter extends CustomPainter {
   final List<double> activeRadar;
   final List<double> teamRadar;
-
-  MetaRadarChartPainter({required this.activeRadar, required this.teamRadar});
+  RadarChartCustomPainter({required this.activeRadar, required this.teamRadar});
 
   @override
   void paint(Canvas canvas, Size size) {
-    Offset center = Offset(size.width / 2, size.height / 2);
-    double maxRadius = math.min(size.width, size.height) / 2.3;
-    int kDimensi = 10;
+    final center = Offset(size.width / 2, size.height / 2);
+    final maxRadius = math.min(size.width, size.height) / 2 * 0.85;
+    const kDimensi = 6;
+    const fitur = ["STR", "END", "SPD", "FLX", "BAL", "CRD"];
 
-    final Paint pGrid = Paint()..color = const Color(0xFF334155)..style = PaintingStyle.stroke..strokeWidth = 1.0;
-    final Paint pAtlet = Paint()..color = const Color(0xFF22C55E).withOpacity(0.25)..style = PaintingStyle.fill; 
-    final Paint pBorderAtlet = Paint()..color = const Color(0xFF22C55E)..style = PaintingStyle.stroke..strokeWidth = 2.0;
-    final Paint pTim = Paint()..color = const Color(0xFF38BDF8)..style = PaintingStyle.stroke..strokeWidth = 1.2; 
+    final pGrid = Paint()..color = Colors.white10..style = PaintingStyle.stroke..strokeWidth = 1.0;
+    final pAxis = Paint()..color = Colors.white30..style = PaintingStyle.stroke..strokeWidth = 1.0;
 
-    for (int i = 1; i <= 5; i++) {
-      double r = maxRadius * (i / 5.0);
-      Path pJaring = Path();
+    for (int i = 1; i <= 4; i++) {
+      double r = maxRadius * (i / 4);
+      Path path = Path();
       for (int j = 0; j < kDimensi; j++) {
         double angle = (j * 2 * math.pi / kDimensi) - (math.pi / 2);
-        Offset pPoint = Offset(center.dx + r * math.cos(angle), center.dy + r * math.sin(angle));
-        if (j == 0) pJaring.moveTo(pPoint.dx, pPoint.dy);
-        else pJaring.lineTo(pPoint.dx, pPoint.dy);
+        Offset pt = Offset(center.dx + r * math.cos(angle), center.dy + r * math.sin(angle));
+        if (j == 0) path.moveTo(pt.dx, pt.dy); else path.lineTo(pt.dx, pt.dy);
       }
-      pJaring.close();
-      canvas.drawPath(pJaring, pGrid);
+      path.close();
+      canvas.drawPath(path, pGrid);
     }
 
     for (int j = 0; j < kDimensi; j++) {
       double angle = (j * 2 * math.pi / kDimensi) - (math.pi / 2);
       Offset endPoint = Offset(center.dx + maxRadius * math.cos(angle), center.dy + maxRadius * math.sin(angle));
-      canvas.drawLine(center, endPoint, pGrid);
+      canvas.drawLine(center, endPoint, pAxis);
+
+      Offset labelPt = Offset(center.dx + (maxRadius + 14) * math.cos(angle) - 10, center.dy + (maxRadius + 14) * math.sin(angle) - 6);
+      TextPainter(
+        text: TextSpan(text: fitur[j], style: const TextStyle(color: Colors.white64, fontSize: 10, fontWeight: FontWeight.bold)),
+        textDirection: TextDirection.ltr,
+      )..layout()..paint(canvas, labelPt);
     }
 
+    final pAtletFill = Paint()..color = Colors.cyan.withOpacity(0.35)..style = PaintingStyle.fill;
+    final pAtletStroke = Paint()..color = Colors.cyan..style = PaintingStyle.stroke..strokeWidth = 2.0;
     Path pathAtlet = Path();
-    bool hasDataAtlet = false;
     for (int j = 0; j < kDimensi; j++) {
       double val = j < activeRadar.length ? activeRadar[j] : 0.0;
-      if (val > 0) hasDataAtlet = true;
       double angle = (j * 2 * math.pi / kDimensi) - (math.pi / 2);
       double r = maxRadius * val.clamp(0.0, 1.0);
       Offset pt = Offset(center.dx + r * math.cos(angle), center.dy + r * math.sin(angle));
-      if (j == 0) pathAtlet.moveTo(pt.dx, pt.dy);
-      else pathAtlet.lineTo(pt.dx, pt.dy);
+      if (j == 0) pathAtlet.moveTo(pt.dx, pt.dy); else pathAtlet.lineTo(pt.dx, pt.dy);
     }
     pathAtlet.close();
-    if (hasDataAtlet) {
-      canvas.drawPath(pathAtlet, pAtlet);
-      canvas.drawPath(pathAtlet, pBorderAtlet);
-    }
+    canvas.drawPath(pathAtlet, pAtletFill);
+    canvas.drawPath(pathAtlet, pAtletStroke);
 
+    final pTimStroke = Paint()..color = Colors.amber.withOpacity(0.7)..style = PaintingStyle.stroke..strokeWidth = 1.5;
     Path pathTim = Path();
-    bool hasDataTim = false;
     for (int j = 0; j < kDimensi; j++) {
       double val = j < teamRadar.length ? teamRadar[j] : 0.0;
-      if (val > 0) hasDataTim = true;
       double angle = (j * 2 * math.pi / kDimensi) - (math.pi / 2);
       double r = maxRadius * val.clamp(0.0, 1.0);
       Offset pt = Offset(center.dx + r * math.cos(angle), center.dy + r * math.sin(angle));
-      if (j == 0) pathTim.moveTo(pt.dx, pt.dy);
-      else pathTim.lineTo(pt.dx, pt.dy);
+      if (j == 0) pathTim.moveTo(pt.dx, pt.dy); else pathTim.lineTo(pt.dx, pt.dy);
     }
     pathTim.close();
-    if (hasDataTim) {
-      canvas.drawPath(pathTim, pTim);
-    }
+    canvas.drawPath(pathTim, pTimStroke);
   }
 
-  @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
-// ==================== HALAMAN 6: AI TRAINING GENERATOR ====================
+// ========================================================
+// HALAMAN 2: DAFTAR SISWA (DENGAN TOMBOL TAMBAH)
+// ========================================================
+class DaftarSiswaPage extends StatefulWidget {
+  final VoidCallback onSelect;
+  const DaftarSiswaPage({Key? key, required this.onSelect}) : super(key: key);
+
+  @override
+  State<DaftarSiswaPage> createState() => _DaftarSiswaPageState();
+}
+
+class _DaftarSiswaPageState extends State<DaftarSiswaPage> {
+  final TextEditingController _namaController = TextEditingController();
+
+  void _tambahSiswaBaru() {
+    if (_namaController.text.trim().isEmpty) return;
+    setState(() {
+      String newId = "M-${(daftarMuridGlobal.length + 1).toString().padLeft(2, '0')}";
+      daftarMuridGlobal.add(Murid(
+        id: newId, 
+        nama: _namaController.text.trim().toUpperCase(), 
+        radarData: [0.3, 0.3, 0.3, 0.3, 0.3, 0.3], // Nilai dasar awal
+        riwayatReps: [], 
+        riwayatWaktu: []
+      ));
+      if (daftarMuridGlobal.length == 1) indeksMuridTerpilih = 0;
+    });
+    _namaController.clear();
+    Navigator.pop(context);
+  }
+
+  void _tampilkanDialogTambah() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        title: const Text("Daftar Siswa Baru", style: TextStyle(color: Colors.cyan)),
+        content: TextField(
+          controller: _namaController,
+          style: const TextStyle(color: Colors.white),
+          decoration: const InputDecoration(hintText: "Masukkan Nama Lengkap", hintStyle: TextStyle(color: Colors.white38)),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Batal", style: TextStyle(color: Colors.white54))),
+          ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: Colors.cyan), onPressed: _tambahSiswaBaru, child: const Text("Simpan", style: TextStyle(color: Colors.black))),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Daftar Anggota / Siswa"), backgroundColor: const Color(0xFF1E293B)),
+      body: daftarMuridGlobal.isEmpty 
+          ? const Center(child: Text("Belum ada data siswa.\nTekan tombol + di bawah untuk menambah.", textAlign: TextAlign.center, style: TextStyle(color: Colors.white38)))
+          : ListView.builder(
+              padding: const EdgeInsets.all(12),
+              itemCount: daftarMuridGlobal.length,
+              itemBuilder: (context, index) {
+                Murid m = daftarMuridGlobal[index];
+                bool isAktif = index == indeksMuridTerpilih;
+                return Card(
+                  color: isAktif ? const Color(0xFF0F2D3A) : const Color(0xFF1E293B),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: BorderSide(color: isAktif ? Colors.cyan : Colors.transparent, width: 1)),
+                  child: ListTile(
+                    leading: Icon(Icons.person, color: isAktif ? Colors.cyan : Colors.white38),
+                    title: Text(m.nama, style: TextStyle(fontWeight: FontWeight.bold, color: isAktif ? Colors.cyan : Colors.white)),
+                    subtitle: Text("ID: ${m.id}"),
+                    trailing: isAktif 
+                      ? const Text("TERPILIH", style: TextStyle(color: Colors.cyan, fontSize: 11, fontWeight: FontWeight.bold))
+                      : ElevatedButton(
+                          style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF334155), padding: const EdgeInsets.symmetric(horizontal: 12)),
+                          onPressed: () {
+                            indeksMuridTerpilih = index;
+                            widget.onSelect();
+                          },
+                          child: const Text("PILIH", style: TextStyle(fontSize: 11, color: Colors.white)),
+                        ),
+                  ),
+                );
+              },
+            ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.cyan,
+        onPressed: _tampilkanDialogTambah,
+        child: const Icon(Icons.add, color: Colors.black),
+      ),
+    );
+  }
+}
+
+// ========================================================
+// HALAMAN 3: INPUT REPETISI (KUANTITATIF)
+// ========================================================
+class InputRepsPage extends StatefulWidget {
+  final VoidCallback onSaved;
+  const InputRepsPage({Key? key, required this.onSaved}) : super(key: key);
+  @override
+  State<InputRepsPage> createState() => _InputRepsPageState();
+}
+
+class _InputRepsPageState extends State<InputRepsPage> {
+  final _inputController = TextEditingController();
+  String _latihanDipilih = "Push Up";
+
+  @override
+  Widget build(BuildContext context) {
+    Murid current = muridAktif;
+    return Scaffold(
+      appBar: AppBar(title: const Text("Input Data Kuantitatif"), backgroundColor: const Color(0xFF1E293B)),
+      body: daftarMuridGlobal.isEmpty
+        ? const Center(child: Text("Tambahkan siswa terlebih dahulu di menu 'Siswa'", style: TextStyle(color: Colors.white38)))
+        : Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Atlet Aktif: ${current.nama}", style: const TextStyle(fontSize: 16, color: Colors.cyan, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 20),
+                DropdownButtonFormField<String>(
+                  value: _latihanDipilih,
+                  items: ["Push Up", "Sit Up", "Back Up", "Squat Jump", "Hapkido Kick Reps"].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                  onChanged: (v) => setState(() => _latihanDipilih = v!),
+                  decoration: const InputDecoration(labelText: "Jenis Latihan Fisik", border: OutlineInputBorder()),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _inputController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: "Jumlah Repetisi (Reps)", hintText: "Contoh: 40", border: OutlineInputBorder()),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.cyan),
+                    onPressed: () {
+                      if (_inputController.text.isNotEmpty) {
+                        setState(() {
+                          current.riwayatReps.insert(0, {
+                            "latihan": _latihanDipilih,
+                            "skor": "${_inputController.text} reps",
+                            "tgl": "HARI INI"
+                          });
+                        });
+                        _inputController.clear();
+                        widget.onSaved();
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Data Repetisi Berhasil Ditambahkan!")));
+                      }
+                    },
+                    child: const Text("SIMPAN DATA REPS", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                  ),
+                )
+              ],
+            ),
+          ),
+    );
+  }
+}
+
+// ========================================================
+// HALAMAN 4: INPUT WAKTU (DURASI)
+// ========================================================
+class InputWaktuPage extends StatefulWidget {
+  final VoidCallback onSaved;
+  const InputWaktuPage({Key? key, required this.onSaved}) : super(key: key);
+  @override
+  State<InputWaktuPage> createState() => _InputWaktuPageState();
+}
+
+class _InputWaktuPageState extends State<InputWaktuPage> {
+  final _menitController = TextEditingController();
+  final _detikController = TextEditingController();
+  String _latihanDipilih = "Plank";
+
+  @override
+  Widget build(BuildContext context) {
+    Murid current = muridAktif;
+    return Scaffold(
+      appBar: AppBar(title: const Text("Input Data Durasi"), backgroundColor: const Color(0xFF1E293B)),
+      body: daftarMuridGlobal.isEmpty
+        ? const Center(child: Text("Tambahkan siswa terlebih dahulu di menu 'Siswa'", style: TextStyle(color: Colors.white38)))
+        : Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Atlet Aktif: ${current.nama}", style: const TextStyle(fontSize: 16, color: Colors.amber, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 20),
+                DropdownButtonFormField<String>(
+                  value: _latihanDipilih,
+                  items: ["Plank", "Horse Stance Hold", "Sparring Match", "Wall Sit", "Shadow Boxing"].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                  onChanged: (v) => setState(() => _latihanDipilih = v!),
+                  decoration: const InputDecoration(labelText: "Jenis Latihan Durasi", border: OutlineInputBorder()),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _menitController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(labelText: "Menit", hintText: "00", border: OutlineInputBorder()),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextField(
+                        controller: _detikController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(labelText: "Detik", hintText: "00", border: OutlineInputBorder()),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.amber),
+                    onPressed: () {
+                      String m = _menitController.text.isEmpty ? "00" : _menitController.text.padLeft(2, '0');
+                      String s = _detikController.text.isEmpty ? "00" : _detikController.text.padLeft(2, '0');
+                      
+                      if (m != "00" || s != "00") {
+                        setState(() {
+                          current.riwayatWaktu.insert(0, {
+                            "latihan": _latihanDipilih,
+                            "skor": "$m:$s",
+                            "tgl": "HARI INI"
+                          });
+                        });
+                        _menitController.clear();
+                        _detikController.clear();
+                        widget.onSaved();
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Data Durasi Berhasil Ditambahkan!")));
+                      }
+                    },
+                    child: const Text("SIMPAN DATA WAKTU", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                  ),
+                )
+              ],
+            ),
+          ),
+    );
+  }
+}
+
+// ========================================================
+// HALAMAN 5 & 6: AI COACH GENERATOR PAGE
+// ========================================================
 class AITrainingGeneratorPage extends StatefulWidget {
   const AITrainingGeneratorPage({Key? key}) : super(key: key);
-
   @override
   State<AITrainingGeneratorPage> createState() => _AITrainingGeneratorPageState();
 }
 
 class _AITrainingGeneratorPageState extends State<AITrainingGeneratorPage> {
-  int _selectedMode = 0; 
-  final TextEditingController _latihanController = TextEditingController();
-  
   String _selectedKlasifikasi = kDaftarKlasifikasiLatihan.first;
   String _selectedTipe = "Repetisi";
   String _selectedBagian = "Tangan";
-  bool _showResult = false;
-
-  final Map<String, String> _mockMatrixData = {
-    "STRENGTH": "Diamond Push Up / Weighted Push Up",
-    "ENDURANCE": "Regular Push Up (High Reps Over time)",
-    "SPEED": "Explosive / Clapping Push Up",
-    "COORDINATION": "Asphymmetric Push Up / Spiderman Push Up",
-    "FLEXIBILITY": "Hindu Push Up / Cobra Stretch Transition",
-    "BALANCE": "Medicine Ball Push Up / One Hand Push Up",
-    "REACTION TIME": "Whistle-Responsive Plyo Push Up",
-    "MUSCULAR ENDURANCE": "Decline Push Up (Slow Negative Tempo)",
-    "POWER": "Incline Bench Plyo Push Up",
-    "CORE STABILITY": "Plank-to-Push Up / Plank Rotation",
-    "DYNAMIC FLEXIBILITY": "Scapula Push Up / Shoulder Tap",
-    "SPEED ENDURANCE": "Interval Tabata Push Up (20s On / 10s Off)",
-    "REACTIVE SPEED / QUICKNESS": "Drop and Catch Push Up",
-    "AGILITY": "Side-to-Side Moving Push Up",
-    "ANTICIPATION & SPATIAL AWARENESS": "Blindfolded Reactive Push Up",
-    "MOBILITY": "Deep Deficit Push Up using Blocks",
-    "OPEN/REACTIVE AGILITY": "Partner Hand-Tap Push Up Drill"
-  };
+  bool _sudahGenerate = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
-      appBar: AppBar(
-        title: const Text("AI COACH GENERATOR", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        backgroundColor: const Color(0xFF1E293B),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
+      appBar: AppBar(title: const Text("AI Coach Generator"), backgroundColor: const Color(0xFF1E293B)),
+      body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            DropdownButtonFormField<String>(
+              value: _selectedKlasifikasi,
+              items: kDaftarKlasifikasiLatihan.map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(fontSize: 12)))).toList(),
+              onChanged: (v) => setState(() => _selectedKlasifikasi = v!),
+              decoration: const InputDecoration(labelText: "Klasifikasi Komponen", border: OutlineInputBorder()),
+            ),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _selectedMode == 0 ? Colors.cyan.shade700 : const Color(0xFF1E293B),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    onPressed: () => setState(() { _selectedMode = 0; _showResult = false; }),
-                    child: const Text("Mode 1: Cari Variasi"),
+                  child: DropdownButtonFormField<String>(
+                    value: _selectedTipe,
+                    items: ["Repetisi", "Waktu"].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                    onChanged: (v) => setState(() => _selectedTipe = v!),
+                    decoration: const InputDecoration(labelText: "Tipe Target", border: OutlineInputBorder()),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _selectedMode == 1 ? Colors.cyan.shade700 : const Color(0xFF1E293B),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    onPressed: () => setState(() { _selectedMode = 1; _showResult = false; }),
-                    child: const Text("Mode 2: Filter Matriks"),
+                  child: DropdownButtonFormField<String>(
+                    value: _selectedBagian,
+                    items: ["Tangan", "Kaki", "Core (Anterior)", "Core (Posterior)", "Pelvic Floor"].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                    onChanged: (v) => setState(() => _selectedBagian = v!),
+                    decoration: const InputDecoration(labelText: "Fokus Anatomi", border: OutlineInputBorder()),
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, padding: const EdgeInsets.symmetric(vertical: 14)),
+                onPressed: () {
+                  setState(() {
+                    _sudahGenerate = true;
+                  });
+                },
+                child: const Text("GENERATE VIA AI COACH", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+              ),
+            ),
             const SizedBox(height: 20),
-
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(12)),
-              child: _selectedMode == 0
-                  ? TextField(
-                      controller: _latihanController,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        labelText: "Masukkan Nama Latihan Pokok",
-                        hintText: "Contoh: Push Up, Squat, Sit Up...",
-                        labelStyle: TextStyle(color: Colors.cyan),
-                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
-                        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.cyan)),
-                      ),
-                    )
-                  : Column(
-                      children: [
-                        DropdownButtonFormField<String>(
-                          value: _selectedKlasifikasi,
-                          dropdownColor: const Color(0xFF1E293B),
-                          decoration: const InputDecoration(labelText: "17 Klasifikasi Kemampuan", labelStyle: TextStyle(color: Colors.cyan)),
-                          items: kDaftarKlasifikasiLatihan.map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(fontSize: 13)))).toList(),
-                          onChanged: (v) => setState(() => _selectedKlasifikasi = v!),
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
+            Expanded(
+              child: _sudahGenerate 
+                ? ListView(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(8)),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: DropdownButtonFormField<String>(
-                                value: _selectedTipe,
-                                dropdownColor: const Color(0xFF1E293B),
-                                decoration: const InputDecoration(labelText: "Opsi Tipe", labelStyle: TextStyle(color: Colors.cyan)),
-                                items: ["Repetisi", "Waktu"].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-                                onChanged: (v) => setState(() => _selectedTipe = v!),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: DropdownButtonFormField<String>(
-                                value: _selectedBagian,
-                                dropdownColor: const Color(0xFF1E293B),
-                                decoration: const InputDecoration(labelText: "Opsi Fokus Otot", labelStyle: TextStyle(color: Colors.cyan)),
-                                items: ["Tangan", "Kaki", "Core (Anterior)", "Core (Posterior)", "Pelvic Floor"].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-                                onChanged: (v) => setState(() => _selectedBagian = v!),
-                              ),
+                            const Text("Rekomendasi Program Latihan:", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.amber)),
+                            const Divider(color: Colors.white24),
+                            Text("• Parameter Utama: $_selectedKlasifikasi", style: const TextStyle(fontSize: 12, height: 1.6)),
+                            Text("• Zona Fokus Otot: $_selectedBagian via $_selectedTipe", style: const TextStyle(fontSize: 12, height: 1.6)),
+                            const SizedBox(height: 12),
+                            const Text("Daftar Menu Latihan Gerak:", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.cyan)),
+                            const SizedBox(height: 6),
+                            Text(
+                              _selectedBagian.contains("Core") || _selectedBagian == "Pelvic Floor"
+                                  ? "1. Dynamic Plank Stability Shifts\n2. Bird-Dog Dynamic Holds\n3. Dead Bug Core Press\n4. Pelvic Bridge Iso-Hold"
+                                  : _selectedBagian == "Tangan"
+                                      ? "1. Plyo Diamond Push Drops\n2. Isometric Push-Hold Low Zone\n3. Hand Release Acceleration Explosions"
+                                      : "1. Explosive Squat Jumps Matrix\n2. Lunge Matrix Rebound Shifts\n3. Calf Raise Rim Pulse Extensions",
+                              style: const TextStyle(fontSize: 13, height: 1.6, color: Colors.white),
                             ),
                           ],
                         ),
-                      ],
-                    ),
+                      )
+                    ],
+                  )
+                : const Center(child: Text("Hasil tabel skema latihan otomatis akan muncul di sini setelah di-generate.", style: TextStyle(color: Colors.white38, fontSize: 12), textAlign: TextAlign.center)),
             ),
-            const SizedBox(height: 20),
-
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.cyan.shade600,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-                onPressed: () => setState(() => _showResult = true),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.bolt),
-                    SizedBox(width: 8),
-                    Text("GENERATE VIA GEMINI AI", style: TextStyle(fontWeight: FontWeight.bold)),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 25),
-
-            if (_showResult) ...[
-              Text(
-                _selectedMode == 0 
-                    ? "MATRIKS 17 KLASIFIKASI: ${_latihanController.text.toUpperCase()}"
-                    : "RANGKUMAN GERAKAN YANG SESUAI:",
-                style: const TextStyle(color: Colors.cyan, fontWeight: FontWeight.bold, fontSize: 14),
-              ),
-              const SizedBox(height: 12),
-              _selectedMode == 0 ? _buildMatrixTable() : _buildSummaryTable(),
-            ] else
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(40.0),
-                  child: Text("Silakan isi input dan tekan tombol di atas untuk memuat data.", style: TextStyle(color: Colors.white38), textAlign: TextAlign.center),
-                ),
-              )
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildMatrixTable() {
-    String namaLatihan = _latihanController.text.isEmpty ? "Push Up" : _latihanController.text;
-    return Table(
-      border: TableBorder.all(color: Colors.white10, width: 1),
-      columnWidths: const {
-        0: FlexColumnWidth(4),
-        1: FlexColumnWidth(6),
-      },
-      children: [
-        const TableRow(
-          backgroundColor: Color(0xFF334155),
-          children: [
-            Padding(padding: EdgeInsets.all(10), child: Text("Klasifikasi", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.cyan))),
-            Padding(padding: EdgeInsets.all(10), child: Text("Jenis Gerakan Variasi", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.cyan))),
-          ]
-        ),
-        ..._mockMatrixData.entries.map((entry) {
-          return TableRow(
-            backgroundColor: const Color(0xFF1E293B),
-            children: [
-              Padding(padding: const EdgeInsets.all(10), child: Text(entry.key, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white70))),
-              Padding(padding: const EdgeInsets.all(10), child: Text(entry.value.replaceAll("Push Up", namaLatihan), style: const TextStyle(fontSize: 12, color: Colors.white))),
-            ]
-          );
-        }).toList()
-      ],
-    );
-  }
-
-  Widget _buildSummaryTable() {
-    return Table(
-      border: TableBorder.all(color: Colors.white10, width: 1),
-      columnWidths: const {
-        0: FlexColumnWidth(3),
-        1: FlexColumnWidth(3),
-        2: FlexColumnWidth(4),
-      },
-      children: [
-        const TableRow(
-          backgroundColor: Color(0xFF334155),
-          children: [
-            Padding(padding: EdgeInsets.all(10), child: Text("Kriteria Pencarian", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.cyan))),
-            Padding(padding: EdgeInsets.all(10), child: Text("Target / Metode", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.cyan))),
-            Padding(padding: EdgeInsets.all(10), child: Text("Rekomendasi Menu Gerakan", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.cyan))),
-          ]
-        ),
-        TableRow(
-          backgroundColor: const Color(0xFF1E293B),
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Text("• $_selectedKlasifikasi\n• $_selectedTipe\n• $_selectedBagian", style: const TextStyle(fontSize: 11, height: 1.5)),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Text("Fokus Zona:\n$_selectedBagian via $_selectedTipe", style: const TextStyle(fontSize: 11, color: Colors.amber, height: 1.4)),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Text(
-                _selectedBagian.contains("Core") || _selectedBagian == "Pelvic Floor"
-                    ? "1. Plank Dynamic Stability\n2. Bird-Dog Holds\n3. Dead Bug Press\n4. Pelvic Bridge Iso"
-                    : _selectedBagian == "Tangan"
-                        ? "1. Plyo Diamond Drops\n2. Isometric Push-Hold\n3. Hand Release Acceleration"
-                        : "1. Explosive Squat Jumps\n2. Lunge Matrix Rebounds\n3. Calf Raise Rim Pulses",
-                style: const TextStyle(fontSize: 12, height: 1.5),
-              ),
-            ),
-          ]
-        ),
-      ],
-    );
+// EXTENSION DECORATION HELPER
+extension BoxStyleExtension on BorderRadius {
+  BoxDecoration toBoxDecoration(Color warna) {
+    return BoxDecoration(color: warna, borderRadius: this);
   }
 }
