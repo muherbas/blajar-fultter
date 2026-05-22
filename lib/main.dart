@@ -50,15 +50,10 @@ class MainNavigationHolder extends StatefulWidget {
   @override
   State<MainNavigationHolder> createState() => _MainNavigationHolderState();
 }
-class MainNavigationHolder extends StatefulWidget {
-  const MainNavigationHolder({Key? key}) : super(key: key);
-  @override
-  State<MainNavigationHolder> createState() => _MainNavigationHolderState();
-}
 
 class _MainNavigationHolderState extends State<MainNavigationHolder> {
   int _currentIndex = 0; 
-  String _selectedMuridId = ""; // Dikosongkan karena belum ada murid di awal
+  String _selectedMuridId = ""; 
   final TextEditingController _namaController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
@@ -67,7 +62,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
   @override
   void initState() {
     super.initState();
-    _daftarMurid = []; // BERSIH: Data contoh Budi & Ruri sudah dihapus
+    _daftarMurid = []; 
   }
 
   Murid get _currentMurid => _daftarMurid.firstWhere(
@@ -255,28 +250,6 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
         selectedItemColor: const Color(0xFF38BDF8),
         unselectedItemColor: Colors.white54,
         type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.analytics), label: 'Dash'),
-          BottomNavigationBarItem(icon: Icon(Icons.group), label: 'Siswa'),
-          BottomNavigationBarItem(icon: Icon(Icons.edit_note), label: 'Reps'),
-          BottomNavigationBarItem(icon: Icon(Icons.timer), label: 'Waktu'),
-          BottomNavigationBarItem(icon: Icon(Icons.more_horiz), label: 'More'),
-        ],
-      ),
-    );
-  }
-}
-    ];
-
-    return Scaffold(
-      body: SafeArea(child: pages[_currentIndex]),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (i) => setState(() => _currentIndex = i),
-        backgroundColor: const Color(0xFF1E293B), 
-        selectedItemColor: const Color(0xFF38BDF8),
-        unselectedItemColor: const Color(0xFF64748B),
-        type: BottomNavigationBarType.fixed,
         selectedFontSize: 11,
         unselectedFontSize: 11,
         items: const [
@@ -284,7 +257,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
           BottomNavigationBarItem(icon: Icon(Icons.group), label: 'DAFTAR SISWA'),
           BottomNavigationBarItem(icon: Icon(Icons.edit_note), label: 'INPUT REPS'),
           BottomNavigationBarItem(icon: Icon(Icons.timer), label: 'INPUT WAKTU'),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'HISTORY'),
+          BottomNavigationBarItem(icon: Icon(Icons.more_horiz), label: 'MORE'),
         ],
       ),
     );
@@ -549,7 +522,6 @@ class DashboardAtletPage extends StatelessWidget {
     return TableRow(
       children: [
         Padding(padding: const EdgeInsets.all(8.0), child: Text(namaKomponen, style: const TextStyle(color: Colors.white, fontSize: 8.5, fontWeight: FontWeight.bold))),
-        // DI SINI PERBAIKANNYA: Mengubah Colors.white20 menjadi const Color(0x33FFFFFF)
         Padding(padding: const EdgeInsets.all(8.0), child: Text(labelPola, style: TextStyle(color: belumAdaData ? const Color(0x33FFFFFF) : Colors.amber[400], fontSize: 8))),
         Padding(padding: const EdgeInsets.all(8.0), child: Text(labelArti, style: TextStyle(color: belumAdaData ? const Color(0x33FFFFFF) : const Color(0xFF34D399), fontSize: 8))),
         Padding(padding: const EdgeInsets.all(8.0), child: Text(kelebihanText, style: const TextStyle(fontSize: 8.5, color: Colors.white70))),
@@ -737,7 +709,7 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
             const Text("INPUT TARGET REPETISI (KUANTITATIF)", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.cyan)),
             const SizedBox(height: 15),
             DropdownButtonFormField<String>(
-              value: widget.selectedMuridId, 
+              value: widget.selectedMuridId.isEmpty ? null : widget.selectedMuridId, 
               dropdownColor: const Color(0xFF1E293B),
               items: widget.daftarMurid.map((m) => DropdownMenuItem(value: m.id, child: Text("${m.id} - ${m.nama}", style: const TextStyle(color: Colors.white)))).toList(),
               onChanged: widget.onMuridChanged, decoration: const InputDecoration(labelText: "Pilih Atlet", border: OutlineInputBorder()),
@@ -761,6 +733,7 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
             SizedBox(width: double.infinity, height: 48, child: ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.cyan, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
               onPressed: () {
+                if (widget.selectedMuridId.isEmpty) return;
                 double reps = double.tryParse(_repsController.text) ?? 0.0;
                 double sets = double.tryParse(_setsController.text) ?? 0.0;
                 if (_jenisController.text.isNotEmpty && reps > 0 && sets > 0) {
@@ -809,7 +782,7 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
             const Text("INPUT TARGET DURASI WAKTU (TIME-BASED)", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.orange)),
             const SizedBox(height: 15),
             DropdownButtonFormField<String>(
-              value: widget.selectedMuridId, 
+              value: widget.selectedMuridId.isEmpty ? null : widget.selectedMuridId, 
               dropdownColor: const Color(0xFF1E293B),
               items: widget.daftarMurid.map((m) => DropdownMenuItem(value: m.id, child: Text("${m.id} - ${m.nama}", style: const TextStyle(color: Colors.white)))).toList(),
               onChanged: widget.onMuridChanged, decoration: const InputDecoration(labelText: "Pilih Atlet", border: OutlineInputBorder()),
@@ -835,6 +808,7 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
             SizedBox(width: double.infinity, height: 48, child: ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
               onPressed: () {
+                if (widget.selectedMuridId.isEmpty) return;
                 double dtk = double.tryParse(_detikController.text) ?? 0.0;
                 double mnt = double.tryParse(_menitController.text) ?? 0.0;
                 double sets = double.tryParse(_setsController.text) ?? 0.0;
@@ -1025,6 +999,7 @@ class MetaRadarChartPainter extends CustomPainter {
 
   @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
+
 // ==================== HALAMAN 6: AI TRAINING GENERATOR ====================
 class AITrainingGeneratorPage extends StatefulWidget {
   const AITrainingGeneratorPage({Key? key}) : super(key: key);
@@ -1034,7 +1009,7 @@ class AITrainingGeneratorPage extends StatefulWidget {
 }
 
 class _AITrainingGeneratorPageState extends State<AITrainingGeneratorPage> {
-  int _selectedMode = 0; // 0: Mode Variasi Latihan, 1: Mode Filter Matriks
+  int _selectedMode = 0; 
   final TextEditingController _latihanController = TextEditingController();
   
   String _selectedKlasifikasi = kDaftarKlasifikasiLatihan.first;
@@ -1042,7 +1017,6 @@ class _AITrainingGeneratorPageState extends State<AITrainingGeneratorPage> {
   String _selectedBagian = "Tangan";
   bool _showResult = false;
 
-  // Simulasi Bank Data Pengetahuan Internal sebelum dihubungkan ke API Online Gemini
   final Map<String, String> _mockMatrixData = {
     "STRENGTH": "Diamond Push Up / Weighted Push Up",
     "ENDURANCE": "Regular Push Up (High Reps Over time)",
@@ -1077,31 +1051,35 @@ class _AITrainingGeneratorPageState extends State<AITrainingGeneratorPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Toggle Tab Mode Input
             Row(
               children: [
                 Expanded(
-                  child: ElevatedButton.styleFrom(
-                    backgroundColor: _selectedMode == 0 ? Colors.cyan.shade700 : const Color(0xFF1E293B),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ).onPressed(() => setState(() { _selectedMode = 0; _showResult = false; })),
-                  child: const Text("Mode 1: Cari Variasi"),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _selectedMode == 0 ? Colors.cyan.shade700 : const Color(0xFF1E293B),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: () => setState(() { _selectedMode = 0; _showResult = false; }),
+                    child: const Text("Mode 1: Cari Variasi"),
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: ElevatedButton.styleFrom(
-                    backgroundColor: _selectedMode == 1 ? Colors.cyan.shade700 : const Color(0xFF1E293B),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ).onPressed(() => setState(() { _selectedMode = 1; _showResult = false; })),
-                  child: const Text("Mode 2: Filter Matriks"),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _selectedMode == 1 ? Colors.cyan.shade700 : const Color(0xFF1E293B),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: () => setState(() { _selectedMode = 1; _showResult = false; }),
+                    child: const Text("Mode 2: Filter Matriks"),
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 20),
 
-            // FORM INPUT BERDASARKAN MODE
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(12)),
@@ -1155,7 +1133,6 @@ class _AITrainingGeneratorPageState extends State<AITrainingGeneratorPage> {
             ),
             const SizedBox(height: 20),
 
-            // TOMBOL GENERATE
             SizedBox(
               width: double.infinity,
               height: 48,
@@ -1178,7 +1155,6 @@ class _AITrainingGeneratorPageState extends State<AITrainingGeneratorPage> {
             ),
             const SizedBox(height: 25),
 
-            // TEMPAT OUTPUT TABEL MATRIKS
             if (_showResult) ...[
               Text(
                 _selectedMode == 0 
@@ -1192,7 +1168,7 @@ class _AITrainingGeneratorPageState extends State<AITrainingGeneratorPage> {
               const Center(
                 child: Padding(
                   padding: EdgeInsets.all(40.0),
-                  child: Text("Silakan isi input dan tekan tombol di atas untuk memuat data.", style: TextStyle(color: Colors.white38), textAlign: Center( )),
+                  child: Text("Silakan isi input dan tekan tombol di atas untuk memuat data.", style: TextStyle(color: Colors.white38), textAlign: TextAlign.center),
                 ),
               )
           ],
@@ -1201,7 +1177,6 @@ class _AITrainingGeneratorPageState extends State<AITrainingGeneratorPage> {
     );
   }
 
-  // Desain Tabel Output Mode 1
   Widget _buildMatrixTable() {
     String namaLatihan = _latihanController.text.isEmpty ? "Push Up" : _latihanController.text;
     return Table(
@@ -1231,7 +1206,6 @@ class _AITrainingGeneratorPageState extends State<AITrainingGeneratorPage> {
     );
   }
 
-  // Desain Tabel Output Mode 2
   Widget _buildSummaryTable() {
     return Table(
       border: TableBorder.all(color: Colors.white10, width: 1),
@@ -1241,12 +1215,12 @@ class _AITrainingGeneratorPageState extends State<AITrainingGeneratorPage> {
         2: FlexColumnWidth(4),
       },
       children: [
-        TableRow(
-          backgroundColor: const Color(0xFF334155),
+        const TableRow(
+          backgroundColor: Color(0xFF334155),
           children: [
-            Padding(padding: const EdgeInsets.all(10), child: Text("Kriteria Pencarian", style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.cyan))),
-            const Padding(padding: EdgeInsets.all(10), child: Text("Target / Metode", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.cyan))),
-            const Padding(padding: EdgeInsets.all(10), child: Text("Rekomendasi Menu Gerakan", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.cyan))),
+            Padding(padding: EdgeInsets.all(10), child: Text("Kriteria Pencarian", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.cyan))),
+            Padding(padding: EdgeInsets.all(10), child: Text("Target / Metode", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.cyan))),
+            Padding(padding: EdgeInsets.all(10), child: Text("Rekomendasi Menu Gerakan", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.cyan))),
           ]
         ),
         TableRow(
@@ -1275,19 +1249,5 @@ class _AITrainingGeneratorPageState extends State<AITrainingGeneratorPage> {
         ),
       ],
     );
-  }
-}
-
-// Ekstensi helper kecil untuk merangkai fungsi onPressed secara estetik
-extension OnPressedExtension on Widget {
-  Widget onPressed(VoidCallback action) {
-    if (this is ElevatedButton) {
-      return ElevatedButton(
-        onPressed: action,
-        style: (this as ElevatedButton).style,
-        child: (this as ElevatedButton).child,
-      );
-    }
-    return this;
   }
 }
