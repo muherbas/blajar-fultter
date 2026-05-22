@@ -68,7 +68,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     _daftarMurid = [
       Murid(
         id: "001",
-        nama: "BUDI SANTOSO",
+        nama: "BASKORO",
         boxData: [
           [20.0, 35.0, 48.0, 75.0, 60.0, 85.0], // STRENGTH
           [25.0, 40.0, 52.0, 68.0, 65.0, 88.0], // ENDURANCE
@@ -81,8 +81,8 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
         radarData: [0.85, 0.68, 0.82, 0.50, 0.40, 0.65, 0.80, 0.70, 0.75, 0.60],
       ),
       Murid(
-        id: "100",
-        nama: "RURI",
+        id: "002",
+        nama: "APRI",
         boxData: [
           [20.0, 35.0, 50.0, 45.0, 65.0, 85.0],
           [25.0, 40.0, 55.0, 72.0, 70.0, 90.0],
