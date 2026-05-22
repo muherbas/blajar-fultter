@@ -59,9 +59,9 @@ class Murid {
     required this.nama,
     required this.boxData,
     required this.radarData,
-    List<Map<String, dynamic>>? riwayatLatihanKuantitatif,
+    List<Map<String, dynamic>>? riwayatLatihanKuatitatif,
     List<Map<String, dynamic>>? riwayatLatihanDurasi,
-  })  : this.riwayatLatihanKuantitatif = riwayatLatihanKuantitatif ?? [],
+  })  : this.riwayatLatihanKuantitatif = riwayatLatihanKuatitatif ?? [],
         this.riwayatLatihanDurasi = riwayatLatihanDurasi ?? [];
 }
 
@@ -74,7 +74,7 @@ class MainNavigationHolder extends StatefulWidget {
 }
 
 class _MainNavigationHolderState extends State<MainNavigationHolder> {
-  int _currentIndex = 0; // Langsung fokus terbuka di DASHBOARD
+  int _currentIndex = 0; // Fokus utama langsung terbuka di DASHBOARD
   String _selectedMuridId = "001"; 
 
   final TextEditingController _namaController = TextEditingController();
@@ -395,7 +395,7 @@ class DashboardAtletPage extends StatelessWidget {
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: SizedBox(
-                      width: 880, // Ukuran pasca pembuangan kolom skor harian
+                      width: 880, // Ukuran ideal pasca pembuangan kolom skor harian
                       child: Table(
                         border: TableBorder.all(color: const Color(0xFF334155), width: 1),
                         columnWidths: const {
@@ -453,22 +453,26 @@ class DashboardAtletPage extends StatelessWidget {
     return Padding(padding: const EdgeInsets.all(8.0), child: Text(text, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF38BDF8), fontSize: 9, fontWeight: FontWeight.bold)));
   }
 
-  // Kalkulator Deteksi Pola Boxplot Berdasarkan Posisi Kuartil Gambar Referensi Baru
+  // Kalkulator Deteksi Pola Boxplot Berdasarkan Gambar Referensi Baru Sabeumnim
   String _hitungPolaBoxplot(int idx) {
     if (idx >= activeMurid.boxData.length) return "Symmetrical / Normal";
+    
+    double min = activeMurid.boxData[idx][0];
     double q1 = activeMurid.boxData[idx][1];
     double q2 = activeMurid.boxData[idx][2]; // Median
     double q3 = activeMurid.boxData[idx][4];
+    double max = activeMurid.boxData[idx][5];
     
     double jarakBawah = q2 - q1;
     double jarakAtas = q3 - q2;
     double iqr = q3 - q1;
+    double totalRange = max - min;
 
-    // 1. Deteksi Variabilitas Rentang (Narrow / Wide)
+    // 1. Deteksi Variabilitas Rentang Kurva (Kurtosis / Sebaran data)
     if (iqr < 12) return "Leptokurtic (Narrow)";
     if (iqr > 38) return "Platykurtic (Wide)";
     
-    // 2. Deteksi Kemiringan Distribusi (Skewness)
+    // 2. Deteksi Kemiringan Distribusi (Skewness Posisi Median)
     if ((jarakAtas - jarakBawah).abs() <= 2.5) {
       return "Symmetrical / Normal";
     } else if (jarakAtas > jarakBawah) {
@@ -490,7 +494,7 @@ class DashboardAtletPage extends StatelessWidget {
         diAtasRataTim = sk >= avg;
       }
     } else {
-      labelPola = "-"; // Murni Radar: Dikunci strip '-' total sesuai request
+      labelPola = "-"; // Murni Tipe Radar: Dikunci strip '-' total sesuai request
       if (dataIdx < activeMurid.radarData.length) {
         double radVal = activeMurid.radarData[dataIdx];
         double avg = dataIdx < teamRadarAverages.length ? teamRadarAverages[dataIdx] : 0.0;
@@ -697,4 +701,183 @@ class InputLatihanDurasiPage extends StatefulWidget {
   final Function(String id, String jenis, String klasifikasi, double waktu, double sets, DateTime tgl) onSimpan;
 
   const InputLatihanDurasiPage({Key? key, required this.daftarMurid, required this.selectedMuridId, required this.onMuridChanged, required this.onSimpan}) : super(key: key);
-  @override State<InputLatihanDurasiPage>
+  @override State<InputLatihanDurasiPage> createState() => _InputLatihanDurasiPageState();
+}
+class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
+  final TextEditingController _jenisLatihanController = TextEditingController();
+  final TextEditingController _waktuController = TextEditingController();
+  final TextEditingController _setsController = TextEditingController();
+  String _selectedKlasifikasi = "ENDURANCE";
+
+  @override Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF0F172A),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Center(child: Text('Input Capaian Durasi (Waktu * Sets)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF06B6D4)))),
+            const SizedBox(height: 16),
+            const Text("Pilih Atlet:", style: TextStyle(fontSize: 11, color: Colors.white70)),
+            const SizedBox(height: 4),
+            DropdownButtonFormField<String>(
+              dropdownColor: const Color(0xFF1E293B),
+              value: widget.selectedMuridId,
+              items: widget.daftarMurid.map((m) => DropdownMenuItem(value: m.id, child: Text(m.nama))).toList(),
+              onChanged: widget.onMuridChanged,
+              decoration: const InputDecoration(filled: true, fillColor: Color(0xFF1E293B), border: OutlineInputBorder()),
+            ),
+            const SizedBox(height: 12),
+            const Text("Klasifikasi Fokus Motorik (17 Opsi):", style: TextStyle(fontSize: 11, color: Colors.white70)),
+            const SizedBox(height: 4),
+            DropdownButtonFormField<String>(
+              dropdownColor: const Color(0xFF1E293B),
+              value: _selectedKlasifikasi,
+              items: kDaftarKlasifikasiLatihan.map((opsi) => DropdownMenuItem(value: opsi, child: Text(opsi, style: const TextStyle(fontSize: 12)))).toList(),
+              onChanged: (val) => setState(() => _selectedKlasifikasi = val!),
+              decoration: const InputDecoration(filled: true, fillColor: Color(0xFF1E293B), border: OutlineInputBorder()),
+            ),
+            const SizedBox(height: 12),
+            TextField(controller: _jenisLatihanController, decoration: const InputDecoration(labelText: 'Jenis Drill (e.g., Plank)', filled: true, fillColor: Color(0xFF1E293B))),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(child: TextField(controller: _waktuController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Waktu (detik)', filled: true, fillColor: Color(0xFF1E293B)))),
+                const SizedBox(width: 12),
+                Expanded(child: TextField(controller: _setsController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Jumlah Sets', filled: true, fillColor: Color(0xFF1E293B)))),
+              ],
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF06B6D4)),
+                onPressed: () {
+                  double w = double.tryParse(_waktuController.text) ?? 0;
+                  double s = double.tryParse(_setsController.text) ?? 0;
+                  widget.onSimpan(widget.selectedMuridId, _jenisLatihanController.text, _selectedKlasifikasi, w, s, DateTime.now());
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Kalkulasi Durasi $_selectedKlasifikasi Masuk Dashboard!')));
+                },
+                child: const Text('SIMPAN & KALKULASI DATA WAKTU', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ==================== RENDERING VISUAL GRAPH BOXPLOT ====================
+class MetaBoxplotChart extends StatelessWidget {
+  final List<List<double>> boxData;
+  final List<double> teamAverages;
+
+  const MetaBoxplotChart({Key? key, required this.boxData, required this.teamAverages}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(size: const Size(double.infinity, 250), painter: _MetaBoxplotPainter(boxData: boxData, teamAverages: teamAverages));
+  }
+}
+
+class _MetaBoxplotPainter extends CustomPainter {
+  final List<List<double>> boxData;
+  final List<double> teamAverages;
+
+  _MetaBoxplotPainter({required this.boxData, required this.teamAverages});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final linePaint = Paint()..color = const Color(0xFF64748B)..strokeWidth = 1.0..style = PaintingStyle.stroke;
+    final boxPaint = Paint()..color = const Color(0xFF334155)..style = PaintingStyle.fill;
+    final borderBoxPaint = Paint()..color = const Color(0xFF94A3B8)..strokeWidth = 1..style = PaintingStyle.stroke;
+    
+    final personalScorePaint = Paint()..color = const Color(0xFF00E5FF)..style = PaintingStyle.fill;
+    final teamMeanPaint = Paint()..color = const Color(0xFFFF1744)..style = PaintingStyle.fill;
+    final medianPaint = Paint()..color = const Color(0xFF10B981)..strokeWidth = 2;
+
+    final List<String> longLabels = ['STRENGTH', 'ENDURANCE', 'SPEED', 'COORDINATION', 'FLEXIBILITY', 'BALANCE', 'REACTION TIME'];
+    double colWidth = size.width / 8;
+    double chartHeight = size.height - 60;
+
+    double getY(double val) {
+      return (chartHeight - (val.clamp(0, 100) * (chartHeight / 100))) + 15;
+    }
+
+    for (int grid = 0; grid <= 100; grid += 25) {
+      double gy = getY(grid.toDouble());
+      canvas.drawLine(Offset(colWidth - 10, gy), Offset(size.width - 10, gy), Paint()..color = const Color(0xFF1E293B));
+    }
+
+    final textPainter = TextPainter(textDirection: TextDirection.ltr);
+
+    for (int i = 0; i < 7; i++) {
+      if (i >= boxData.length || boxData[i].length < 6) continue;
+      double x = (i + 1) * colWidth + 10;
+      canvas.drawLine(Offset(x, getY(boxData[i][0])), Offset(x, getY(boxData[i][5])), linePaint);
+      canvas.drawRect(Rect.fromLTRB(x - 12, getY(boxData[i][4]), x + 12, getY(boxData[i][1])), boxPaint);
+      canvas.drawRect(Rect.fromLTRB(x - 12, getY(boxData[i][4]), x + 12, getY(boxData[i][1])), borderBoxPaint);
+      canvas.drawLine(Offset(x - 12, getY(boxData[i][2])), Offset(x + 12, getY(boxData[i][2])), medianPaint);
+      canvas.drawCircle(Offset(x, getY(boxData[i][3])), 4.5, personalScorePaint);
+      
+      double teamAvgValue = i < teamAverages.length ? teamAverages[i] : 0.0;
+      canvas.drawRect(Rect.fromCenter(center: Offset(x, getY(teamAvgValue)), width: 7, height: 7), teamMeanPaint);
+
+      canvas.save();
+      canvas.translate(x, chartHeight + 22);
+      canvas.rotate(0.35);
+      textPainter.text = TextSpan(text: longLabels[i], style: const TextStyle(color: Colors.white70, fontSize: 7, fontWeight: FontWeight.bold));
+      textPainter.layout();
+      textPainter.paint(canvas, Offset(-textPainter.width / 2, 0));
+      canvas.restore();
+    }
+  }
+  @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+// ==================== RENDERING VISUAL GRAPH RADAR ====================
+class MetaRadarChartPainter extends CustomPainter {
+  final List<double> activeRadar;
+  final List<double> teamRadar;
+  MetaRadarChartPainter({required this.activeRadar, required this.teamRadar});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final centerX = size.width / 2;
+    final centerY = size.height / 2;
+    final radius = math.min(centerX, centerY) * 0.75;
+    final baseGridPaint = Paint()..color = const Color(0xFF334155)..style = PaintingStyle.stroke;
+    final personalBorderPaint = Paint()..color = const Color(0xFF00E5FF)..style = PaintingStyle.stroke..strokeWidth = 2.0;
+    final teamBorderPaint = Paint()..color = const Color(0xFFFF1744)..style = PaintingStyle.stroke..strokeWidth = 1.2;
+
+    for (int g = 1; g <= 4; g++) canvas.drawCircle(Offset(centerX, centerY), radius * (g / 4), baseGridPaint);
+
+    final teamPath = Path();
+    final personalPath = Path();
+
+    int loopBound = math.min(10, math.min(activeRadar.length, teamRadar.length));
+
+    for (int i = 0; i < loopBound; i++) {
+      final angle = (i * 2 * math.pi / 10) - (math.pi / 2);
+      double tx = centerX + radius * teamRadar[i] * math.cos(angle);
+      double ty = centerY + radius * teamRadar[i] * math.sin(angle);
+      if (i == 0) teamPath.moveTo(tx, ty); else teamPath.lineTo(tx, ty);
+
+      double px = centerX + radius * activeRadar[i] * math.cos(angle);
+      double py = centerY + radius * activeRadar[i] * math.sin(angle);
+      if (i == 0) personalPath.moveTo(px, py); else personalPath.lineTo(px, py);
+
+      canvas.drawLine(Offset(centerX, centerY), Offset(centerX + radius * math.cos(angle), centerY + radius * math.sin(angle)), baseGridPaint);
+    }
+    
+    if (loopBound > 0) {
+      teamPath.close(); 
+      personalPath.close();
+      canvas.drawPath(teamPath, teamBorderPaint);
+      canvas.drawPath(personalPath, personalBorderPaint);
+    }
+  }
+  @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
