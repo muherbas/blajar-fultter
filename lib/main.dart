@@ -32,7 +32,7 @@ class Murid {
   
   // Riwayat latihan kuantitatif (Halaman 3)
   List<Map<String, dynamic>> riwayatLatihanKuantitatif;
-  // Riwayat latihan durasi/waktu (Halaman 4 Baru)
+  // Riwayat latihan durasi/waktu (Halaman 4)
   List<Map<String, dynamic>> riwayatLatihanDurasi;
 
   Murid({
@@ -55,7 +55,7 @@ class MainNavigationHolder extends StatefulWidget {
 }
 
 class _MainNavigationHolderState extends State<MainNavigationHolder> {
-  int _currentIndex = 1; // Default terbuka di halaman "DAFTAR"
+  int _currentIndex = 1; // Default terbuka langsung di halaman "DAFTAR"
   String _selectedMuridId = "001"; // ID murid aktif yang dirender di dashboard
 
   final TextEditingController _namaController = TextEditingController();
@@ -178,7 +178,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     return -1;
   }
 
-  // Sinkronisasi data Halaman 3 (Kuantitatif)
+  // Sinkronisasi data Halaman 3 (Kuantitatif - Reps)
   void _simpanDataKuantitatif(String idMurid, String jenis, String klasifikasi, double reps, double sets, DateTime tgl) {
     setState(() {
       int idx = _daftarMurid.indexWhere((m) => m.id == idMurid);
@@ -194,17 +194,17 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     });
   }
 
-  // Sinkronisasi data Halaman 4 Baru (Durasi/Waktu)
+  // Sinkronisasi data Halaman 4 (Kualitatif - Durasi/Waktu)
   void _simpanDataDurasi(String idMurid, String jenis, String klasifikasi, double waktu, double sets, DateTime tgl) {
     setState(() {
       int idx = _daftarMurid.indexWhere((m) => m.id == idMurid);
       if (idx != -1) {
-        double skor = waktu * sets; // Kalkulasi real-time akumulasi durasi
+        double skor = waktu * sets; 
         _daftarMurid[idx].riwayatLatihanDurasi.add({
           'tanggal': tgl, 'jenis': jenis, 'klasifikasi': klasifikasi, 'waktu': waktu, 'sets': sets, 'skor': skor
         });
         int boxIdx = _dapatkanBoxIndex(klasifikasi);
-        if (boxIdx != -1) _daftarMurid[idx].boxData[boxIdx][3] = skor; // Update dashboard secara real-time
+        if (boxIdx != -1) _daftarMurid[idx].boxData[boxIdx][3] = skor; 
         _selectedMuridId = idMurid;
       }
     });
@@ -235,7 +235,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
         onMuridChanged: (id) => setState(() => _selectedMuridId = id!),
         onSimpan: _simpanDataKuantitatif,
       ),
-      InputLatihanDurasiPage( // Halaman 4 Baru
+      InputLatihanDurasiPage(
         daftarMurid: _daftarMurid,
         selectedMuridId: _selectedMuridId,
         onMuridChanged: (id) => setState(() => _selectedMuridId = id!),
@@ -289,6 +289,8 @@ class DashboardAtletPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
+            
+            // Card Boxplot
             Container(
               width: double.infinity,
               decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(16)),
@@ -302,9 +304,75 @@ class DashboardAtletPage extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(height: 16),
+
+            // Tabel Real-time Evaluasi Matriks
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(16)),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('MATRIKS EVALUASI REAL-TIME BOXPLOT', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFF10B981))),
+                  const SizedBox(height: 14),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: SizedBox(
+                      width: 650,
+                      child: Table(
+                        border: TableBorder.all(color: const Color(0xFF334155), width: 1),
+                        columnWidths: const {
+                          0: FlexColumnWidth(1.2),
+                          1: FlexColumnWidth(1.3),
+                          2: FlexColumnWidth(1.5),
+                          3: FlexColumnWidth(1.5),
+                          4: FlexColumnWidth(2.0),
+                        },
+                        children: [
+                          TableRow(
+                            decoration: const BoxDecoration(color: Color(0xFF0F172A)),
+                            children: [
+                              _buildHeaderCell('KOMPONEN'),
+                              _buildHeaderCell('MAKNA STATISTIK'),
+                              _buildHeaderCell('KEKURANGAN'),
+                              _buildHeaderCell('KELEBIHAN'),
+                              _buildHeaderCell('SARAN DINAMIS'),
+                            ],
+                          ),
+                          _buildTableRow('STRENGTH / PWR', 'Score: ${activeMurid.boxData[0][3].toStringAsFixed(1)}', 'Standar baseline angkatan motorik rendah.', 'Satu atlet menembus outlier batas atas.', 'Fokus ke volume hypertrophy & dynamic power.'),
+                          _buildTableRow('ENDURANCE / VO2', 'Score: ${activeMurid.boxData[1][3].toStringAsFixed(1)}', 'Recovery rate tim tidak merata.', 'Kapasitas VO2 Max beberapa atlet superior.', 'Tambahkan zona 2 aerobic low intensity interval.'),
+                          _buildTableRow('SPEED / AGILITY', 'Score: ${activeMurid.boxData[2][3].toStringAsFixed(1)}', 'Rentang variabilitas kotak melebar.', 'Akselerasi awal fase eksplosif matang.', 'Kelompokkan latihan lari berdasarkan klaster kecepatan.'),
+                          _buildTableRow('COORD / SPATIAL', 'Score: ${activeMurid.boxData[3][3].toStringAsFixed(1)}', 'Distribusi mampat di angka menengah.', 'Gerakan seragam dan kompak.', 'Berikan stimulus pola motorik kompleks baru.'),
+                          _buildTableRow('FLEX / MOBILITY', 'Score: ${activeMurid.boxData[4][3].toStringAsFixed(1)}', 'Otot panggul dominan kaku.', 'Kelenturan ligamen sendi optimal.', 'Sesi khusus dynamic stretching sebelum latihan.'),
+                          _buildTableRow('BALANCE / CORE', 'Score: ${activeMurid.boxData[5][3].toStringAsFixed(1)}', 'Stabilitas core melemah saat lelah.', 'Tumpuan satu kaki kokoh.', 'Integrasikan latihan bosu ball & plank.'),
+                          _buildTableRow('REACTION TIME', 'Score: ${activeMurid.boxData[6][3].toStringAsFixed(1)}', 'Whisker bawah menjulur panjang.', 'Respon visual-motorik kilat.', 'Ambil data reaksi saat kondisi CNS segar.'),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildHeaderCell(String text) {
+    return Padding(padding: const EdgeInsets.all(6.0), child: Text(text, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF38BDF8), fontSize: 8, fontWeight: FontWeight.w900)));
+  }
+
+  TableRow _buildTableRow(String comp, String stat, String minus, String plus, String advice) {
+    return TableRow(
+      children: [
+        Padding(padding: const EdgeInsets.all(6.0), child: Text(comp, style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold))),
+        Padding(padding: const EdgeInsets.all(6.0), child: Text(stat, style: const TextStyle(color: Color(0xFF34D399), fontSize: 8, fontWeight: FontWeight.bold))),
+        Padding(padding: const EdgeInsets.all(6.0), child: Text(minus, style: const TextStyle(color: Color(0xFFF43F5E), fontSize: 8))),
+        Padding(padding: const EdgeInsets.all(6.0), child: Text(plus, style: const TextStyle(color: Color(0xFF34D399), fontSize: 8))),
+        Padding(padding: const EdgeInsets.all(6.0), child: Text(advice, style: const TextStyle(color: Color(0xFFE2E8F0), fontSize: 8))),
+      ],
     );
   }
 }
@@ -484,7 +552,7 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
   }
 }
 
-// ==================== HALAMAN 4 BARU: INPUT LATIHAN DURASI (WAKTU) ====================
+// ==================== HALAMAN 4: INPUT LATIHAN DURASI (WAKTU) ====================
 class InputLatihanDurasiPage extends StatefulWidget {
   final List<Murid> daftarMurid;
   final String selectedMuridId;
@@ -509,7 +577,6 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
   String _selectedKlasifikasi = "STRENGTH";
   DateTime _selectedDate = DateTime.now();
 
-  // Variabel untuk kalkulasi real-time lokal tracker komponen bawah
   double _skorTerakhir = 0.0;
   int _totalRiwayatEntry = 0;
   double _rataRataSkorKumulatif = 0.0;
@@ -544,7 +611,6 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Fitur Search Global Murid Aktif untuk Dashboard
     List<Murid> opsiDropdownTerfilter = widget.daftarMurid.where((m) {
       return m.nama.toLowerCase().contains(_filterKeyword.toLowerCase()) || m.id.contains(_filterKeyword);
     }).toList();
@@ -562,7 +628,7 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
           ),
           const SizedBox(height: 16),
 
-          // Search Field
+          // Search Field Murid
           TextField(
             controller: _searchMuridController,
             onChanged: (val) => setState(() => _filterKeyword = val),
@@ -605,7 +671,7 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
           ),
           const SizedBox(height: 14),
 
-          // 2. Timeline Tanggal Pelaksanaan
+          // Timeline Picker Tanggal Pelaksanaan (BUG FIXED: Backslash dihapus)
           InkWell(
             onTap: () async {
               DateTime? picked = await showDatePicker(context: context, initialDate: _selectedDate, firstDate: DateTime(2020), lastDate: DateTime(2030));
@@ -615,9 +681,9 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
               padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
               decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFF334155))),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween, // Diperbaiki: spaceBetween aman dari bug sintaks
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Timeline Pelaksanaan: ${_selectedDate.day.toString().padLeft(2,\'0\')}/${_selectedDate.month.toString().padLeft(2,\'0\')}/${_selectedDate.year}', style: const TextStyle(color: Colors.white, fontSize: 13)),
+                  Text('Timeline Pelaksanaan: ${ _selectedDate.day.toString().padLeft(2, '0') }/${ _selectedDate.month.toString().padLeft(2, '0') }/${_selectedDate.year}', style: const TextStyle(color: Colors.white, fontSize: 13)),
                   const Icon(Icons.timeline, color: Color(0xFF06B6D4), size: 18),
                 ],
               ),
@@ -625,7 +691,7 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
           ),
           const SizedBox(height: 14),
 
-          // 3. Nama Jenis Latihan (Manual Input)
+          // Nama Jenis Latihan
           TextField(
             controller: _jenisLatihanController,
             style: const TextStyle(color: Colors.white, fontSize: 13),
@@ -639,7 +705,7 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
           ),
           const SizedBox(height: 14),
 
-          // 4. Opsi Klasifikasi Biomotorik Durasi
+          // Dropdown Klasifikasi
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFF334155))),
@@ -657,7 +723,7 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
           ),
           const SizedBox(height: 14),
 
-          // 5. Input Berapa Lama Waktu dan Jumlah Set
+          // Input Waktu dan Set
           Row(
             children: [
               Expanded(
@@ -693,7 +759,7 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
           ),
           const SizedBox(height: 24),
 
-          // 6. Tombol Simpan Data Utama
+          // Tombol Simpan Data Waktu
           SizedBox(
             width: double.infinity,
             height: 46,
@@ -707,7 +773,6 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
                   return;
                 }
 
-                // Simpan & kirim ke state global real-time
                 widget.onSimpan(widget.selectedMuridId, _jenisLatihanController.text.trim(), _selectedKlasifikasi, waktu, sets, _selectedDate);
                 
                 setState(() { _hitungKalkulasiLokal(widget.selectedMuridId); });
@@ -724,7 +789,7 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
           ),
           const SizedBox(height: 24),
 
-          // 7. Widget Monitor Kalkulasi Real-time Terkini Komponen Bawah
+          // Widget Panel Kalkulasi Real-time Terkini (Bawah)
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF0891B2), width: 1)),
@@ -734,10 +799,10 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
                 const Text('Kalkulasi Real-time Terkini (Durasi):', style: TextStyle(color: Color(0xFFF8FAFC), fontSize: 13, fontWeight: FontWeight.bold)),
                 const Divider(color: Color(0xFF334155), height: 16),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween, // Diperbaiki dari .between
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('Skor Terakhir (Waktu × Set):', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12)),
-                    Text(_skorTerakhir.toStringAsFixed(1), style: const TextStyle(color: Color(0xFF06B6D4), fontSize: 14, fontWeight: FontWeight.w900)), // Menggunakan .w900 yang aman
+                    Text(_skorTerakhir.toStringAsFixed(1), style: const TextStyle(color: Color(0xFF06B6D4), fontSize: 14, fontWeight: FontWeight.w900)),
                   ],
                 ),
                 const SizedBox(height: 8),
