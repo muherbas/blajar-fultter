@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
       title: 'Premium Athlete Dashboard',
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0F172A), // Latar slate-900 premium
+        scaffoldBackgroundColor: const Color(0xFF0F172A),
         fontFamily: 'Roboto',
       ),
       home: const MainNavigationHolder(),
@@ -23,7 +23,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// 1. DAFTAR KLASIFIKASI ASLI (SAMA PERSIS VERSI SEBELUMNYA)
 const List<String> kDaftarKlasifikasiLatihan = [
   "STRENGTH", "ENDURANCE", "SPEED", "COORDINATION", "FLEXIBILITY", "BALANCE", "REACTION TIME",
   "MUSCULAR ENDURANCE", "POWER", "CORE STABILITY", "DYNAMIC FLEXIBILITY", "SPEED ENDURANCE",
@@ -63,7 +62,6 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
   @override
   void initState() {
     super.initState();
-    // INITIAL DATA DUMMY ASLI (LOGIKA AWAL SEBELUMNYA)
     _daftarMurid = [
       Murid(
         id: "001", nama: "BUDI SANTOSO",
@@ -96,7 +94,6 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
 
   Murid get _currentMurid => _daftarMurid.firstWhere((m) => m.id == _selectedMuridId, orElse: () => _daftarMurid.first);
 
-  // 2. RUMUS RATA-RATA TIM ASLI (SAMA PERSIS)
   List<double> get _teamAverageBoxScores {
     List<double> averages = List.generate(7, (_) => 0.0);
     if (_daftarMurid.isEmpty) return averages;
@@ -135,7 +132,6 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     return averages;
   }
 
-  // 3. INDEX MAPPING ASLI (SAMA PERSIS)
   int _dapatkanBoxIndex(String klasifikasi) {
     final String upper = klasifikasi.toUpperCase();
     if (upper == "STRENGTH" || upper == "POWER" || upper == "CORE STABILITY") return 0;
@@ -148,7 +144,6 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     return -1;
   }
 
-  // 4. LOGIKA INPUT DATA REPS & WAKTU (SAMA PERSIS VERSI AWAL)
   void _simpanDataKuantitatif(String id, String jenis, String klas, double reps, double sets, DateTime tgl) {
     setState(() {
       int idx = _daftarMurid.indexWhere((m) => m.id == id);
@@ -302,7 +297,6 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // BOXPLOT CONTAINER
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -331,7 +325,6 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // RADAR CONTAINER
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -345,7 +338,7 @@ class DashboardAtletPage extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Container(width: 4, height: 16, color: const Color(0xFF22C55E)), // Sesuai warna hijau stabil asli
+                      Container(width: 4, height: 16, color: const Color(0xFF22C55E)), 
                       const SizedBox(width: 8),
                       const Text(
                         'PROFIL BIOMOTORIK METRIKS RADAR (10 DIMENSI)',
@@ -366,7 +359,6 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // TABEL EVALUASI MATRIKS 100% PERSIS RUMUS ASLI
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -456,7 +448,6 @@ class DashboardAtletPage extends StatelessWidget {
     );
   }
 
-  // 5. RUMUS IDENTIFIKASI KEMIRIPAN 40 POLA ASLI (SAMA PERSIS)
   Map<String, String> _analisisKomplet40Pola(int idx, String namaKomponen) {
     bool adaDataInput = activeMurid.riwayatLatihanKuantitatif.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == idx) ||
                         activeMurid.riwayatLatihanDurasi.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == idx) ||
@@ -797,8 +788,8 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
             SizedBox(width: double.infinity, height: 48, child: ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
               onPressed: () {
-                double mnt = double.tryParse(_menitController.text) ?? 0.0;
                 double dtk = double.tryParse(_detikController.text) ?? 0.0;
+                double mnt = double.tryParse(_menitController.text) ?? 0.0;
                 double sets = double.tryParse(_setsController.text) ?? 0.0;
                 double totalDetik = (mnt * 60) + dtk;
                 if (_jenisController.text.isNotEmpty && totalDetik > 0 && sets > 0) {
@@ -928,9 +919,9 @@ class MetaRadarChartPainter extends CustomPainter {
     int kDimensi = 10;
 
     final Paint pGrid = Paint()..color = const Color(0xFF334155)..style = PaintingStyle.stroke..strokeWidth = 1.0;
-    final Paint pAtlet = Paint()..color = const Color(0xFF22C55E).withOpacity(0.25)..style = PaintingStyle.fill; // Hijau asli
+    final Paint pAtlet = Paint()..color = const Color(0xFF22C55E).withOpacity(0.25)..style = PaintingStyle.fill; 
     final Paint pBorderAtlet = Paint()..color = const Color(0xFF22C55E)..style = PaintingStyle.stroke..strokeWidth = 2.0;
-    final Paint pTim = Paint()..color = const Color(0xFF38BDF8)..style = PaintingStyle.stroke..strokeWidth = 1.2; // Biru rata tim asli
+    final Paint pTim = Paint()..color = const Color(0xFF38BDF8)..style = PaintingStyle.stroke..strokeWidth = 1.2; 
 
     for (int i = 1; i <= 5; i++) {
       double r = maxRadius * (i / 5.0);
