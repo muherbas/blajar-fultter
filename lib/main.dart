@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
-import 'package:intl/intl.dart'; // Untuk format tanggal timeline
 
 void main() {
   runApp(const MyApp());
@@ -84,7 +83,11 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     if (_daftarMurid.isEmpty) return averages;
     for (int i = 0; i < 7; i++) {
       double sum = 0;
-      for (var murid in _daftarMurid) sum += murid.boxData[i][3];
+      for (var murid in _daftarMurid) {
+        if (i < murid.boxData.length && murid.boxData[i].length > 3) {
+          sum += murid.boxData[i][3];
+        }
+      }
       averages[i] = sum / _daftarMurid.length;
     }
     return averages;
@@ -95,7 +98,11 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     if (_daftarMurid.isEmpty) return averages;
     for (int i = 0; i < 10; i++) {
       double sum = 0;
-      for (var murid in _daftarMurid) sum += murid.radarData[i];
+      for (var murid in _daftarMurid) {
+        if (i < murid.radarData.length) {
+          sum += murid.radarData[i];
+        }
+      }
       averages[i] = sum / _daftarMurid.length;
     }
     return averages;
@@ -113,20 +120,40 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     return -1;
   }
 
-  void _simpanData(String id, String jenis, String klas, double val, double sets, bool isReps) {
+  void _simpanDataKuantitatif(String id, String jenis, String klas, double reps, double sets, DateTime tgl) {
     setState(() {
       int idx = _daftarMurid.indexWhere((m) => m.id == id);
       if (idx != -1) {
-        double skor = val * sets;
-        var entry = {'tanggal': DateTime.now(), 'jenis': jenis, 'klasifikasi': klas, 'skor': skor, 'isReps': isReps};
-        if (isReps) _daftarMurid[idx].riwayatLatihanKuantitatif.add(entry);
-        else _daftarMurid[idx].riwayatLatihanDurasi.add(entry);
+        double skor = reps * sets;
+        _daftarMurid[idx].riwayatLatihanKuantitatif.add({
+          'tanggal': tgl, 'jenis': jenis, 'klasifikasi': klas, 'skor': skor, 'isReps': true
+        });
 
         int bIdx = _dapatkanBoxIndex(klas);
         if (bIdx != -1) {
           _daftarMurid[idx].boxData[bIdx][3] = skor;
           _daftarMurid[idx].radarData[bIdx] = (skor / 100).clamp(0.0, 1.0);
         }
+        _selectedMuridId = id;
+      }
+    });
+  }
+
+  void _simpanDataDurasi(String id, String jenis, String klas, double waktu, double sets, DateTime tgl) {
+    setState(() {
+      int idx = _daftarMurid.indexWhere((m) => m.id == id);
+      if (idx != -1) {
+        double skor = waktu * sets;
+        _daftarMurid[idx].riwayatLatihanDurasi.add({
+          'tanggal': tgl, 'jenis': jenis, 'klasifikasi': klas, 'skor': skor, 'isReps': false
+        });
+
+        int bIdx = _dapatkanBoxIndex(klas);
+        if (bIdx != -1) {
+          _daftarMurid[idx].boxData[bIdx][3] = skor;
+          _daftarMurid[idx].radarData[bIdx] = (skor / 100).clamp(0.0, 1.0);
+        }
+        _selectedMuridId = id;
       }
     });
   }
@@ -140,7 +167,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
       DaftarMuridPage(
         daftarMurid: filtered, selectedId: _selectedMuridId, namaController: _namaController, searchController: _searchController,
         onSearchChanged: (v) => setState(() => _searchQuery = v),
-        onSelect: (id) => setState(() { _selectedMuridId = id; _currentIndex = 4; }), // Otomatis ke Timeline History
+        onSelect: (id) => setState(() { _selectedMuridId = id; _currentIndex = 4; }), 
         onDelete: (m) => setState(() => _daftarMurid.remove(m)),
         onAdd: () {
           if (_namaController.text.isEmpty) return;
@@ -148,9 +175,9 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
           _namaController.clear();
         },
       ),
-      InputLatihanKuantitatifPage(daftarMurid: _daftarMurid, selectedMuridId: _selectedMuridId, onMuridChanged: (id) => setState(() => _selectedMuridId = id!), onSimpan: (id, j, k, r, s, t) => _simpanData(id, j, k, r, s, true)),
-      InputLatihanDurasiPage(daftarMurid: _daftarMurid, selectedMuridId: _selectedMuridId, onMuridChanged: (id) => setState(() => _selectedMuridId = id!), onSimpan: (id, j, k, w, s, t) => _simpanData(id, j, k, w, s, false)),
-      TimelineHistoryPage(activeMurid: _currentMurid), // Halaman 5 Baru
+      InputLatihanKuantitatifPage(daftarMurid: _daftarMurid, selectedMuridId: _selectedMuridId, onMuridChanged: (id) => setState(() => _selectedMuridId = id!), onSimpan: _simpanDataKuantitatif),
+      InputLatihanDurasiPage(daftarMurid: _daftarMurid, selectedMuridId: _selectedMuridId, onMuridChanged: (id) => setState(() => _selectedMuridId = id!), onSimpan: _simpanDataDurasi),
+      TimelineHistoryPage(activeMurid: _currentMurid), 
     ];
 
     return Scaffold(
@@ -235,21 +262,34 @@ class DashboardAtletPage extends StatelessWidget {
   Widget _c(String t, {Color? color}) => Padding(padding: const EdgeInsets.all(8), child: Text(t, style: TextStyle(fontSize: 8, color: color ?? Colors.white)));
 }
 
-// ==================== HALAMAN 5: TIMELINE HISTORY (BARU) ====================
+// ==================== HALAMAN 5: TIMELINE HISTORY (100% STANDAR DART) ====================
 class TimelineHistoryPage extends StatelessWidget {
   final Murid activeMurid;
   const TimelineHistoryPage({Key? key, required this.activeMurid}) : super(key: key);
 
+  // Format Tanggal Manual tanpa dependensi paket intl luar
+  String _formatTanggalManual(DateTime dt) {
+    final List<String> bulan = [
+      "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", 
+      "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
+    ];
+    String tgl = dt.day.toString().padLeft(2, '0');
+    String bln = bulan[dt.month - 1];
+    String thn = dt.year.toString();
+    String jam = dt.hour.toString().padLeft(2, '0');
+    String mnt = dt.minute.toString().padLeft(2, '0');
+    
+    return "$tgl $bln $thn | $jam:$mnt";
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Gabungkan riwayat
     List<Map<String, dynamic>> allHistory = [...activeMurid.riwayatLatihanKuantitatif, ...activeMurid.riwayatLatihanDurasi];
-    // Urutkan tanggal terbaru ke terlama
     allHistory.sort((a, b) => (b['tanggal'] as DateTime).compareTo(a['tanggal'] as DateTime));
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("HISTORY: ${activeMurid.nama}", style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+        title: Text("HISTORY TIMELINE: ${activeMurid.nama}", style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
         backgroundColor: const Color(0xFF1E293B),
         centerTitle: true,
       ),
@@ -266,7 +306,6 @@ class TimelineHistoryPage extends StatelessWidget {
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Garis Timeline
                     Column(
                       children: [
                         Container(width: 12, height: 12, decoration: BoxDecoration(color: isReps ? Colors.cyan : Colors.orange, shape: BoxShape.circle)),
@@ -274,7 +313,6 @@ class TimelineHistoryPage extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(width: 15),
-                    // Kartu Detail
                     Expanded(
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 20),
@@ -284,10 +322,10 @@ class TimelineHistoryPage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
-                              mainAxisAlignment: militaryTime,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(item['klasifikasi'], style: TextStyle(color: isReps ? Colors.cyan : Colors.orange, fontWeight: FontWeight.bold, fontSize: 12)),
-                                Text(DateFormat('dd MMM yyyy | HH:mm').format(tgl), style: const TextStyle(color: Colors.white38, fontSize: 10)),
+                                Text(item['klasifikasi'], style: TextStyle(color: isReps ? Colors.cyan : Colors.orange, fontWeight: FontWeight.bold, fontSize: 11)),
+                                Text(_formatTanggalManual(tgl), style: const TextStyle(color: Colors.white38, fontSize: 10)),
                               ],
                             ),
                             const Divider(color: Colors.white10),
@@ -304,7 +342,6 @@ class TimelineHistoryPage extends StatelessWidget {
             ),
     );
   }
-  static const militaryTime = MainAxisAlignment.spaceBetween;
 }
 
 // ==================== HALAMAN 2: DAFTAR (KUNCI) ====================
