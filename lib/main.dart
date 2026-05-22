@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
       title: 'Premium Athlete Dashboard',
       theme: ThemeData(
         brightness: Brightness.light,
-        scaffoldBackgroundColor: const Color(0xFF0F172A), // Latar belakang gelap elit (Slate 900)
+        scaffoldBackgroundColor: const Color(0xFF0F172A), // Latar belakang Slate 900
         fontFamily: 'Roboto',
       ),
       home: const DashboardAtletPage(),
@@ -28,7 +28,6 @@ class DashboardAtletPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Variabel dummy untuk ID dan Nama Murid, nanti bisa dihubungkan ke database dinamis
     const String idMurid = "001";
     const String namaMurid = "BUDI SANTOSO";
 
@@ -135,7 +134,6 @@ class DashboardAtletPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  // REVISI LAYOUT: Legend ditaruh di bawah tulisan judul (Enter) agar tidak memotong layar HP
                   Row(
                     children: [
                       Container(width: 8, height: 8, color: const Color(0xFFF43F5E)),
@@ -209,44 +207,55 @@ class BoxplotPainter extends CustomPainter {
     final Paint linePaint = Paint()..color = const Color(0xFF475569)..strokeWidth = 1.0..style = PaintingStyle.stroke;
     final Paint boxPaint = Paint()..color = const Color(0xFF0284C7)..style = PaintingStyle.fill;
 
+    // Garis dasar chart (X-Axis line) berada di paling bawah
     canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), linePaint);
     int dataCount = 7;
     double spacing = size.width / dataCount;
 
+    // Nilai data (0.0 sampai 1.0)
+    // Format indeks: [outlier, bottomWhisker, q1, median, q3, topWhisker]
     List<List<double>> boxData = [
-      [0.0, 0.20, 0.35, 0.48, 0.60, 0.80], 
-      [0.15, 0.25, 0.40, 0.52, 0.65, 0.82], 
-      [0.0, 0.30, 0.45, 0.55, 0.70, 0.88], 
-      [0.0, 0.18, 0.32, 0.45, 0.58, 0.76], 
-      [0.0, 0.22, 0.38, 0.50, 0.62, 0.78], 
-      [0.0, 0.12, 0.28, 0.40, 0.55, 0.72], 
-      [0.20, 0.28, 0.42, 0.56, 0.68, 0.84], 
+      [0.82, 0.20, 0.35, 0.48, 0.60, 0.80], 
+      [0.88, 0.25, 0.40, 0.52, 0.65, 0.82], 
+      [0.00, 0.30, 0.45, 0.55, 0.70, 0.88], 
+      [0.00, 0.18, 0.32, 0.45, 0.58, 0.76], 
+      [0.00, 0.22, 0.38, 0.50, 0.62, 0.78], 
+      [0.00, 0.12, 0.28, 0.40, 0.55, 0.72], 
+      [0.90, 0.28, 0.42, 0.56, 0.68, 0.84], 
     ];
 
     for (int i = 0; i < dataCount; i++) {
       double x = (spacing * i) + (spacing / 2);
       var data = boxData[i];
       
-      double outlier = data[0] * size.height;
-      double topWhisker = data[1] * size.height;
-      double q3 = data[2] * size.height;
-      double median = data[3] * size.height;
-      double q1 = data[4] * size.height;
-      double bottomWhisker = data[5] * size.height;
+      // PERBAIKAN: Membalik titik koordinat Y agar 0 berada di bawah dan 1 di atas canvas
+      double outlier = size.height - (data[0] * size.height);
+      double bottomWhisker = size.height - (data[1] * size.height);
+      double q1 = size.height - (data[2] * size.height);
+      double median = size.height - (data[3] * size.height);
+      double q3 = size.height - (data[4] * size.height);
+      double topWhisker = size.height - (data[5] * size.height);
       double boxWidth = spacing * 0.35;
 
+      // Gambar titik pencilan (outlier) jika nilainya > 0
       if (data[0] > 0) {
         canvas.drawCircle(Offset(x, outlier), 2.5, Paint()..color = const Color(0xFF38BDF8));
       }
       
-      canvas.drawLine(Offset(x, topWhisker), Offset(x, q3), linePaint);
+      // Garis Whisker Atas (dari Q3 ke Top Whisker)
+      canvas.drawLine(Offset(x, q3), Offset(x, topWhisker), linePaint);
       canvas.drawLine(Offset(x - boxWidth/3, topWhisker), Offset(x + boxWidth/3, topWhisker), linePaint);
+      
+      // Garis Whisker Bawah (dari Q1 ke Bottom Whisker)
       canvas.drawLine(Offset(x, q1), Offset(x, bottomWhisker), linePaint);
       canvas.drawLine(Offset(x - boxWidth/3, bottomWhisker), Offset(x + boxWidth/3, bottomWhisker), linePaint);
 
+      // Gambar Kotak Boxplot (Rect dari Q3 ke Q1 secara visual koordinat inverted)
       Rect boxRect = Rect.fromLTRB(x - boxWidth / 2, q3, x + boxWidth / 2, q1);
       canvas.drawRect(boxRect, boxPaint);
       canvas.drawRect(boxRect, Paint()..color = const Color(0xFF38BDF8)..style = PaintingStyle.stroke..strokeWidth = 1);
+      
+      // Garis Median di dalam kotak
       canvas.drawLine(Offset(x - boxWidth / 2, median), Offset(x + boxWidth / 2, median), Paint()..color = const Color(0xFFF8FAFC)..strokeWidth = 1.5);
     }
   }
