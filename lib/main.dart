@@ -86,21 +86,21 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
   @override
   void initState() {
     super.initState();
-    // RESET VALUE KE NOL: Budi Santoso dan Ruri diinisialisasi dengan CurrentScore = 0.0 & Radar = 0.0
+    // RESET VALUE KE NOL: CurrentScore diinisialisasi 0.0 agar grafik mulai dari bawah
     _daftarMurid = [
       Murid(
         id: "001",
         nama: "BUDI SANTOSO",
         boxData: [
-          [20.0, 35.0, 48.0, 0.0, 60.0, 85.0], // STRENGTH (Skor awal 0.0)
-          [25.0, 40.0, 52.0, 0.0, 65.0, 88.0], // ENDURANCE (Skor awal 0.0)
-          [30.0, 42.0, 65.0, 0.0, 75.0, 90.0], // SPEED (Skor awal 0.0)
-          [18.0, 32.0, 45.0, 0.0, 58.0, 76.0], // COORDINATION (Skor awal 0.0)
-          [22.0, 48.0, 52.0, 0.0, 56.0, 78.0], // FLEXIBILITY (Skor awal 0.0)
-          [12.0, 38.0, 40.0, 0.0, 42.0, 72.0], // BALANCE (Skor awal 0.0)
-          [28.0, 42.0, 56.0, 0.0, 68.0, 92.0], // REACTION TIME (Skor awal 0.0)
+          [20.0, 35.0, 48.0, 0.0, 60.0, 85.0], // STRENGTH
+          [25.0, 40.0, 52.0, 0.0, 65.0, 88.0], // ENDURANCE
+          [30.0, 42.0, 65.0, 0.0, 75.0, 90.0], // SPEED
+          [18.0, 32.0, 45.0, 0.0, 58.0, 76.0], // COORDINATION
+          [22.0, 48.0, 52.0, 0.0, 56.0, 78.0], // FLEXIBILITY
+          [12.0, 38.0, 40.0, 0.0, 42.0, 72.0], // BALANCE
+          [28.0, 42.0, 56.0, 0.0, 68.0, 92.0], // REACTION TIME
         ],
-        radarData: List.generate(10, (_) => 0.0), // Radar awal 0.0
+        radarData: List.generate(10, (_) => 0.0),
       ),
       Murid(
         id: "100",
@@ -114,7 +114,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
           [18.0, 32.0, 46.0, 0.0, 60.0, 78.0],
           [25.0, 40.0, 52.0, 0.0, 66.0, 90.0],
         ],
-        radarData: List.generate(10, (_) => 0.0), // Radar awal 0.0
+        radarData: List.generate(10, (_) => 0.0),
       ),
     ];
   }
@@ -258,12 +258,12 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
       return m.nama.toLowerCase().contains(_searchQuery.toLowerCase()) || m.id.contains(_searchQuery);
     }).toList();
 
-    // Halaman diatur dalam struktur daftar widget fungsional penuh
     final List<Widget> pages = [
       DashboardAtletPage(
         activeMurid: _currentMurid,
         teamBoxAverages: _teamAverageBoxScores,
         teamRadarAverages: _teamAverageRadar,
+        dapatkanBoxIndexFunc: _dapatkanBoxIndex, // Oper fungsi resolver ke Halaman Dashboard
       ),
       DaftarMuridPage(
         daftarMurid: filteredList,
@@ -291,12 +291,12 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     ];
 
     return Scaffold(
-      body: SafeArea(child: pages[_currentIndex]), // Kunci perbaikan: Konten mengikuti _currentIndex secara real-time
+      body: SafeArea(child: pages[_currentIndex]),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
           setState(() {
-            _currentIndex = index; // Membuka penuh kunci perpindahan halaman sistem
+            _currentIndex = index;
           });
         },
         backgroundColor: const Color(0xFF1E293B),
@@ -319,12 +319,14 @@ class DashboardAtletPage extends StatelessWidget {
   final Murid activeMurid;
   final List<double> teamBoxAverages;
   final List<double> teamRadarAverages;
+  final int Function(String) dapatkanBoxIndexFunc; // Pemicu validasi string terpusat
 
   const DashboardAtletPage({
     Key? key, 
     required this.activeMurid, 
     required this.teamBoxAverages,
     required this.teamRadarAverages,
+    required this.dapatkanBoxIndexFunc,
   }) : super(key: key);
 
   @override
@@ -335,7 +337,7 @@ class DashboardAtletPage extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
-            // Identitas Atlet aktif
+            // Identitas Atlet
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(12),
@@ -405,12 +407,12 @@ class DashboardAtletPage extends StatelessWidget {
                       child: Table(
                         border: TableBorder.all(color: const Color(0xFF334155), width: 1),
                         columnWidths: const {
-                          0: FlexColumnWidth(1.8), // KOMPONEN
-                          1: FlexColumnWidth(2.2), // POLA BOXPLOT
-                          2: FlexColumnWidth(2.5), // ARTI POLA
-                          3: FlexColumnWidth(2.3), // KELEBIHAN
-                          4: FlexColumnWidth(2.3), // KEKURANGAN
-                          5: FlexColumnWidth(3.4), // REKOMENDASI
+                          0: FlexColumnWidth(1.8), 
+                          1: FlexColumnWidth(2.2), 
+                          2: FlexColumnWidth(2.5), 
+                          3: FlexColumnWidth(2.3), 
+                          4: FlexColumnWidth(2.3), 
+                          5: FlexColumnWidth(3.4), 
                         },
                         children: [
                           TableRow(
@@ -461,10 +463,11 @@ class DashboardAtletPage extends StatelessWidget {
     return Padding(padding: const EdgeInsets.all(8.0), child: Text(text, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF38BDF8), fontSize: 9, fontWeight: FontWeight.bold)));
   }
 
+  // Kunci Perbaikan Utama: Deteksi keberadaan data disamakan dengan indeks grafik boxplotnya
   Map<String, String> _analisisKomplet40Pola(int idx, String namaKomponen) {
-    // SINKRONISASI TOTAL: Periksa riwayat inputan yang sebenarnya untuk komponen ini
-    bool adaDataInput = activeMurid.riwayatLatihanKuantitatif.any((element) => element['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase()) ||
-                        activeMurid.riwayatLatihanDurasi.any((element) => element['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase());
+    // Memeriksa riwayat inputan yang sebenarnya berdasarkan nama komponen atau tujuan indeks boxplotnya
+    bool adaDataInput = activeMurid.riwayatLatihanKuantitatif.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi']) == idx) ||
+                        activeMurid.riwayatLatihanDurasi.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi']) == idx);
 
     if (!adaDataInput || idx >= activeMurid.boxData.length) {
       return {"pola": "Belum Ada Data", "arti": "Menunggu input performa fungsional dari latihan."};
@@ -544,9 +547,9 @@ class DashboardAtletPage extends StatelessWidget {
     String labelPola = "-";
     String labelArti = "-";
     
-    // Sinkronisasi pendeteksian data murni dari log aktivitas halaman input ke-2 dan ke-3
-    bool adaDataDiInput = activeMurid.riwayatLatihanKuantitatif.any((element) => element['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase()) ||
-                        activeMurid.riwayatLatihanDurasi.any((element) => element['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase());
+    // Sinkronisasi pendeteksian disamakan dengan index map boxplot agar sinkron instan
+    bool adaDataDiInput = activeMurid.riwayatLatihanKuantitatif.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi']) == dataIdx) ||
+                        activeMurid.riwayatLatihanDurasi.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi']) == dataIdx);
 
     if (tipeGrafik == "BOXPLOT") {
       Map<String, String> hasilPola = _analisisKomplet40Pola(dataIdx, namaKomponen);
@@ -560,7 +563,7 @@ class DashboardAtletPage extends StatelessWidget {
         diAtasRataTim = sk >= avg;
       }
     } else {
-      labelPola = "-"; // Menjaga pola radar murni strip sesuai format baku Sabeumnim
+      labelPola = "-"; 
       labelArti = "-";
       if (adaDataDiInput && dataIdx < activeMurid.radarData.length) {
         belumAdaData = false;
@@ -582,8 +585,8 @@ class DashboardAtletPage extends StatelessWidget {
     return TableRow(
       children: [
         Padding(padding: const EdgeInsets.all(6.0), child: Text(namaKomponen, style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold))),
-        Padding(padding: const EdgeInsets.all(6.0), child: Text(labelPola, style: TextStyle(color: (labelPola == '-' || belumAdaData) ? Colors.white30 : Colors.amber[400], fontSize: 7, fontWeight: FontWeight.w600))),
-        Padding(padding: const EdgeInsets.all(6.0), child: Text(labelArti, style: TextStyle(color: (labelArti == '-' || belumAdaData) ? Colors.white30 : Colors.teal[300], fontSize: 7, fontWeight: FontWeight.w500))),
+        Padding(padding: const EdgeInsets.all(6.0), child: Text(labelPola, style: TextStyle(color: (labelPola == '-' || belumAdaData || labelPola == "Belum Ada Data") ? Colors.white30 : Colors.amber[400], fontSize: 7, fontWeight: FontWeight.w600))),
+        Padding(padding: const EdgeInsets.all(6.0), child: Text(labelArti, style: TextStyle(color: (labelArti == '-' || belumAdaData || labelArti.contains("Menunggu")) ? Colors.white30 : const Color(0xFF34D399), fontSize: 7, fontWeight: FontWeight.w500))),
         Padding(padding: const EdgeInsets.all(6.0), child: Text(kelebihanText, style: TextStyle(color: belumAdaData ? Colors.white30 : const Color(0xFF10B981), fontSize: 8))),
         Padding(padding: const EdgeInsets.all(6.0), child: Text(kekuranganText, style: TextStyle(color: belumAdaData ? Colors.white30 : const Color(0xFFEF4444), fontSize: 8))),
         Padding(padding: const EdgeInsets.all(6.0), child: Text(rekomendasiText, style: TextStyle(color: belumAdaData ? Colors.amber.withOpacity(0.6) : const Color(0xFF94A3B8), fontSize: 8))),
@@ -888,4 +891,27 @@ class _MetaBoxplotPainter extends CustomPainter {
       canvas.drawLine(Offset(colWidth - 10, gy), Offset(size.width - 10, gy), Paint()..color = const Color(0xFF1E293B));
     }
 
-    final
+    final textPainter = TextPainter(textDirection: TextDirection.ltr);
+
+    for (int i = 0; i < 7; i++) {
+      if (i >= boxData.length || boxData[i].length < 6) continue;
+      double x = (i + 1) * colWidth + 10;
+      double personalScore = boxData[i][3];
+
+      canvas.drawLine(Offset(x, getY(boxData[i][0])), Offset(x, getY(boxData[i][5])), linePaint);
+      canvas.drawLine(Offset(x - 6, getY(boxData[i][0])), Offset(x + 6, getY(boxData[i][0])), linePaint);
+      canvas.drawLine(Offset(x - 6, getY(boxData[i][5])), Offset(x + 6, getY(boxData[i][5])), linePaint);
+
+      canvas.drawRect(Rect.fromLTRB(x - 12, getY(boxData[i][1]), x + 12, getY(boxData[i][4])), boxPaint);
+      canvas.drawRect(Rect.fromLTRB(x - 12, getY(boxData[i][1]), x + 12, getY(boxData[i][4])), borderBoxPaint);
+      canvas.drawLine(Offset(x - 12, getY(boxData[i][2])), Offset(x + 12, getY(boxData[i][2])), medianPaint);
+      
+      double py = getY(personalScore);
+      canvas.drawCircle(Offset(x, py), 5.5, personalScorePaint);
+      
+      textPainter.text = TextSpan(
+        text: personalScore.toStringAsFixed(0),
+        style: const TextStyle(color: Color(0xFF00E5FF), fontSize: 8, fontWeight: FontWeight.bold),
+      );
+      textPainter.layout();
+      textPainter.
