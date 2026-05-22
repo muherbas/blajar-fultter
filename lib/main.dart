@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
       title: 'Premium Athlete Dashboard',
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0F172A),
+        scaffoldBackgroundColor: const Color(0xFF0F172A), // Latar slate-900 premium
         fontFamily: 'Roboto',
       ),
       home: const MainNavigationHolder(),
@@ -23,6 +23,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// 1. DAFTAR KLASIFIKASI ASLI (SAMA PERSIS VERSI SEBELUMNYA)
 const List<String> kDaftarKlasifikasiLatihan = [
   "STRENGTH", "ENDURANCE", "SPEED", "COORDINATION", "FLEXIBILITY", "BALANCE", "REACTION TIME",
   "MUSCULAR ENDURANCE", "POWER", "CORE STABILITY", "DYNAMIC FLEXIBILITY", "SPEED ENDURANCE",
@@ -62,6 +63,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
   @override
   void initState() {
     super.initState();
+    // INITIAL DATA DUMMY ASLI (LOGIKA AWAL SEBELUMNYA)
     _daftarMurid = [
       Murid(
         id: "001", nama: "BUDI SANTOSO",
@@ -94,6 +96,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
 
   Murid get _currentMurid => _daftarMurid.firstWhere((m) => m.id == _selectedMuridId, orElse: () => _daftarMurid.first);
 
+  // 2. RUMUS RATA-RATA TIM ASLI (SAMA PERSIS)
   List<double> get _teamAverageBoxScores {
     List<double> averages = List.generate(7, (_) => 0.0);
     if (_daftarMurid.isEmpty) return averages;
@@ -132,6 +135,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     return averages;
   }
 
+  // 3. INDEX MAPPING ASLI (SAMA PERSIS)
   int _dapatkanBoxIndex(String klasifikasi) {
     final String upper = klasifikasi.toUpperCase();
     if (upper == "STRENGTH" || upper == "POWER" || upper == "CORE STABILITY") return 0;
@@ -144,6 +148,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     return -1;
   }
 
+  // 4. LOGIKA INPUT DATA REPS & WAKTU (SAMA PERSIS VERSI AWAL)
   void _simpanDataKuantitatif(String id, String jenis, String klas, double reps, double sets, DateTime tgl) {
     setState(() {
       int idx = _daftarMurid.indexWhere((m) => m.id == id);
@@ -263,10 +268,9 @@ class DashboardAtletPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // PERBAIKAN FONT HEADER: Menyesuaikan ukuran, ketebalan, dan kerapatan agar mirip HTML asli
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: const Color(0xFF1E293B), 
                 borderRadius: BorderRadius.circular(12),
@@ -277,23 +281,20 @@ class DashboardAtletPage extends StatelessWidget {
                 children: [
                   Text(
                     'COMPREHENSIVE PERFORMANCE DASHBOARD',
-                    textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.slate[400],
-                      fontSize: 13, // Diperbesar agar seimbang
-                      fontWeight: FontWeight.w800, // Dipertebal ekstra
-                      letterSpacing: -0.2, // Dirapatkan kembali agar padat solid
+                      color: Colors.blueGrey[300],
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.5,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Text(
                     '${activeMurid.id} - ${activeMurid.nama}',
-                    textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: Color(0xFF38BDF8), 
-                      fontSize: 22, // Ukuran nama dipertegas dominan
-                      fontWeight: FontWeight.w900, // Ketebalan maksimal (bold pekat)
-                      letterSpacing: -0.5, // Kerapatan teks diperketat fungsional
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
                 ],
@@ -301,6 +302,7 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
+            // BOXPLOT CONTAINER
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -329,6 +331,7 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
+            // RADAR CONTAINER
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -342,11 +345,11 @@ class DashboardAtletPage extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Container(width: 4, height: 16, color: const Color(0xFFA855F7)),
+                      Container(width: 4, height: 16, color: const Color(0xFF22C55E)), // Sesuai warna hijau stabil asli
                       const SizedBox(width: 8),
                       const Text(
                         'PROFIL BIOMOTORIK METRIKS RADAR (10 DIMENSI)',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: Color(0xFFA855F7)),
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: Color(0xFF22C55E)),
                       ),
                     ],
                   ),
@@ -363,6 +366,7 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
+            // TABEL EVALUASI MATRIKS 100% PERSIS RUMUS ASLI
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -452,6 +456,7 @@ class DashboardAtletPage extends StatelessWidget {
     );
   }
 
+  // 5. RUMUS IDENTIFIKASI KEMIRIPAN 40 POLA ASLI (SAMA PERSIS)
   Map<String, String> _analisisKomplet40Pola(int idx, String namaKomponen) {
     bool adaDataInput = activeMurid.riwayatLatihanKuantitatif.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == idx) ||
                         activeMurid.riwayatLatihanDurasi.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == idx) ||
@@ -707,12 +712,12 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
               onChanged: (v) => setState(() => _selectedKlasifikasi = v!), decoration: const InputDecoration(labelText: "Klasifikasi Kemampuan", border: OutlineInputBorder()),
             ),
             const SizedBox(height: 12),
-            TextField(controller: _jenisController, decoration: const InputDecoration(labelText: "Nama Latihan (cth: Push Up, Sit Up)", border: OutlineInputBorder())),
+            TextField(controller: _jenisController, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: "Nama Latihan (cth: Push Up, Sit Up)", border: OutlineInputBorder())),
             const SizedBox(height: 12),
             Row(children: [
-              Expanded(child: TextField(controller: _repsController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Jumlah Reps", border: OutlineInputBorder()))),
+              Expanded(child: TextField(controller: _repsController, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: "Jumlah Reps", border: OutlineInputBorder()))),
               const SizedBox(width: 12),
-              Expanded(child: TextField(controller: _setsController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Jumlah Sets", border: OutlineInputBorder()))),
+              Expanded(child: TextField(controller: _setsController, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: "Jumlah Sets", border: OutlineInputBorder()))),
             ]),
             const SizedBox(height: 20),
             SizedBox(width: double.infinity, height: 48, child: ElevatedButton(
@@ -779,14 +784,14 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
               onChanged: (v) => setState(() => _selectedKlasifikasi = v!), decoration: const InputDecoration(labelText: "Klasifikasi Kemampuan", border: OutlineInputBorder()),
             ),
             const SizedBox(height: 12),
-            TextField(controller: _jenisController, decoration: const InputDecoration(labelText: "Nama Latihan (cth: Plank, Kuda-Kuda)", border: OutlineInputBorder())),
+            TextField(controller: _jenisController, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: "Nama Latihan (cth: Plank, Kuda-Kuda)", border: OutlineInputBorder())),
             const SizedBox(height: 12),
             Row(children: [
-              Expanded(child: TextField(controller: _menitController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Menit", border: OutlineInputBorder()))),
+              Expanded(child: TextField(controller: _menitController, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: "Menit", border: OutlineInputBorder()))),
               const SizedBox(width: 8),
-              Expanded(child: TextField(controller: _detikController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Detik", border: OutlineInputBorder()))),
+              Expanded(child: TextField(controller: _detikController, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: "Detik", border: OutlineInputBorder()))),
               const SizedBox(width: 8),
-              Expanded(child: TextField(controller: _setsController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Sets", border: OutlineInputBorder()))),
+              Expanded(child: TextField(controller: _setsController, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: "Sets", border: OutlineInputBorder()))),
             ]),
             const SizedBox(height: 20),
             SizedBox(width: double.infinity, height: 48, child: ElevatedButton(
@@ -892,7 +897,6 @@ class _BoxplotPainter extends CustomPainter {
         canvas.drawLine(Offset(x - 15, yAvg), Offset(x + 15, yAvg), pRataTim);
       }
 
-      // Hubungkan garis antar titik skor (Tren Line) jika berurutan ada datanya
       Offset currentScoreOffset = Offset(x, yScore);
       if (prevScoreOffset != null) {
         canvas.drawLine(prevScoreOffset, currentScoreOffset, pGarisHubungScore);
@@ -924,9 +928,9 @@ class MetaRadarChartPainter extends CustomPainter {
     int kDimensi = 10;
 
     final Paint pGrid = Paint()..color = const Color(0xFF334155)..style = PaintingStyle.stroke..strokeWidth = 1.0;
-    final Paint pAtlet = Paint()..color = const Color(0xFFA855F7).withOpacity(0.35)..style = PaintingStyle.fill;
-    final Paint pBorderAtlet = Paint()..color = const Color(0xFFA855F7)..style = PaintingStyle.stroke..strokeWidth = 2.0;
-    final Paint pTim = Paint()..color = const Color(0xFF10B981)..style = PaintingStyle.stroke..strokeWidth = 1.2;
+    final Paint pAtlet = Paint()..color = const Color(0xFF22C55E).withOpacity(0.25)..style = PaintingStyle.fill; // Hijau asli
+    final Paint pBorderAtlet = Paint()..color = const Color(0xFF22C55E)..style = PaintingStyle.stroke..strokeWidth = 2.0;
+    final Paint pTim = Paint()..color = const Color(0xFF38BDF8)..style = PaintingStyle.stroke..strokeWidth = 1.2; // Biru rata tim asli
 
     for (int i = 1; i <= 5; i++) {
       double r = maxRadius * (i / 5.0);
