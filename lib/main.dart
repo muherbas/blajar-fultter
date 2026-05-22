@@ -30,7 +30,7 @@ class Murid {
   final List<List<double>> boxData; // Index 0-6 untuk biomotorik utama
   final List<double> radarData;
   
-  // Menyimpan riwayat kalkulasi real-time kuantitatif khusus
+  // Menyimpan riwayat kalkulasi latihan kuantitatif khusus murid ini
   List<Map<String, dynamic>> riwayatLatihan;
 
   Murid({
@@ -42,7 +42,7 @@ class Murid {
   }) : this.riwayatLatihan = riwayatLatihan ?? [];
 }
 
-// Pengelola State Navigasi Utama Antara Dashboard, Daftar, dan Input Data
+// Pengelola State Navigasi Utama (3 Halaman: Dashboard, Daftar, & Input Data)
 class MainNavigationHolder extends StatefulWidget {
   const MainNavigationHolder({Key? key}) : super(key: key);
 
@@ -107,7 +107,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     );
   }
 
-  // Tambah Murid Baru
+  // Tambah Murid Baru Berurutan
   void _tambahMurid() {
     if (_namaController.text.trim().isEmpty) return;
     setState(() {
@@ -134,7 +134,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     );
   }
 
-  // Hapus id-murid
+  // Hapus Data Murid
   void _hapusMurid(Murid murid) {
     showDialog(
       context: context,
@@ -143,7 +143,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
           backgroundColor: const Color(0xFF1E293B),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           title: const Text('Konfirmasi Hapus', style: TextStyle(color: Color(0xFFF8FAFC), fontSize: 16, fontWeight: FontWeight.bold)),
-          content: Text('Apakah Anda yakin ingin menghapus data permanent dari ID-${murid.id} (${murid.nama})?', style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13)),
+          content: Text('Apakah Anda yakin ingin menghapus data permanen dari ID-${murid.id} (${murid.nama})?', style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13)),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
@@ -171,7 +171,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     );
   }
 
-  // Menyimpan entri data kuantitatif baru ke model murid (Real-time update ke dashboard)
+  // Menyimpan entri data kuantitatif baru dan melakukan sinkronisasi nilai ke chart dashboard
   void _simpanDataLatihan(String idMurid, String jenisLatihan, String klasifikasi, double reps, double sets, DateTime tanggal) {
     setState(() {
       int idx = _daftarMurid.indexWhere((m) => m.id == idMurid);
@@ -186,22 +186,22 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
           'skor': skorAkhir,
         });
 
-        // Map klasifikasi ke index boxData dashboard (0 s.d 6)
+        // Menentukan index komponen biomotorik berdasarkan klasifikasi pilihan
         int boxIndex = -1;
-        if (klasifikasi.contains("Strength") || klasifikasi.contains("Power") || klasifikasi.contains("Muscular")) boxIndex = 0;
+        if (klasifikasi.contains("Strength") || klasifikasi.contains("Muscular") || klasifikasi.contains("Power")) boxIndex = 0;
         else if (klasifikasi.contains("Endurance") || klasifikasi.contains("Speed Endurance")) boxIndex = 1;
-        else if (klasifikasi.contains("Speed") || klasifikasi.contains("Reactive Speed") || klasifikasi.contains("Agility")) boxIndex = 2;
-        else if (klasifikasi.contains("Coordination") || klasifikasi.contains("Anticipation")) boxIndex = 3;
-        else if (klasifikasi.contains("Flexibility") || klasifikasi.contains("Mobility") || klasifikasi.contains("Dynamic Flexibility")) boxIndex = 4;
+        else if (klasifikasi.contains("Speed") || klasifikasi.contains("Agility")) boxIndex = 2;
+        else if (klasifikasi.contains("Coordination")) boxIndex = 3;
+        else if (klasifikasi.contains("Flexibility") || klasifikasi.contains("Mobility")) boxIndex = 4;
         else if (klasifikasi.contains("Balance") || klasifikasi.contains("Core")) boxIndex = 5;
         else if (klasifikasi.contains("Reaction")) boxIndex = 6;
 
-        // Update nilai score boxData [index][3] secara dinamis di dashboard jika klasifikasi cocok
+        // Jika klasifikasi cocok, perbarui nilai median data [index 3] boxplot secara dinamis
         if (boxIndex != -1) {
           _daftarMurid[idx].boxData[boxIndex][3] = skorAkhir; 
         }
         
-        _selectedMuridId = idMurid; // Pastikan murid ini yang aktif terpilih
+        _selectedMuridId = idMurid; // Fokuskan dashboard ke murid yang baru di-update
       }
     });
   }
@@ -228,7 +228,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
         onSelect: (id) {
           setState(() {
             _selectedMuridId = id;
-            _currentIndex = 0; // Otomatis ke Dashboard setelah dipilih
+            _currentIndex = 0; // Otomatis pindah ke Dashboard setelah dipilih
           });
         },
         onDelete: _hapusMurid,
@@ -308,13 +308,13 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Card Komponen Utama (Boxplot)
+            // Card Boxplot Chart
             Container(
               width: double.infinity,
               decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(16)),
               padding: const EdgeInsets.all(16),
               child: Column(
-                cross CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('KOMPONEN UTAMA', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: Color(0xFF38BDF8), letterSpacing: 0.5)),
                   const SizedBox(height: 20),
@@ -335,7 +335,7 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Tabel Kolom Matriks Komponen Utama
+            // Tabel Matriks Komponen Utama
             Container(
               width: double.infinity,
               decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(16)),
@@ -385,7 +385,7 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Card Komponen Turunan (Radar Spider)
+            // Card Radar Spider Chart
             Container(
               width: double.infinity,
               decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(16)),
@@ -434,7 +434,7 @@ class DashboardAtletPage extends StatelessWidget {
   }
 }
 
-// ==================== HALAMAN 2: DAFTAR MURID & MANAGEMENT BACKUP ====================
+// ==================== HALAMAN 2: DAFTAR MURID & BACKUP CONTROL ====================
 class DaftarMuridPage extends StatelessWidget {
   final List<Murid> daftarMurid;
   final int totalKapasitas;
@@ -474,6 +474,7 @@ class DaftarMuridPage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
+          // Tombol Backup dan Restore dengan perbaikan properti border: Border.all()
           Row(
             children: [
               Expanded(
@@ -513,7 +514,7 @@ class DaftarMuridPage extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
-          // Search Field
+          // Search Box pencarian murid global
           TextField(
             controller: searchController,
             onChanged: onSearchChanged,
@@ -530,7 +531,7 @@ class DaftarMuridPage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // Input Registrasi Murid Baru
+          // Input Registrasi Atlet Baru
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(12)),
@@ -558,7 +559,7 @@ class DaftarMuridPage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // ListView Item Murid
+          // List Murid Terdaftar
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -581,7 +582,7 @@ class DaftarMuridPage extends StatelessWidget {
                     child: Text(murid.id, style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
                   ),
                   title: Text(murid.nama, style: const TextStyle(color: Color(0xFFF8FAFC), fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-                  subtitle: Text('Total Riwayat Data Kuantitatif: ${murid.riwayatLatihan.length}', style: const TextStyle(color: Color(0xFF64748B), fontSize: 10)),
+                  subtitle: Text('Total Entri Riwayat: ${murid.riwayatLatihan.length}', style: const TextStyle(color: Color(0xFF64748B), fontSize: 10)),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -605,7 +606,7 @@ class DaftarMuridPage extends StatelessWidget {
   }
 }
 
-// ==================== HALAMAN 3: INPUT LATIHAN KUANTITATIF ====================
+// ==================== HALAMAN 3: INPUT LATIHAN KUANTITATIF (FITUR BARU) ====================
 class InputLatihanKuantitatifPage extends StatefulWidget {
   final List<Murid> daftarMurid;
   final String selectedMuridId;
@@ -634,7 +635,7 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
   String _selectedKlasifikasi = "1. Strength (Kekuatan)";
   DateTime _selectedDate = DateTime.now();
 
-  // Variabel untuk kalkulasi real-time lokal tracker komponen bawah
+  // Variabel penampung kalkulasi real-time lokal panel bawah
   double _skorTerakhir = 0.0;
   int _totalRiwayatEntry = 0;
   double _rataRataSkorKumulatif = 0.0;
@@ -671,6 +672,7 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
 
   @override
   Widget build(BuildContext context) {
+    // Memfilter opsi dropdown murid berdasarkan pencarian cepat nama/ID
     List<Murid> opsiDropdownTerfilter = widget.daftarMurid.where((m) {
       return m.nama.toLowerCase().contains(_filterKeyword.toLowerCase()) || m.id.contains(_filterKeyword);
     }).toList();
@@ -694,7 +696,7 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
             onChanged: (val) => setState(() => _filterKeyword = val),
             style: const TextStyle(color: Colors.white, fontSize: 13),
             decoration: InputDecoration(
-              labelText: '🔍 Ketik untuk cari nama murid...',
+              labelText: '🔍 Ketik untuk cari nama/ID murid...',
               labelStyle: const TextStyle(color: Color(0xFFA855F7), fontSize: 12),
               filled: true,
               fillColor: const Color(0xFF1E293B),
@@ -704,7 +706,7 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
           ),
           const SizedBox(height: 14),
 
-          // 2. Dropdown Pilih Murid
+          // 2. Dropdown Pilih Murid (Telah Terfilter Otomatis)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
@@ -737,7 +739,7 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
           ),
           const SizedBox(height: 14),
 
-          // 3. Tanggal Pelaksanaan
+          // 3. Picker Kalender Tanggal Pelaksanaan
           InkWell(
             onTap: () async {
               DateTime? picked = await showDatePicker(
@@ -762,7 +764,7 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
           ),
           const SizedBox(height: 14),
 
-          // 4. Nama Jenis Latihan
+          // 4. Input Nama Jenis Latihan
           TextField(
             controller: _jenisLatihanController,
             style: const TextStyle(color: Colors.white, fontSize: 13),
@@ -776,7 +778,7 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
           ),
           const SizedBox(height: 14),
 
-          // 5. Opsi Klasifikasi Biomotorik Dropdown
+          // 5. Dropdown Klasifikasi Biomotorik
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFF334155))),
@@ -797,7 +799,7 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
           ),
           const SizedBox(height: 14),
 
-          // 6. Baris Repetisi & Set
+          // 6. Baris Input Repetisi & Set
           Row(
             children: [
               Expanded(
@@ -833,7 +835,7 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
           ),
           const SizedBox(height: 24),
 
-          // 7. Tombol Simpan Utama
+          // 7. Tombol Simpan Utama Dengan Perbaikan mainAxisAlignment.spaceBetween
           SizedBox(
             width: double.infinity,
             height: 46,
@@ -852,10 +854,10 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
                   return;
                 }
 
-                // Simpan & jalankan sinkronisasi real-time global
+                // Kirim data ke sistem pusat state global
                 widget.onSimpan(widget.selectedMuridId, _jenisLatihanController.text.trim(), _selectedKlasifikasi, reps, sets, _selectedDate);
                 
-                // Perbarui tampilan tracker lokal komponen bawah secara instan
+                // Sinkronisasi data ke tampilan monitor lokal bawah secara instan
                 setState(() {
                   _hitungKalkulasiLokal(widget.selectedMuridId);
                 });
@@ -866,7 +868,7 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
                 _setsController.clear();
 
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Data Kuantitatif Sinkron Masuk Dashboard Real-time!'), backgroundColor: Color(0xFF10B981)),
+                  const SnackBar(content: Text('Data Kuantitatif Sinkron Masuk Dashboard!'), backgroundColor: Color(0xFF10B981)),
                 );
               },
               child: const Text('SIMPAN DATA INPUT', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
@@ -874,10 +876,116 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
           ),
           const SizedBox(height: 24),
 
-          // 8. Widget Kalkulasi Real-time Terkini Komponen Bawah
+          // 8. Widget Monitor Perhitungan Real-time (Dengan perbaikan properti MainAxisAlignment & FontWeight)
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: const Color(0xFF1E293B), 
               borderRadius: BorderRadius.circular(12), 
-              border: Border.all(color: const Color
+              border: Border.all(color: const Color(0xFF4A148C), width: 1)
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Kalkulasi Real-time Terkini:', style: TextStyle(color: Color(0xFFF8FAFC), fontSize: 13, fontWeight: FontWeight.bold)),
+                const Divider(color: Color(0xFF334155), height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween, // Diperbaiki dari .between
+                  children: [
+                    const Text('Skor Terakhir (Reps × Set):', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12)),
+                    Text(
+                      _skorTerakhir.toStringAsFixed(1), 
+                      style: const TextStyle(color: Color(0xFFFFA855), fontSize: 14, fontWeight: FontWeight.w900), // Diperbaiki dari .black ke .w900
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween, // Diperbaiki dari .between
+                  children: [
+                    const Text('Total Riwayat Entry (N):', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12)),
+                    Text('$_totalRiwayatEntry', style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween, // Diperbaiki dari .between
+                  children: [
+                    const Text('Rata-rata Skor Kumulatif:', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12)),
+                    Text(_rataRataSkorKumulatif.toStringAsFixed(1), style: const TextStyle(color: Color(0xFF34D399), fontSize: 13, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ==================== CUSTOM PAINTERS PLOT CHART ====================
+class BoxplotChart extends StatelessWidget {
+  final List<List<double>> boxData;
+  const BoxplotChart({Key? key, required this.boxData}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: const Size(double.infinity, 200),
+      painter: _BoxplotPainter(boxData: boxData),
+    );
+  }
+}
+
+class _BoxplotPainter extends CustomPainter {
+  final List<List<double>> boxData;
+  _BoxplotPainter({required this.boxData});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paintLine = Paint()..color = const Color(0xFF475569)..strokeWidth = 1.5..style = PaintingStyle.stroke;
+    final paintBox = Paint()..color = const Color(0xFF38BDF8).withOpacity(0.4)..style = PaintingStyle.fill;
+    final paintMedian = Paint()..color = const Color(0xFF10B981)..strokeWidth = 3;
+
+    double barWidth = size.width / 8;
+    for (int i = 0; i < math.min(7, boxData.length); i++) {
+      double x = (i + 1) * barWidth;
+      double medianVal = boxData[i][3];
+      double boxTop = 150 - (medianVal * 1.2);
+      double boxBottom = boxTop + 40;
+
+      canvas.drawLine(Offset(x, boxTop - 20), Offset(x, boxBottom + 20), paintLine);
+      canvas.drawRect(Rect.fromLTRB(x - 10, boxTop, x + 10, boxBottom), paintBox);
+      canvas.drawLine(Offset(x - 10, boxTop + 20), Offset(x + 10, boxTop + 20), paintMedian);
+    }
+  }
+  @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+class RadarSpiderChart extends StatelessWidget {
+  final List<double> studentValues;
+  const RadarSpiderChart({Key? key, required this.studentValues}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(size: const Size(double.infinity, 300), painter: _RadarPainter());
+  }
+}
+
+class _RadarPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paintGrid = Paint()..color = const Color(0xFF334155)..style = PaintingStyle.stroke..strokeWidth = 1;
+    final paintLineMurid = Paint()..color = const Color(0xFFF43F5E)..style = PaintingStyle.fill;
+    
+    Offset center = Offset(size.width / 2, size.height / 2);
+    double radius = 100;
+    
+    for (int i = 1; i <= 4; i++) {
+      canvas.drawCircle(center, radius * (i / 4), paintGrid);
+    }
+    canvas.drawCircle(center, radius * 0.75, paintLineMurid..color = const Color(0xFFF43F5E).withOpacity(0.3));
+  }
+  @override bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
