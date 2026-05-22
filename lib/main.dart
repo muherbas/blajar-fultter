@@ -15,475 +15,344 @@ class MyApp extends StatelessWidget {
       title: 'Premium Athlete Dashboard',
       theme: ThemeData(
         brightness: Brightness.light,
-        scaffoldBackgroundColor: const Color(0xFFF4F7FA),
-        primaryColor: const Color(0xFF1E88E5),
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1E88E5)),
+        scaffoldBackgroundColor: const Color(0xFF0F172A), // Latar belakang gelap elit (Slate 900)
+        fontFamily: 'Roboto',
       ),
-      home: const MainNavigationContainer(),
-    );
-  }
-}
-
-class Murid {
-  final String id;
-  final String nama;
-  final List<double> dataBoxplot;
-  final List<double> dataRadar;
-
-  Murid({
-    required this.id,
-    required this.nama,
-    required this.dataBoxplot,
-    required this.dataRadar,
-  });
-}
-
-class MainNavigationContainer extends StatefulWidget {
-  const MainNavigationContainer({Key? key}) : super(key: key);
-
-  @override
-  State<MainNavigationContainer> createState() => _MainNavigationContainerState();
-}
-
-class _MainNavigationContainerState extends State<MainNavigationContainer> {
-  int _currentIndex = 1; // Default ke halaman Manajemen agar langsung kelihatan hasilnya
-
-  final List<Murid> _daftarMurid = [
-    Murid(
-      id: "100",
-      nama: "Ruri",
-      dataBoxplot: [0.35, 0.40, 0.45, 0.32, 0.38, 0.28, 0.42],
-      dataRadar: [0.80, 0.65, 0.85, 0.50, 0.70, 0.90, 0.75, 0.60, 0.80, 0.55],
-    ),
-    Murid(
-      id: "101",
-      nama: "Adi Wijaya",
-      dataBoxplot: [0.50, 0.60, 0.30, 0.45, 0.55, 0.40, 0.35],
-      dataRadar: [0.60, 0.80, 0.70, 0.75, 0.60, 0.65, 0.85, 0.70, 0.65, 0.80],
-    ),
-  ];
-
-  late Murid _muridTerpilih;
-
-  @override
-  void initState() {
-    super.initState();
-    _muridTerpilih = _daftarMurid[0];
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final List<Widget> _halaman = [
-      DashboardAtletPage(murid: _muridTerpilih),
-      ManajemenMuridPage(
-        daftarMurid: _daftarMurid,
-        muridTerpilih: _muridTerpilih,
-        onMuridDipilih: (muridBaru) {
-          setState(() {
-            _muridTerpilih = muridBaru;
-            _currentIndex = 0; // Pindah ke dashboard setelah dipilih
-          });
-        },
-        onDaftarUpdated: (listBaru) {
-          setState(() {
-            _daftarMurid.clear();
-            _daftarMurid.addAll(listBaru);
-            if (!_daftarMurid.contains(_muridTerpilih) && _daftarMurid.isNotEmpty) {
-              _muridTerpilih = _daftarMurid[0];
-            }
-          });
-        },
-      ),
-      const MateriNunchakuPage(),
-    ];
-
-    return Scaffold(
-      body: SafeArea(child: _halaman[_currentIndex]),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        selectedItemColor: const Color(0xFF1E88E5),
-        unselectedItemColor: Colors.grey,
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.analytics_outlined),
-            activeIcon: Icon(Icons.analytics),
-            label: 'DASHBOARD',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.group_outlined),
-            activeIcon: Icon(Icons.group),
-            label: 'MANAJEMEN',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.menu_book_outlined),
-            activeIcon: Icon(Icons.menu_book),
-            label: 'MATERI',
-          ),
-        ],
-      ),
+      home: const DashboardAtletPage(),
     );
   }
 }
 
 class DashboardAtletPage extends StatelessWidget {
-  final Murid murid;
-  const DashboardAtletPage({Key? key, required this.murid}) : super(key: key);
+  const DashboardAtletPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    // Variabel dummy untuk ID dan Nama Murid, nanti bisa dihubungkan ke database dinamis
+    const String idMurid = "001";
+    const String namaMurid = "BUDI SANTOSO";
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('DASHBOARD: ${murid.nama}', style: const TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        title: const Text(
+          'DASHBOARD PERFORMANCE [$idMurid - $namaMurid]',
+          style: TextStyle(
+            color: Color(0xFFF8FAFC), 
+            fontSize: 13, 
+            fontWeight: FontWeight.w900, 
+            letterSpacing: 1.2
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: const Color(0xFF1E293B), // Slate 800
         elevation: 0,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: Padding(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+        child: Column(
+          children: [
+            // ==================== CARD 1: BOXPLOT (KOMPONEN UTAMA) ====================
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E293B),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  )
+                ],
+              ),
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('DATA SEBARAN BOXPLOT', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                  const SizedBox(height: 8),
-                  Text(murid.dataBoxplot.toString()),
+                  const Text(
+                    'KOMPONEN UTAMA',
+                    style: TextStyle(
+                      fontSize: 11, 
+                      fontWeight: FontWeight.w900, 
+                      color: Color(0xFF38BDF8),
+                      letterSpacing: 1.0
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const SizedBox(
+                    height: 200,
+                    child: BoxplotChart(),
+                  ),
+                  const SizedBox(height: 16),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: const [
+                        Text(
+                          'GLOBAL TEAM AVERAGE',
+                          style: TextStyle(fontSize: 8, color: Color(0xFF94A3B8), fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          '68.5',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFFF8FAFC)),
+                        ),
+                      ],
+                    ),
+                  )
                 ],
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: Padding(
+            
+            const SizedBox(height: 20),
+            
+            // ==================== CARD 2: RADAR SPIDER (KOMPONEN TURUNAN) ====================
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E293B),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  )
+                ],
+              ),
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('DATA PARAMETER RADAR', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                  const SizedBox(height: 8),
-                  Text(murid.dataRadar.toString()),
+                  const Text(
+                    'KOMPONEN TURUNAN',
+                    style: TextStyle(
+                      fontSize: 11, 
+                      fontWeight: FontWeight.w900, 
+                      color: Color(0xFFF43F5E), 
+                      letterSpacing: 1.0
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  // REVISI LAYOUT: Legend ditaruh di bawah tulisan judul (Enter) agar tidak memotong layar HP
+                  Row(
+                    children: [
+                      Container(width: 8, height: 8, color: const Color(0xFFF43F5E)),
+                      const SizedBox(width: 4),
+                      const Text('Murid', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 8, fontWeight: FontWeight.bold)),
+                      const SizedBox(width: 12),
+                      Container(width: 8, height: 8, color: const Color(0xFF0EA5E9)),
+                      const SizedBox(width: 4),
+                      const Text('Tim Avg', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 8, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  const SizedBox(
+                    height: 340, 
+                    child: RadarSpiderChart(),
+                  ),
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
-class ManajemenMuridPage extends StatefulWidget {
-  final List<Murid> daftarMurid;
-  final Murid muridTerpilih;
-  final void Function(Murid murid) onMuridDipilih;
-  final void Function(List<Murid> listBaru) onDaftarUpdated;
-
-  const ManajemenMuridPage({
-    Key? key,
-    required this.daftarMurid,
-    required this.muridTerpilih,
-    required this.onMuridDipilih,
-    required this.onDaftarUpdated,
-  }) : super(key: key);
-
-  @override
-  State<ManajemenMuridPage> createState() => _ManajemenMuridPageState();
-}
-
-class _ManajemenMuridPageState extends State<ManajemenMuridPage> {
-  final TextEditingController _namaController = TextEditingController();
-  String _searchQuery = "";
-  int _nextIdCounter = 102; // ID counter otomatis selanjutnya
-
-  void _tambahMurid() {
-    if (_namaController.text.trim().isEmpty) return;
-
-    final rand = math.Random();
-    List<double> boxplotBaru = List.generate(7, (_) => double.parse((rand.nextDouble() * 0.5 + 0.2).toStringAsFixed(2)));
-    List<double> radarBaru = List.generate(10, (_) => double.parse((rand.nextDouble() * 0.5 + 0.4).toStringAsFixed(2)));
-
-    Murid muridBaru = Murid(
-      id: _nextIdCounter.toString(),
-      nama: _namaController.text.trim(),
-      dataBoxplot: boxplotBaru,
-      dataRadar: radarBaru,
-    );
-
-    List<Murid> newList = List.from(widget.daftarMurid)..add(muridBaru);
-    widget.onDaftarUpdated(newList);
-
-    setState(() {
-      _nextIdCounter++;
-    });
-    _namaController.clear();
-    FocusScope.of(context).unfocus();
-  }
-
-  void _hapusMurid(Murid murid) {
-    if (widget.daftarMurid.length <= 1) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Minimal harus menyisakan 1 atlet di database.')),
-      );
-      return;
-    }
-    List<Murid> newList = List.from(widget.daftarMurid)..remove(murid);
-    widget.onDaftarUpdated(newList);
-  }
+// ==================== IMPLEMENTASI GRAFIK BOXPLOT ====================
+class BoxplotChart extends StatelessWidget {
+  const BoxplotChart({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Filter pencarian nama atlet
-    final filteredList = widget.daftarMurid.where((m) {
-      return m.nama.toLowerCase().contains(_searchQuery.toLowerCase());
-    }).toList();
-
-    return Scaffold(
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-        children: [
-          // Judul Utama Halaman
-          const Center(
+    final List<String> labels = [
+      'STRENGTH',
+      'ENDURANCE',
+      'SPEED',
+      'COORD',
+      'FLEX',
+      'BALANCE',
+      'REACTION'
+    ];
+    
+    return Column(
+      children: [
+        Expanded(
+          child: CustomPaint(
+            size: Size.infinite,
+            painter: BoxplotPainter(),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: labels.map((label) => SizedBox(
+            width: 44,
             child: Text(
-              'Database JUMBO & Kontrol Atlet',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1565C0)),
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 8, color: Color(0xFF94A3B8), fontWeight: FontWeight.bold),
             ),
-          ),
-          const SizedBox(height: 16),
-
-          // Baris Tombol Ekspor & Impor
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.archive_outlined, color: Colors.deepOrangeAccent),
-                  label: const Text('Ekspor Backup', style: TextStyle(color: Color(0xFF1565C0))),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.blueGrey, style: BorderStyle.solid),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.unarchive_outlined, color: Colors.deepOrangeAccent),
-                  label: const Text('Impor Restore', style: TextStyle(color: Color(0xFF1565C0))),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.blueGrey, style: BorderStyle.solid),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-
-          // Kolom Pencarian Nama Atlet
-          TextField(
-            onChanged: (val) {
-              setState(() {
-                _searchQuery = val;
-              });
-            },
-            decoration: InputDecoration(
-              prefixIcon: const Icon(Icons.search, color: Colors.blueAccent),
-              hintText: 'Cari nama atlet untuk kelola/hapus...',
-              filled: true,
-              fillColor: Colors.white,
-              contentPadding: const EdgeInsets.symmetric(vertical: 10),
-              enabledBorder: OutlineInputBorder(
-                borderSide: const BorderSide(color: Colors.blueAccent, width: 1.5),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: const BorderSide(color: Colors.blue, width: 2),
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Daftar Item Atlet Terfilter
-          ...filteredList.map((murid) {
-            final bool isSelected = murid.id == widget.muridTerpilih.id;
-            return Card(
-              color: Colors.white,
-              elevation: 1,
-              margin: const EdgeInsets.symmetric(vertical: 6),
-              shape: RoundedRectangleBorder(
-                side: BorderSide(color: Colors.grey.shade200, width: 1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundColor: Colors.blue.shade50,
-                      child: const Icon(Icons.person, color: Color(0xFF1E88E5)),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            murid.nama,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                          ),
-                          Text(
-                            'ID - ${murid.id}',
-                            style: const TextStyle(color: Colors.grey, fontSize: 13),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Status Tombol Sedang Dilihat / Pilih
-                    ElevatedButton(
-                      onPressed: () => widget.onMuridDipilih(murid),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: isSelected ? const Color(0xFF2EC4B6) : Colors.blueGrey.shade100,
-                        foregroundColor: isSelected ? Colors.white : Colors.black87,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                      ),
-                      child: Text(isSelected ? 'Sedang Dilihat' : 'Lihat Atlet'),
-                    ),
-                    const SizedBox(width: 6),
-                    // Tombol Hapus
-                    IconButton(
-                      onPressed: () => _hapusMurid(murid),
-                      icon: const Icon(Icons.cancel, color: Color(0xFFE53935)),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    )
-                  ],
-                ),
-              ),
-            );
-          }).toList(),
-          const SizedBox(height: 20),
-
-          // Container Box Pendaftaran Atlet Baru
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: const Color(0xFF0288D1), width: 1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE3F2FD),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    'Tambah Murid Baru (+ID: $_nextIdCounter)',
-                    style: const TextStyle(color: Color(0xFF1565C0), fontWeight: FontWeight.bold),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _namaController,
-                  decoration: const InputDecoration(
-                    labelText: 'Nama Lengkap Murid Baru',
-                    hintText: 'Contoh: Adi Wijaya',
-                    border: OutlineInputBorder(),
-                    floatingLabelBehavior: FloatingLabelBehavior.always,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: _tambahMurid,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1E88E5),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    child: const Text(
-                      'DAFTARKAN ATLET BARU',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+          )).toList(),
+        ),
+      ],
     );
   }
 }
 
-class MateriNunchakuPage extends StatelessWidget {
-  const MateriNunchakuPage({Key? key}) : super(key: key);
-
+class BoxplotPainter extends CustomPainter {
   @override
-  Widget build(BuildContext context) {
-    final List<Map<String, dynamic>> kurikulumNunchaku = [
-      {
-        "kategori": "NUNCHAKU BASIC",
-        "materi": ["BARBEL SEBAGAI GADA", "BASIC MOVEMENT NUNCHAKU"]
-      },
-      {
-        "kategori": "NUNCHAKU INTERMEDIATE",
-        "materi": ["NUNCHAKU SWITCH HAND"]
-      }
+  void paint(Canvas canvas, Size size) {
+    final Paint linePaint = Paint()..color = const Color(0xFF475569)..strokeWidth = 1.0..style = PaintingStyle.stroke;
+    final Paint boxPaint = Paint()..color = const Color(0xFF0284C7)..style = PaintingStyle.fill;
+
+    canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), linePaint);
+    int dataCount = 7;
+    double spacing = size.width / dataCount;
+
+    List<List<double>> boxData = [
+      [0.0, 0.20, 0.35, 0.48, 0.60, 0.80], 
+      [0.15, 0.25, 0.40, 0.52, 0.65, 0.82], 
+      [0.0, 0.30, 0.45, 0.55, 0.70, 0.88], 
+      [0.0, 0.18, 0.32, 0.45, 0.58, 0.76], 
+      [0.0, 0.22, 0.38, 0.50, 0.62, 0.78], 
+      [0.0, 0.12, 0.28, 0.40, 0.55, 0.72], 
+      [0.20, 0.28, 0.42, 0.56, 0.68, 0.84], 
     ];
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('MATERI NUNCHAKU', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        elevation: 0,
-      ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: kurikulumNunchaku.length,
-        itemBuilder: (context, index) {
-          final item = kurikulumNunchaku[index];
-          return Card(
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(item["kategori"], style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                  const Divider(),
-                  ...(item["materi"] as List<String>).map((m) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Text('• $m'),
-                      )),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
+    for (int i = 0; i < dataCount; i++) {
+      double x = (spacing * i) + (spacing / 2);
+      var data = boxData[i];
+      
+      double outlier = data[0] * size.height;
+      double topWhisker = data[1] * size.height;
+      double q3 = data[2] * size.height;
+      double median = data[3] * size.height;
+      double q1 = data[4] * size.height;
+      double bottomWhisker = data[5] * size.height;
+      double boxWidth = spacing * 0.35;
+
+      if (data[0] > 0) {
+        canvas.drawCircle(Offset(x, outlier), 2.5, Paint()..color = const Color(0xFF38BDF8));
+      }
+      
+      canvas.drawLine(Offset(x, topWhisker), Offset(x, q3), linePaint);
+      canvas.drawLine(Offset(x - boxWidth/3, topWhisker), Offset(x + boxWidth/3, topWhisker), linePaint);
+      canvas.drawLine(Offset(x, q1), Offset(x, bottomWhisker), linePaint);
+      canvas.drawLine(Offset(x - boxWidth/3, bottomWhisker), Offset(x + boxWidth/3, bottomWhisker), linePaint);
+
+      Rect boxRect = Rect.fromLTRB(x - boxWidth / 2, q3, x + boxWidth / 2, q1);
+      canvas.drawRect(boxRect, boxPaint);
+      canvas.drawRect(boxRect, Paint()..color = const Color(0xFF38BDF8)..style = PaintingStyle.stroke..strokeWidth = 1);
+      canvas.drawLine(Offset(x - boxWidth / 2, median), Offset(x + boxWidth / 2, median), Paint()..color = const Color(0xFFF8FAFC)..strokeWidth = 1.5);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// ==================== IMPLEMENTASI GRAFIK RADAR SPIDER ====================
+class RadarSpiderChart extends StatelessWidget {
+  const RadarSpiderChart({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size.infinite,
+      painter: RadarSpiderPainter(),
     );
   }
+}
+
+class RadarSpiderPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    Offset center = Offset(size.width / 2, size.height / 2);
+    double maxRadius = math.min(size.width, size.height) / 2.7; 
+    int numFeatures = 10;
+
+    List<String> labels = [
+      'MUSCULAR END.', 'POWER', 'CORE STAB.', 'DYN. FLEX', 'SPEED END.',
+      'REACTIVE SP.', 'AGILITY', 'ANTICIPATION', 'MOBILITY', 'REACT AGILITY'
+    ];
+
+    // 1. GRID JARING SPIDER BACKGROUND
+    Paint gridPaint = Paint()..color = const Color(0xFF334155)..style = PaintingStyle.stroke..strokeWidth = 1.0;
+    for (int i = 1; i <= 4; i++) {
+      double currentRadius = maxRadius * (i / 4);
+      Path gridPath = Path();
+      for (int j = 0; j < numFeatures; j++) {
+        double angle = (j * 2 * math.pi / numFeatures) - (math.pi / 2);
+        double x = center.dx + currentRadius * math.cos(angle);
+        double y = center.dy + currentRadius * math.sin(angle);
+        if (j == 0) gridPath.moveTo(x, y); else gridPath.lineTo(x, y);
+      }
+      gridPath.close();
+      canvas.drawPath(gridPath, gridPaint);
+    }
+
+    // 2. DRAW AXIS LINES & TEXT LABELS
+    for (int j = 0; j < numFeatures; j++) {
+      double angle = (j * 2 * math.pi / numFeatures) - (math.pi / 2);
+      double x = center.dx + maxRadius * math.cos(angle);
+      double y = center.dy + maxRadius * math.sin(angle);
+      canvas.drawLine(center, Offset(x, y), gridPaint);
+      
+      TextPainter textPainter = TextPainter(
+        text: TextSpan(
+          text: labels[j],
+          style: const TextStyle(fontSize: 7.5, fontWeight: FontWeight.w800, color: Color(0xFF94A3B8), letterSpacing: 0.3),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      
+      double textX = center.dx + (maxRadius + 14) * math.cos(angle) - (textPainter.width / 2);
+      double textY = center.dy + (maxRadius + 10) * math.sin(angle) - (textPainter.height / 2);
+      textPainter.paint(canvas, Offset(textX, textY));
+    }
+
+    // 3. LAPISAN JARING A: GLOBAL TEAM AVERAGE
+    List<double> teamAvgValues = [0.65, 0.70, 0.60, 0.65, 0.68, 0.70, 0.62, 0.65, 0.70, 0.60];
+    Path teamPath = Path();
+    for (int j = 0; j < numFeatures; j++) {
+      double angle = (j * 2 * math.pi / numFeatures) - (math.pi / 2);
+      double currentRadius = maxRadius * teamAvgValues[j];
+      double x = center.dx + currentRadius * math.cos(angle);
+      double y = center.dy + currentRadius * math.sin(angle);
+      if (j == 0) teamPath.moveTo(x, y); else teamPath.lineTo(x, y);
+    }
+    teamPath.close();
+    canvas.drawPath(teamPath, Paint()..color = const Color(0xFF0EA5E9).withOpacity(0.12)..style = PaintingStyle.fill);
+    canvas.drawPath(teamPath, Paint()..color = const Color(0xFF0EA5E9).withOpacity(0.5)..style = PaintingStyle.stroke..strokeWidth = 1.2);
+
+    // 4. LAPISAN JARING B: DATA NILAI MURID
+    List<double> studentValues = [0.80, 0.65, 0.85, 0.50, 0.70, 0.90, 0.75, 0.60, 0.80, 0.55];
+    Path studentPath = Path();
+    List<Offset> studentPoints = [];
+    for (int j = 0; j < numFeatures; j++) {
+      double angle = (j * 2 * math.pi / numFeatures) - (math.pi / 2);
+      double currentRadius = maxRadius * studentValues[j];
+      double x = center.dx + currentRadius * math.cos(angle);
+      double y = center.dy + currentRadius * math.sin(angle);
+      studentPoints.add(Offset(x, y));
+      if (j == 0) studentPath.moveTo(x, y); else studentPath.lineTo(x, y);
+    }
+    studentPath.close();
+    canvas.drawPath(studentPath, Paint()..color = const Color(0xFFF43F5E).withOpacity(0.28)..style = PaintingStyle.fill);
+    canvas.drawPath(studentPath, Paint()..color = const Color(0xFFF43F5E)..style = PaintingStyle.stroke..strokeWidth = 2.0);
+
+    // Titik sudut nilai murid
+    Paint pointPaint = Paint()..color = const Color(0xFFFFF1F2);
+    for (Offset point in studentPoints) {
+      canvas.drawCircle(point, 3, pointPaint);
+      canvas.drawCircle(point, 1.5, Paint()..color = const Color(0xFFE11D48));
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
