@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// Master List 17 Klasifikasi Sesuai Target Input
+// Master List 17 Klasifikasi Sesuai Request Sabeumnim
 const List<String> kDaftarKlasifikasiLatihan = [
   "STRENGTH",
   "ENDURANCE",
@@ -190,7 +190,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     if (upper == "FLEXIBILITY" || upper == "DYNAMIC FLEXIBILITY") return 4;
     if (upper == "BALANCE") return 5;
     if (upper == "REACTION TIME" || upper == "REACTIVE SPEED / QUICKNESS") return 6;
-    return -1; // Menandakan masuk kategori murni Radar saja (AGILITY, MOBILITY, OPEN/REACTIVE AGILITY)
+    return -1; // Masuk kategori murni RADAR (AGILITY, MOBILITY, OPEN/REACTIVE AGILITY)
   }
 
   void _simpanDataKuantitatif(String idMurid, String jenis, String klasifikasi, double reps, double sets, DateTime tgl) {
@@ -210,10 +210,10 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
             _daftarMurid[idx].radarData[boxIdx] = normalisasi;
           }
         } else {
-          // Jika murni kategori Radar (misal: AGILITY di index 8)
           double normalisasi = (skorKalkulasi / 100).clamp(0.0, 1.0);
-          if (klasifikasi.contains("AGILITY")) _daftarMurid[idx].radarData[8] = normalisasi;
+          if (klasifikasi.contains("AGILITY") && !klasifikasi.contains("OPEN")) _daftarMurid[idx].radarData[8] = normalisasi;
           if (klasifikasi.contains("MOBILITY")) _daftarMurid[idx].radarData[9] = normalisasi;
+          if (klasifikasi.contains("OPEN")) _daftarMurid[idx].radarData[2] = normalisasi; // Dipetakan ke pilar fungsional pendukung
         }
         _selectedMuridId = idMurid;
       }
@@ -238,8 +238,9 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
           }
         } else {
           double normalisasi = (skorKalkulasi / 100).clamp(0.0, 1.0);
-          if (klasifikasi.contains("AGILITY")) _daftarMurid[idx].radarData[8] = normalisasi;
+          if (klasifikasi.contains("AGILITY") && !klasifikasi.contains("OPEN")) _daftarMurid[idx].radarData[8] = normalisasi;
           if (klasifikasi.contains("MOBILITY")) _daftarMurid[idx].radarData[9] = normalisasi;
+          if (klasifikasi.contains("OPEN")) _daftarMurid[idx].radarData[2] = normalisasi;
         }
         _selectedMuridId = idMurid;
       }
@@ -324,7 +325,7 @@ class DashboardAtletPage extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
-            // Identitas Atlet Atas
+            // Identitas Atlet
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(12),
@@ -339,7 +340,7 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             
-            // Boxplot Chart Panel
+            // Boxplot Panel
             Container(
               width: double.infinity,
               decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(12)),
@@ -355,7 +356,7 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // Radar Chart Panel
+            // Radar Panel
             Container(
               width: double.infinity,
               decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(12)),
@@ -377,7 +378,7 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // ==================== NEW FEATURE: MATRIKS KOLOM PERUBAHAN REAL-TIME ====================
+            // ==================== RE-STRUCTURED FEATURE: MATRIKS KOLOM 6 SEKTOR INDUK ====================
             Container(
               width: double.infinity,
               decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(12)),
@@ -385,21 +386,21 @@ class DashboardAtletPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('MATRIKS EVALUASI & ADAPTASI STRATEGI LATIHAN', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF10B981))),
+                  const Text('MATRIKS KONTROL PERUBAHAN DATA ATLET', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF10B981))),
                   const SizedBox(height: 10),
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: SizedBox(
-                      width: 900, // Diperlebar agar scannable dan tidak menumpuk padat
+                      width: 1050, // Ruang lebar optimal agar scannable penuh
                       child: Table(
                         border: TableBorder.all(color: const Color(0xFF334155), width: 1),
                         columnWidths: const {
-                          0: FlexColumnWidth(1.6), // Komponen
-                          1: FlexColumnWidth(1.2), // Pola Boxplot
-                          2: FlexColumnWidth(1.5), // Skor
-                          3: FlexColumnWidth(1.8), // Kelebihan
-                          4: FlexColumnWidth(1.8), // Kekurangan
-                          5: FlexColumnWidth(2.5), // Rekomendasi
+                          0: FlexColumnWidth(1.8), // KOMPONEN
+                          1: FlexColumnWidth(1.4), // POLA BOXPLOT
+                          2: FlexColumnWidth(2.0), // SKOR
+                          3: FlexColumnWidth(2.0), // KELEBIHAN
+                          4: FlexColumnWidth(2.0), // KEKURANGAN
+                          5: FlexColumnWidth(2.8), // REKOMENDASI
                         },
                         children: [
                           TableRow(
@@ -413,25 +414,28 @@ class DashboardAtletPage extends StatelessWidget {
                               _buildHeaderCell('REKOMENDASI'),
                             ],
                           ),
-                          // Pemetaan Otomatis 17 Latihan Real-time
-                          _buildCustomRow('STRENGTH (BOXPLOT)', 'STRENGTH', 'Q1:${activeMurid.boxData[0][1].toStringAsFixed(0)} | M:${activeMurid.boxData[0][2].toStringAsFixed(0)} | S:${activeMurid.boxData[0][3].toStringAsFixed(0)}', activeMurid.boxData[0][3] >= teamBoxAverages[0], 'Power Angkatan Diatas Rata-rata', 'Stabilitas Core Maksimal', 'Pertahankan dengan fungsional sirkuit weight; Tambahkan PNF stretching sendi.'),
-                          _buildCustomRow('ENDURANCE (BOXPLOT)', 'ENDURANCE', 'Q1:${activeMurid.boxData[1][1].toStringAsFixed(0)} | M:${activeMurid.boxData[1][2].toStringAsFixed(0)} | S:${activeMurid.boxData[1][3].toStringAsFixed(0)}', activeMurid.boxData[1][3] >= teamBoxAverages[1], 'Sirkulasi O2 Paru Stabil', 'Saturasi Menurun Di Ronde Akhir', 'Pertahankan dengan VO2Max drills; Imbangi porsi istirahat teratur.'),
-                          _buildCustomRow('SPEED (BOXPLOT)', 'SPEED', 'Q1:${activeMurid.boxData[2][1].toStringAsFixed(0)} | M:${activeMurid.boxData[2][2].toStringAsFixed(0)} | S:${activeMurid.boxData[2][3].toStringAsFixed(0)}', activeMurid.boxData[2][3] >= teamBoxAverages[2], 'Akselerasi Serangan Kilat', 'Deselerasi Langkah Lambat', 'Pertahankan via sprint pendek eksplosif; Imbangi latihan kelincahan bayangan.'),
-                          _buildCustomRow('COORDINATION (BOXPLOT)', 'COORDINATION', 'Q1:${activeMurid.boxData[3][1].toStringAsFixed(0)} | M:${activeMurid.boxData[3][2].toStringAsFixed(0)} | S:${activeMurid.boxData[3][3].toStringAsFixed(0)}', activeMurid.boxData[3][3] >= teamBoxAverages[3], 'Sinkronisasi Kaki & Tangan Baik', 'Akurasi Target Terganggu', 'Pertahankan drills sirkuit kombinasi; Berikan latihan visual target presisi.'),
-                          _buildCustomRow('FLEXIBILITY (BOXPLOT)', 'FLEXIBILITY', 'Q1:${activeMurid.boxData[4][1].toStringAsFixed(0)} | M:${activeMurid.boxData[4][2].toStringAsFixed(0)} | S:${activeMurid.boxData[4][3].toStringAsFixed(0)}', activeMurid.boxData[4][3] >= teamBoxAverages[4], 'Jangkauan Tendangan Tinggi Luas', 'Otot Kaku Saat Bertahan', 'Pertahankan yoga/stretching dinamis; Imbangi latihan eksentrik penguatan sendi.'),
-                          _buildCustomRow('BALANCE (BOXPLOT)', 'BALANCE', 'Q1:${activeMurid.boxData[5][1].toStringAsFixed(0)} | M:${activeMurid.boxData[5][2].toStringAsFixed(0)} | S:${activeMurid.boxData[5][3].toStringAsFixed(0)}', activeMurid.boxData[5][3] >= teamBoxAverages[5], 'Tumpuan Kokoh Saat Kontra', 'Keseimbangan Goyah Pasca Kicking', 'Pertahankan drills papan goyang tunggal; Berikan core plank penguat pinggul.'),
-                          _buildCustomRow('REACTION TIME (BOXPLOT)', 'REACTION TIME', 'Q1:${activeMurid.boxData[6][1].toStringAsFixed(0)} | M:${activeMurid.boxData[6][2].toStringAsFixed(0)} | S:${activeMurid.boxData[6][3].toStringAsFixed(0)}', activeMurid.boxData[6][3] >= teamBoxAverages[6], 'Refleks Counter Serangan Instan', 'Antisipasi Sering Terkecoh', 'Pertahankan stimulus peluit/lampu; Imbangi latihan sparring taktis berkala.'),
-                          _buildCustomRow('MUSCULAR ENDURANCE (BOXPLOT)', 'ENDURANCE', 'Q1:${activeMurid.boxData[1][1].toStringAsFixed(0)} | M:${activeMurid.boxData[1][2].toStringAsFixed(0)} | S:${activeMurid.boxData[1][3].toStringAsFixed(0)}', activeMurid.boxData[1][3] >= teamBoxAverages[1], 'Daya Tahan Kontraksi Otot Lama', 'Asam Laktat Cepat Menumpuk', 'Pertahankan high reps bodyweight; Tambahkan suplemen nutrisi hidrasi tim.'),
-                          _buildCustomRow('POWER (BOXPLOT)', 'STRENGTH', 'Q1:${activeMurid.boxData[0][1].toStringAsFixed(0)} | M:${activeMurid.boxData[0][2].toStringAsFixed(0)} | S:${activeMurid.boxData[0][3].toStringAsFixed(0)}', activeMurid.boxData[0][3] >= teamBoxAverages[0], 'Hantaman Serangan Sangat Telak', 'Transfer Energi Kurang Mengalir', 'Pertahankan plyometrik eksplosif; Imbangi drills transisi kecepatan gerak.'),
-                          _buildCustomRow('CORE STABILITY (BOXPLOT)', 'STRENGTH', 'Q1:${activeMurid.boxData[0][1].toStringAsFixed(0)} | M:${activeMurid.boxData[0][2].toStringAsFixed(0)} | S:${activeMurid.boxData[0][3].toStringAsFixed(0)}', activeMurid.boxData[0][3] >= teamBoxAverages[0], 'Keseimbangan Poros Tubuh Sempurna', 'Kelemahan Rotasi Pinggul', 'Pertahankan plank statis bervariasi; Imbangi russian twist menggunakan beban.'),
-                          _buildCustomRow('DYNAMIC FLEXIBILITY (BOXPLOT)', 'FLEXIBILITY', 'Q1:${activeMurid.boxData[4][1].toStringAsFixed(0)} | M:${activeMurid.boxData[4][2].toStringAsFixed(0)} | S:${activeMurid.boxData[4][3].toStringAsFixed(0)}', activeMurid.boxData[4][3] >= teamBoxAverages[4], 'Mobilitas Serangan Udara Tinggi', 'Kurang Elastis Gerak Mendadak', 'Pertahankan ayunan kaki terprogram; Tambahkan conditioning sendi bawah.'),
-                          _buildCustomRow('SPEED ENDURANCE (BOXPLOT)', 'SPEED', 'Q1:${activeMurid.boxData[2][1].toStringAsFixed(0)} | M:${activeMurid.boxData[2][2].toStringAsFixed(0)} | S:${activeMurid.boxData[2][3].toStringAsFixed(0)}', activeMurid.boxData[2][3] >= teamBoxAverages[2], 'Kecepatan Konstan Tiap Ronde', 'Penurunan Akselerasi Sudden-Attack', 'Pertahankan interval running intensitas tinggi; Tingkatkan recovery glikogen.'),
-                          _buildCustomRow('REACTIVE SPEED (BOXPLOT)', 'REACTION TIME', 'Q1:${activeMurid.boxData[6][1].toStringAsFixed(0)} | M:${activeMurid.boxData[6][2].toStringAsFixed(0)} | S:${activeMurid.boxData[6][3].toStringAsFixed(0)}', activeMurid.boxData[6][3] >= teamBoxAverages[6], 'Kecepatan Menghindar Sangat Responsif', 'Timing Eksekusi Sering Terlambat', 'Pertahankan shadow boxing stimulus; Berikan drill counter target pad.'),
-                          // Komponen Tipe Grafik RADAR (Pola Boxplot Otomatis Kosong)
-                          _buildCustomRow('AGILITY (RADAR)', '-', 'Val: ${activeMurid.radarData[8].toStringAsFixed(2)}', activeMurid.radarData[8] >= teamRadarAverages[8], 'Kelincahan Potong Sudut Sangat Baik', 'Footwork Terlalu Lebar', 'Pertahankan ladder drills dinamis; Imbangi langkah pendek efisien.'),
-                          _buildCustomRow('ANTICIPATION (BOXPLOT)', 'COORDINATION', 'Q1:${activeMurid.boxData[3][1].toStringAsFixed(0)} | M:${activeMurid.boxData[3][2].toStringAsFixed(0)} | S:${activeMurid.boxData[3][3].toStringAsFixed(0)}', activeMurid.boxData[3][3] >= teamBoxAverages[3], 'Mampu Membaca Pola Serangan Lawan', 'Respon Lambat Saat Terdesak', 'Pertahankan analisis video sparring; Tambahkan latihan visual reaksi cepat.'),
-                          _buildCustomRow('MOBILITY (RADAR)', '-', 'Val: ${activeMurid.radarData[9].toStringAsFixed(2)}', activeMurid.radarData[9] >= teamRadarAverages[9], 'Keluwesan Ruang Gerak Matras Luas', 'Stamina Drop Akibat Over-movement', 'Pertahankan kelenturan otot sendi panggul; Imbangi taktik kontrol ring.'),
-                          _buildCustomRow('OPEN AGILITY (RADAR)', '-', 'Val: ${activeMurid.radarData[2].toStringAsFixed(2)}', activeMurid.radarData[2] >= teamRadarAverages[2], 'Respon Adaptasi Lapangan Fleksibel', 'Kerapatan Defensif Longgar', 'Pertahankan game taktis bereaksi acak; Tingkatkan perlindungan cover dada.'),
+                          
+                          // Pemetaan Dinamis 17 Klasifikasi Berjalan Secara Real-Time
+                          _buildEvaluasiRow('STRENGTH', 'STRENGTH', 'BOXPLOT', 0),
+                          _buildEvaluasiRow('ENDURANCE', 'ENDURANCE', 'BOXPLOT', 1),
+                          _buildEvaluasiRow('SPEED', 'SPEED', 'BOXPLOT', 2),
+                          _buildEvaluasiRow('COORDINATION', 'COORDINATION', 'BOXPLOT', 3),
+                          _buildEvaluasiRow('FLEXIBILITY', 'FLEXIBILITY', 'BOXPLOT', 4),
+                          _buildEvaluasiRow('BALANCE', 'BALANCE', 'BOXPLOT', 5),
+                          _buildEvaluasiRow('REACTION TIME', 'REACTION TIME', 'BOXPLOT', 6),
+                          
+                          _buildEvaluasiRow('MUSCULAR ENDURANCE', 'ENDURANCE', 'BOXPLOT', 1),
+                          _buildEvaluasiRow('POWER', 'STRENGTH', 'BOXPLOT', 0),
+                          _buildEvaluasiRow('CORE STABILITY', 'STRENGTH', 'BOXPLOT', 0),
+                          _buildEvaluasiRow('DYNAMIC FLEXIBILITY', 'FLEXIBILITY', 'BOXPLOT', 4),
+                          _buildEvaluasiRow('SPEED ENDURANCE', 'SPEED', 'BOXPLOT', 2),
+                          _buildEvaluasiRow('REACTIVE SPEED / QUICKNESS', 'REACTION TIME', 'BOXPLOT', 6),
+                          _buildEvaluasiRow('ANTICIPATION & SPATIAL AWARENESS', 'COORDINATION', 'BOXPLOT', 3),
+                          
+                          // Komponen Khusus Grafik RADAR (Pola Boxplot Otomatis Kosong)
+                          _buildEvaluasiRow('AGILITY', '-', 'RADAR', 8),
+                          _buildEvaluasiRow('MOBILITY', '-', 'RADAR', 9),
+                          _buildEvaluasiRow('OPEN/REACTIVE AGILITY', '-', 'RADAR', 2),
                         ],
                       ),
                     ),
@@ -446,378 +450,37 @@ class DashboardAtletPage extends StatelessWidget {
   }
 
   Widget _buildHeaderCell(String text) {
-    return Padding(padding: const EdgeInsets.all(6.0), child: Text(text, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF38BDF8), fontSize: 9, fontWeight: FontWeight.bold)));
+    return Padding(padding: const EdgeInsets.all(8.0), child: Text(text, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF38BDF8), fontSize: 9, fontWeight: FontWeight.bold)));
   }
 
-  TableRow _buildCustomRow(String komponen, String polaBoxplot, String skor, bool statusPositif, String kelebihanBase, String kekuranganBase, String rekomendasi) {
+  // Fungsi Parser Otomatis Pembuat Resume Kelebihan, Kekurangan, & Rekomendasi Sesuai Instruksi Sabeumnim
+  TableRow _buildEvaluasiRow(String namaKomponen, String polaBoxplot, String tipeGrafik, int dataIdx) {
+    String skorTeks = "";
+    bool diAtasRataTim = false;
+    
+    if (tipeGrafik == "BOXPLOT") {
+      double q1 = activeMurid.boxData[dataIdx][1];
+      double q2 = activeMurid.boxData[dataIdx][2];
+      double sk = activeMurid.boxData[dataIdx][3];
+      diAtasRataTim = sk >= teamBoxAverages[dataIdx];
+      skorTeks = "Q1:${q1.toStringAsFixed(0)} | Q2:${q2.toStringAsFixed(0)} | S:${sk.toStringAsFixed(0)}";
+    } else {
+      double radVal = activeMurid.radarData[dataIdx];
+      diAtasRataTim = radVal >= teamRadarAverages[dataIdx];
+      skorTeks = "Radar: ${radVal.toStringAsFixed(2)}";
+    }
+
+    // Pembuatan resume otomatis berdasarkan komponen spesifik murid
+    String kelebihanText = diAtasRataTim ? "Kapasitas fungsional optimal di atas target tim harian." : "Stabilitas gerak dasar atlet konsisten.";
+    String kekuranganText = !diAtasRataTim ? "Defisit volume energi dibanding target rata-rata tim." : "Memerlukan variasi stimulus beban lanjutan.";
+    
+    String rekomendasiText = "";
+    if (diAtasRataTim) {
+      rekomendasiText = "UPGRADE: Naikkan intensitas sirkuit gerakan fungsional bervariasi untuk menjaga keunggulan fisik dominan.";
+    } else {
+      rekomendasiText = "BALANCING: Tambahkan porsi latihan beban terarah khusus area $namaKomponen untuk menyeimbangkan ketertinggalan.";
+    }
+
     return TableRow(
       children: [
-        Padding(padding: const EdgeInsets.all(6.0), child: Text(komponen, style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold))),
-        Padding(padding: const EdgeInsets.all(6.0), child: Text(polaBoxplot, style: TextStyle(color: polaBoxplot == '-' ? Colors.white24 : Colors.amber[300], fontSize: 8, fontWeight: FontWeight.w500))),
-        Padding(padding: const EdgeInsets.all(6.0), child: Text(skor, style: const TextStyle(color: Color(0xFF00E5FF), fontSize: 8, fontWeight: FontWeight.bold))),
-        Padding(padding: const EdgeInsets.all(6.0), child: Text(statusPositif ? kelebihanBase : 'Baseline Tercapai', style: const TextStyle(color: Color(0xFF10B981), fontSize: 8))),
-        Padding(padding: const EdgeInsets.all(6.0), child: Text(!statusPositif ? kekuranganBase : 'Minim Defisit', style: const TextStyle(color: Color(0xFFEF4444), fontSize: 8))),
-        Padding(padding: const EdgeInsets.all(6.0), child: Text(rekomendasi, style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 8))),
-      ],
-    );
-  }
-}
-
-// ==================== HALAMAN 2: DAFTAR MURID ====================
-class DaftarMuridPage extends StatelessWidget {
-  final List<Murid> daftarMurid;
-  final int totalKapasitas;
-  final String selectedId;
-  final TextEditingController namaController;
-  final TextEditingController searchController;
-  final ValueChanged<String> onSearchChanged;
-  final Function(String) onSelect;
-  final Function(Murid) onDelete;
-  final VoidCallback onAdd;
-
-  const DaftarMuridPage({
-    Key? key, required this.daftarMurid, required this.totalKapasitas, required this.selectedId,
-    required this.namaController, required this.searchController, required this.onSearchChanged,
-    required this.onSelect, required this.onDelete, required this.onAdd,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: [
-          const Center(child: Text('Database Kontrol Atlet', style: TextStyle(color: Color(0xFF38BDF8), fontSize: 16, fontWeight: FontWeight.bold))),
-          const SizedBox(height: 14),
-          TextField(
-            controller: searchController,
-            onChanged: onSearchChanged,
-            style: const TextStyle(color: Colors.white, fontSize: 13),
-            decoration: InputDecoration(
-              hintText: 'Cari nama atau ID murid...',
-              prefixIcon: const Icon(Icons.search, color: Color(0xFF38BDF8), size: 18),
-              filled: true,
-              fillColor: const Color(0xFF1E293B),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(12)),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: namaController,
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
-                    textCapitalization: TextCapitalization.characters,
-                    decoration: const InputDecoration(hintText: 'NAMA ATLET BARU', border: InputBorder.none),
-                  ),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF10B981)),
-                  onPressed: onAdd,
-                  child: const Text('REGISTRASI'),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: daftarMurid.length,
-            itemBuilder: (context, index) {
-              final murid = daftarMurid[index];
-              final isSelected = murid.id == selectedId;
-              return Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF0EA5E9).withOpacity(0.15) : const Color(0xFF1E293B),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: isSelected ? const Color(0xFF38BDF8) : Colors.transparent),
-                ),
-                child: ListTile(
-                  leading: CircleAvatar(backgroundColor: Colors.blueGrey[800], child: Text(murid.id, style: const TextStyle(fontSize: 10, color: Colors.white))),
-                  title: Text(murid.nama, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(icon: const Icon(Icons.analytics, color: Color(0xFF34D399)), onPressed: () => onSelect(murid.id)),
-                      IconButton(icon: const Icon(Icons.delete, color: Color(0xFFEF4444)), onPressed: () => onDelete(murid)),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ==================== HALAMAN 3: INPUT REPETISI ====================
-class InputLatihanKuantitatifPage extends StatefulWidget {
-  final List<Murid> daftarMurid;
-  final String selectedMuridId;
-  final ValueChanged<String?> onMuridChanged;
-  final Function(String id, String jenis, String klasifikasi, double reps, double sets, DateTime tgl) onSimpan;
-
-  const InputLatihanKuantitatifPage({Key? key, required this.daftarMurid, required this.selectedMuridId, required this.onMuridChanged, required this.onSimpan}) : super(key: key);
-  @override State<InputLatihanKuantitatifPage> createState() => _InputLatihanKuantitatifPageState();
-}
-class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPage> {
-  final TextEditingController _jenisLatihanController = TextEditingController();
-  final TextEditingController _repsController = TextEditingController();
-  final TextEditingController _setsController = TextEditingController();
-  String _selectedKlasifikasi = "STRENGTH";
-
-  @override Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Center(child: Text('Input Capaian Kuantitatif (Reps * Sets)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFFA855F7)))),
-            const SizedBox(height: 16),
-            const Text("Pilih Atlet:", style: TextStyle(fontSize: 11, color: Colors.white70)),
-            const SizedBox(height: 4),
-            DropdownButtonFormField<String>(
-              dropdownColor: const Color(0xFF1E293B),
-              value: widget.selectedMuridId,
-              items: widget.daftarMurid.map((m) => DropdownMenuItem(value: m.id, child: Text(m.nama))).toList(),
-              onChanged: widget.onMuridChanged,
-              decoration: const InputDecoration(filled: true, fillColor: Color(0xFF1E293B), border: OutlineInputBorder()),
-            ),
-            const SizedBox(height: 12),
-            const Text("Klasifikasi Fokus Motorik (17 Opsi):", style: TextStyle(fontSize: 11, color: Colors.white70)),
-            const SizedBox(height: 4),
-            DropdownButtonFormField<String>(
-              dropdownColor: const Color(0xFF1E293B),
-              value: _selectedKlasifikasi,
-              items: kDaftarKlasifikasiLatihan.map((opsi) => DropdownMenuItem(value: opsi, child: Text(opsi, style: const TextStyle(fontSize: 12)))).toList(),
-              onChanged: (val) => setState(() => _selectedKlasifikasi = val!),
-              decoration: const InputDecoration(filled: true, fillColor: Color(0xFF1E293B), border: OutlineInputBorder()),
-            ),
-            const SizedBox(height: 12),
-            TextField(controller: _jenisLatihanController, decoration: const InputDecoration(labelText: 'Nama Gerakan Mandiri (e.g., Push Up)', filled: true, fillColor: Color(0xFF1E293B))),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(child: TextField(controller: _repsController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Jumlah Repetisi', filled: true, fillColor: Color(0xFF1E293B)))),
-                const SizedBox(width: 12),
-                Expanded(child: TextField(controller: _setsController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Jumlah Sets', filled: true, fillColor: Color(0xFF1E293B)))),
-              ],
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFA855F7)),
-                onPressed: () {
-                  double r = double.tryParse(_repsController.text) ?? 0;
-                  double s = double.tryParse(_setsController.text) ?? 0;
-                  widget.onSimpan(widget.selectedMuridId, _jenisLatihanController.text, _selectedKlasifikasi, r, s, DateTime.now());
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data $_selectedKlasifikasi Sukses Terkalkulasi!')));
-                },
-                child: const Text('SIMPAN & KALKULASI DATA REPS', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ==================== HALAMAN 4: INPUT DURASI WAKTU ====================
-class InputLatihanDurasiPage extends StatefulWidget {
-  final List<Murid> daftarMurid;
-  final String selectedMuridId;
-  final ValueChanged<String?> onMuridChanged;
-  final Function(String id, String jenis, String klasifikasi, double waktu, double sets, DateTime tgl) onSimpan;
-
-  const InputLatihanDurasiPage({Key? key, required this.daftarMurid, required this.selectedMuridId, required this.onMuridChanged, required this.onSimpan}) : super(key: key);
-  @override State<InputLatihanDurasiPage> createState() => _InputLatihanDurasiPageState();
-}
-class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
-  final TextEditingController _jenisLatihanController = TextEditingController();
-  final TextEditingController _waktuController = TextEditingController();
-  final TextEditingController _setsController = TextEditingController();
-  String _selectedKlasifikasi = "ENDURANCE";
-
-  @override Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Center(child: Text('Input Capaian Durasi (Waktu * Sets)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF06B6D4)))),
-            const SizedBox(height: 16),
-            const Text("Pilih Atlet:", style: TextStyle(fontSize: 11, color: Colors.white70)),
-            const SizedBox(height: 4),
-            DropdownButtonFormField<String>(
-              dropdownColor: const Color(0xFF1E293B),
-              value: widget.selectedMuridId,
-              items: widget.daftarMurid.map((m) => DropdownMenuItem(value: m.id, child: Text(m.nama))).toList(),
-              onChanged: widget.onMuridChanged,
-              decoration: const InputDecoration(filled: true, fillColor: Color(0xFF1E293B), border: OutlineInputBorder()),
-            ),
-            const SizedBox(height: 12),
-            const Text("Klasifikasi Fokus Motorik (17 Opsi):", style: TextStyle(fontSize: 11, color: Colors.white70)),
-            const SizedBox(height: 4),
-            DropdownButtonFormField<String>(
-              dropdownColor: const Color(0xFF1E293B),
-              value: _selectedKlasifikasi,
-              items: kDaftarKlasifikasiLatihan.map((opsi) => DropdownMenuItem(value: opsi, child: Text(opsi, style: const TextStyle(fontSize: 12)))).toList(),
-              onChanged: (val) => setState(() => _selectedKlasifikasi = val!),
-              decoration: const InputDecoration(filled: true, fillColor: Color(0xFF1E293B), border: OutlineInputBorder()),
-            ),
-            const SizedBox(height: 12),
-            TextField(controller: _jenisLatihanController, decoration: const InputDecoration(labelText: 'Jenis Drill (e.g., Plank)', filled: true, fillColor: Color(0xFF1E293B))),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(child: TextField(controller: _waktuController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Waktu (detik)', filled: true, fillColor: Color(0xFF1E293B)))),
-                const SizedBox(width: 12),
-                Expanded(child: TextField(controller: _setsController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Jumlah Sets', filled: true, fillColor: Color(0xFF1E293B)))),
-              ],
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF06B6D4)),
-                onPressed: () {
-                  double w = double.tryParse(_waktuController.text) ?? 0;
-                  double s = double.tryParse(_setsController.text) ?? 0;
-                  widget.onSimpan(widget.selectedMuridId, _jenisLatihanController.text, _selectedKlasifikasi, w, s, DateTime.now());
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Kalkulasi Durasi $_selectedKlasifikasi Masuk Dashboard!')));
-                },
-                child: const Text('SIMPAN & KALKULASI DATA WAKTU', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ==================== RENDERING DIAGRAM BOXPLOT UTUH ====================
-class MetaBoxplotChart extends StatelessWidget {
-  final List<List<double>> boxData;
-  final List<double> teamAverages;
-
-  const MetaBoxplotChart({Key? key, required this.boxData, required this.teamAverages}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(size: const Size(double.infinity, 250), painter: _MetaBoxplotPainter(boxData: boxData, teamAverages: teamAverages));
-  }
-}
-
-class _MetaBoxplotPainter extends CustomPainter {
-  final List<List<double>> boxData;
-  final List<double> teamAverages;
-
-  _MetaBoxplotPainter({required this.boxData, required this.teamAverages});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final linePaint = Paint()..color = const Color(0xFF64748B)..strokeWidth = 1.0..style = PaintingStyle.stroke;
-    final boxPaint = Paint()..color = const Color(0xFF334155)..style = PaintingStyle.fill;
-    final borderBoxPaint = Paint()..color = const Color(0xFF94A3B8)..strokeWidth = 1..style = PaintingStyle.stroke;
-    
-    final personalScorePaint = Paint()..color = const Color(0xFF00E5FF)..style = PaintingStyle.fill;
-    final teamMeanPaint = Paint()..color = const Color(0xFFFF1744)..style = PaintingStyle.fill;
-    final medianPaint = Paint()..color = const Color(0xFF10B981)..strokeWidth = 2;
-
-    final List<String> longLabels = ['STRENGTH', 'ENDURANCE', 'SPEED', 'COORDINATION', 'FLEXIBILITY', 'BALANCE', 'REACTION TIME'];
-    double colWidth = size.width / 8;
-    double chartHeight = size.height - 60;
-
-    double getY(double val) {
-      return (chartHeight - (val.clamp(0, 100) * (chartHeight / 100))) + 15;
-    }
-
-    for (int grid = 0; grid <= 100; grid += 25) {
-      double gy = getY(grid.toDouble());
-      canvas.drawLine(Offset(colWidth - 10, gy), Offset(size.width - 10, gy), Paint()..color = const Color(0xFF1E293B));
-    }
-
-    final textPainter = TextPainter(textDirection: TextDirection.ltr);
-
-    for (int i = 0; i < 7; i++) {
-      double x = (i + 1) * colWidth + 10;
-      canvas.drawLine(Offset(x, getY(boxData[i][0])), Offset(x, getY(boxData[i][5])), linePaint);
-      canvas.drawRect(Rect.fromLTRB(x - 12, getY(boxData[i][4]), x + 12, getY(boxData[i][1])), boxPaint);
-      canvas.drawRect(Rect.fromLTRB(x - 12, getY(boxData[i][4]), x + 12, getY(boxData[i][1])), borderBoxPaint);
-      canvas.drawLine(Offset(x - 12, getY(boxData[i][2])), Offset(x + 12, getY(boxData[i][2])), medianPaint);
-      canvas.drawCircle(Offset(x, getY(boxData[i][3])), 4.5, personalScorePaint);
-      canvas.drawRect(Rect.fromCenter(center: Offset(x, getY(teamAverages[i])), width: 7, height: 7), teamMeanPaint);
-
-      canvas.save();
-      canvas.translate(x, chartHeight + 22);
-      canvas.rotate(0.35);
-      textPainter.text = TextSpan(text: longLabels[i], style: const TextStyle(color: Colors.white70, fontSize: 7, fontWeight: FontWeight.bold));
-      textPainter.layout();
-      textPainter.paint(canvas, Offset(-textPainter.width / 2, 0));
-      canvas.restore();
-    }
-  }
-  @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
-
-// ==================== RENDERING DIAGRAM RADAR ====================
-class MetaRadarChartPainter extends CustomPainter {
-  final List<double> activeRadar;
-  final List<double> teamRadar;
-  MetaRadarChartPainter({required this.activeRadar, required this.teamRadar});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final centerX = size.width / 2;
-    final centerY = size.height / 2;
-    final radius = math.min(centerX, centerY) * 0.75;
-    final baseGridPaint = Paint()..color = const Color(0xFF334155)..style = PaintingStyle.stroke;
-    final personalBorderPaint = Paint()..color = const Color(0xFF00E5FF)..style = PaintingStyle.stroke..strokeWidth = 2.0;
-    final teamBorderPaint = Paint()..color = const Color(0xFFFF1744)..style = PaintingStyle.stroke..strokeWidth = 1.2;
-
-    final List<String> labels = ['STR', 'END', 'SPD', 'CRD', 'FLX', 'BAL', 'REA', 'PWR', 'AGI', 'MOB'];
-    
-    for (int g = 1; g <= 4; g++) canvas.drawCircle(Offset(centerX, centerY), radius * (g / 4), baseGridPaint);
-
-    final teamPath = Path();
-    final personalPath = Path();
-    final textPainter = TextPainter(textDirection: TextDirection.ltr);
-
-    for (int i = 0; i < 10; i++) {
-      final angle = (i * 2 * math.pi / 10) - (math.pi / 2);
-      double tx = centerX + radius * teamRadar[i] * math.cos(angle);
-      double ty = centerY + radius * teamRadar[i] * math.sin(angle);
-      if (i == 0) teamPath.moveTo(tx, ty); else teamPath.lineTo(tx, ty);
-
-      double px = centerX + radius * activeRadar[i] * math.cos(angle);
-      double py = centerY + radius * activeRadar[i] * math.sin(angle);
-      if (i == 0) personalPath.moveTo(px, py); else personalPath.lineTo(px, py);
-
-      canvas.drawLine(Offset(centerX, centerY), Offset(centerX + radius * math.cos(angle), centerY + radius * math.sin(angle)), baseGridPaint);
-      
-      textPainter.text = TextSpan(text: labels[i], style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 9));
-      textPainter.layout();
-      canvas.drawParagraph(TextParagraphBuilder(ParagraphStyle())..addText(""), Offset(px, py));
-    }
-    teamPath.close(); personalPath.close();
-    canvas.drawPath(teamPath, teamBorderPaint);
-    canvas.drawPath(personalPath, personalBorderPaint);
-  }
-  @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
+        Padding(padding: const EdgeInsets.all(6.0), child: Text("$namaKomponen ($tipeGrafik)", style: const TextStyle(color: Color
