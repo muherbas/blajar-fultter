@@ -62,8 +62,6 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
   @override
   void initState() {
     super.initState();
-    // Kembali murni bersih dari nol sesuai logika real-time Sabeumnim.
-    // Titik awal atlet (indeks ke-3) berada di angka 0.0 sampai ada inputan masuk.
     _daftarMurid = [
       Murid(
         id: "001", nama: "BUDI SANTOSO",
@@ -104,7 +102,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
       int count = 0;
       for (var murid in _daftarMurid) {
         if (i < murid.boxData.length && murid.boxData[i].length > 3) {
-          if (murid.boxData[i][3] > 0) { // Hanya menghitung rata-rata tim dari murid yang sudah latihan
+          if (murid.boxData[i][3] > 0) { 
             sum += murid.boxData[i][3];
             count++;
           }
@@ -709,12 +707,16 @@ class _BoxplotPainter extends CustomPainter {
       List<double> d = boxData[i];
       if (d.length < 6) continue;
 
-      double mapY(double val) => 10 + (chartHeight * (1.0 - (val / 100.0))).clamp(0.0, chartHeight);
+      // PERBAIKAN UTAMA: Jika nilainya murni 0, paksa posisi Y berada di paling bawah grafik (100% tinggi grafik)
+      double mapY(double val) {
+        if (val == 0.0) return 10 + chartHeight; 
+        return 10 + (chartHeight * (1.0 - (val / 100.0))).clamp(0.0, chartHeight);
+      }
 
       double yMin = mapY(d[0]);
       double yQ1 = mapY(d[1]);
       double yQ2 = mapY(d[2]);
-      double yScore = mapY(d[3]);
+      double yScore = mapY(d[3]); 
       double yQ3 = mapY(d[4]);
       double yMax = mapY(d[5]);
 
@@ -733,9 +735,8 @@ class _BoxplotPainter extends CustomPainter {
         canvas.drawLine(Offset(x - 15, yAvg), Offset(x + 15, yAvg), pRataTim);
       }
 
-      if (d[3] > 0) {
-        canvas.drawCircle(Offset(x, yScore), 5.0, pSkorKini);
-      }
+      // PERBAIKAN KEDUA: Selalu gambar titik merah (bahkan saat bernilai 0.0) agar terlihat hinggap di dasar paling bawah.
+      canvas.drawCircle(Offset(x, yScore), 5.0, pSkorKini);
 
       final List<String> labels = ["STR", "END", "SPD", "CRD", "FLX", "BAL", "REA"];
       final txt = TextPainter(text: TextSpan(text: labels[i], style: const TextStyle(fontSize: 8, color: Colors.white60)), textDirection: TextDirection.ltr)..layout();
@@ -790,4 +791,32 @@ class MetaRadarChartPainter extends CustomPainter {
       if (val > 0) hasDataAtlet = true;
       double angle = (j * 2 * math.pi / kDimensi) - (math.pi / 2);
       double r = maxRadius * val.clamp(0.0, 1.0);
-      Offset pt = Offset(center.dx + r * math.cos
+      Offset pt = Offset(center.dx + r * math.cos(angle), center.dy + r * math.sin(angle));
+      if (j == 0) pathAtlet.moveTo(pt.dx, pt.dy);
+      else pathAtlet.lineTo(pt.dx, pt.dy);
+    }
+    pathAtlet.close();
+    if (hasDataAtlet) {
+      canvas.drawPath(pathAtlet, pAtlet);
+      canvas.drawPath(pathAtlet, pBorderAtlet);
+    }
+
+    Path pathTim = Path();
+    bool hasDataTim = false;
+    for (int j = 0; j < kDimensi; j++) {
+      double val = j < teamRadar.length ? teamRadar[j] : 0.0;
+      if (val > 0) hasDataTim = true;
+      double angle = (j * 2 * math.pi / kDimensi) - (math.pi / 2);
+      double r = maxRadius * val.clamp(0.0, 1.0);
+      Offset pt = Offset(center.dx + r * math.cos(angle), center.dy + r * math.sin(angle));
+      if (j == 0) pathTim.moveTo(pt.dx, pt.dy);
+      else pathTim.lineTo(pt.dx, pt.dy);
+    }
+    pathTim.close();
+    if (hasDataTim) {
+      canvas.drawPath(pathTim, pTim);
+    }
+  }
+
+  @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
