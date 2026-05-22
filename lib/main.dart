@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// Master List 17 Klasifikasi Sesuai Target Input
+// Master List 17 Klasifikasi Sesuai Target Input Sabeumnim
 const List<String> kDaftarKlasifikasiLatihan = [
   "STRENGTH",
   "ENDURANCE",
@@ -48,7 +48,7 @@ const List<String> kDaftarKlasifikasiLatihan = [
 class Murid {
   final String id;
   final String nama;
-  final List<List<double>> boxData; // Index 0-6: [Min, Q1, Q2/Median, CurrentScore, Q3, Max]
+  final List<List<double>> boxData; // Index: [Min, Q1, Q2/Median, CurrentScore, Q3, Max]
   final List<double> radarData; // 10 Dimensi Nilai Atlet (0.0 - 1.0)
   
   List<Map<String, dynamic>> riwayatLatihanKuantitatif;
@@ -59,9 +59,9 @@ class Murid {
     required this.nama,
     required this.boxData,
     required this.radarData,
-    List<Map<String, dynamic>>? riwayatLatihanKuatitatif,
+    List<Map<String, dynamic>>? riwayatLatihanKuantitatif,
     List<Map<String, dynamic>>? riwayatLatihanDurasi,
-  })  : this.riwayatLatihanKuantitatif = riwayatLatihanKuatitatif ?? [],
+  })  : this.riwayatLatihanKuantitatif = riwayatLatihanKuantitatif ?? [],
         this.riwayatLatihanDurasi = riwayatLatihanDurasi ?? [];
 }
 
@@ -74,7 +74,7 @@ class MainNavigationHolder extends StatefulWidget {
 }
 
 class _MainNavigationHolderState extends State<MainNavigationHolder> {
-  int _currentIndex = 1; // Default halaman DAFTAR
+  int _currentIndex = 0; // Langsung fokus terbuka di DASHBOARD
   String _selectedMuridId = "001"; 
 
   final TextEditingController _namaController = TextEditingController();
@@ -93,10 +93,10 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
         boxData: [
           [20.0, 35.0, 48.0, 75.0, 60.0, 85.0], // STRENGTH
           [25.0, 40.0, 52.0, 68.0, 65.0, 88.0], // ENDURANCE
-          [30.0, 45.0, 55.0, 82.0, 70.0, 90.0], // SPEED
+          [30.0, 42.0, 65.0, 82.0, 75.0, 90.0], // SPEED
           [18.0, 32.0, 45.0, 50.0, 58.0, 76.0], // COORDINATION
-          [22.0, 38.0, 50.0, 40.0, 62.0, 78.0], // FLEXIBILITY
-          [12.0, 28.0, 40.0, 65.0, 55.0, 72.0], // BALANCE
+          [22.0, 48.0, 52.0, 40.0, 56.0, 78.0], // FLEXIBILITY
+          [12.0, 38.0, 40.0, 65.0, 42.0, 72.0], // BALANCE
           [28.0, 42.0, 56.0, 80.0, 68.0, 92.0], // REACTION TIME
         ],
         radarData: [0.85, 0.68, 0.82, 0.50, 0.40, 0.65, 0.80, 0.70, 0.75, 0.60],
@@ -329,7 +329,7 @@ class DashboardAtletPage extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
-            // Identitas Atlet
+            // Identitas Atlet Atas
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(12),
@@ -382,7 +382,7 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // ==================== MATRIKS KONTROL EVALUASI (SKOR DIHAPUS TOTAL) ====================
+            // ==================== MATRIKS KONTROL EVALUASI (BERSIH TANPA KOLOM SKOR) ====================
             Container(
               width: double.infinity,
               decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(12)),
@@ -395,12 +395,12 @@ class DashboardAtletPage extends StatelessWidget {
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: SizedBox(
-                      width: 850, // Lebar ideal tanpa kolom skor
+                      width: 880, // Ukuran pasca pembuangan kolom skor harian
                       child: Table(
                         border: TableBorder.all(color: const Color(0xFF334155), width: 1),
                         columnWidths: const {
-                          0: FlexColumnWidth(2.2), // KOMPONEN
-                          1: FlexColumnWidth(1.8), // POLA BOXPLOT (Gambar Referensi)
+                          0: FlexColumnWidth(2.3), // KOMPONEN
+                          1: FlexColumnWidth(2.2), // POLA BOXPLOT (Dinamis Sesuai Gambar Referensi)
                           2: FlexColumnWidth(2.5), // KELEBIHAN
                           3: FlexColumnWidth(2.5), // KEKURANGAN
                           4: FlexColumnWidth(3.5), // REKOMENDASI
@@ -453,22 +453,29 @@ class DashboardAtletPage extends StatelessWidget {
     return Padding(padding: const EdgeInsets.all(8.0), child: Text(text, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF38BDF8), fontSize: 9, fontWeight: FontWeight.bold)));
   }
 
-  // Deteksi Pola Distribusi Statistik Sesuai Gambar Referensi Sabeumnim
+  // Kalkulator Deteksi Pola Boxplot Berdasarkan Posisi Kuartil Gambar Referensi Baru
   String _hitungPolaBoxplot(int idx) {
-    if (idx >= activeMurid.boxData.length) return "Normal Distribution";
+    if (idx >= activeMurid.boxData.length) return "Symmetrical / Normal";
     double q1 = activeMurid.boxData[idx][1];
     double q2 = activeMurid.boxData[idx][2]; // Median
     double q3 = activeMurid.boxData[idx][4];
     
     double jarakBawah = q2 - q1;
     double jarakAtas = q3 - q2;
-    double rentangInterkuartil = q3 - q1;
+    double iqr = q3 - q1;
 
-    if (rentangInterkuartil < 15) return "Narrow (Ketat)";
-    if (rentangInterkuartil > 42) return "Wide (Lebar)";
-    if ((jarakAtas - jarakBawah).abs() < 3) return "Normal Distribution";
-    if (jarakAtas > jarakBawah) return "Skewed Top Heavy"; 
-    return "Skewed Down";
+    // 1. Deteksi Variabilitas Rentang (Narrow / Wide)
+    if (iqr < 12) return "Leptokurtic (Narrow)";
+    if (iqr > 38) return "Platykurtic (Wide)";
+    
+    // 2. Deteksi Kemiringan Distribusi (Skewness)
+    if ((jarakAtas - jarakBawah).abs() <= 2.5) {
+      return "Symmetrical / Normal";
+    } else if (jarakAtas > jarakBawah) {
+      return "Skewed Right (Top Heavy)";
+    } else {
+      return "Skewed Left (Down)";
+    }
   }
 
   TableRow _buildEvaluasiRow(String namaKomponen, String tipeGrafik, int dataIdx) {
@@ -483,7 +490,7 @@ class DashboardAtletPage extends StatelessWidget {
         diAtasRataTim = sk >= avg;
       }
     } else {
-      labelPola = "-"; // Mengunci Nilai Strip Khusus Radar Sesuai Permintaan
+      labelPola = "-"; // Murni Radar: Dikunci strip '-' total sesuai request
       if (dataIdx < activeMurid.radarData.length) {
         double radVal = activeMurid.radarData[dataIdx];
         double avg = dataIdx < teamRadarAverages.length ? teamRadarAverages[dataIdx] : 0.0;
@@ -510,7 +517,7 @@ class DashboardAtletPage extends StatelessWidget {
   }
 }
 
-// ==================== DAFTAR MURID WIDGET ====================
+// ==================== HALAMAN 2: DAFTAR MURID ====================
 class DaftarMuridPage extends StatelessWidget {
   final List<Murid> daftarMurid;
   final int totalKapasitas;
@@ -647,4 +654,47 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
             DropdownButtonFormField<String>(
               dropdownColor: const Color(0xFF1E293B),
               value: _selectedKlasifikasi,
-              items: kDaftarKlasifikasiLatihan.map((opsi) => DropdownMenuItem(value: opsi, child: Text(opsi,
+              items: kDaftarKlasifikasiLatihan.map((opsi) => DropdownMenuItem(value: opsi, child: Text(opsi, style: const TextStyle(fontSize: 12)))).toList(),
+              onChanged: (val) => setState(() => _selectedKlasifikasi = val!),
+              decoration: const InputDecoration(filled: true, fillColor: Color(0xFF1E293B), border: OutlineInputBorder()),
+            ),
+            const SizedBox(height: 12),
+            TextField(controller: _jenisLatihanController, decoration: const InputDecoration(labelText: 'Nama Gerakan Mandiri (e.g., Push Up)', filled: true, fillColor: Color(0xFF1E293B))),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(child: TextField(controller: _repsController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Jumlah Repetisi', filled: true, fillColor: Color(0xFF1E293B)))),
+                const SizedBox(width: 12),
+                Expanded(child: TextField(controller: _setsController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Jumlah Sets', filled: true, fillColor: Color(0xFF1E293B)))),
+              ],
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFA855F7)),
+                onPressed: () {
+                  double r = double.tryParse(_repsController.text) ?? 0;
+                  double s = double.tryParse(_setsController.text) ?? 0;
+                  widget.onSimpan(widget.selectedMuridId, _jenisLatihanController.text, _selectedKlasifikasi, r, s, DateTime.now());
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data $_selectedKlasifikasi Sukses Terkalkulasi!')));
+                },
+                child: const Text('SIMPAN & KALKULASI DATA REPS', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ==================== HALAMAN 4: INPUT DURASI WAKTU ====================
+class InputLatihanDurasiPage extends StatefulWidget {
+  final List<Murid> daftarMurid;
+  final String selectedMuridId;
+  final ValueChanged<String?> onMuridChanged;
+  final Function(String id, String jenis, String klasifikasi, double waktu, double sets, DateTime tgl) onSimpan;
+
+  const InputLatihanDurasiPage({Key? key, required this.daftarMurid, required this.selectedMuridId, required this.onMuridChanged, required this.onSimpan}) : super(key: key);
+  @override State<InputLatihanDurasiPage>
