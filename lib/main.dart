@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
       title: 'Premium Athlete Dashboard',
       theme: ThemeData(
         brightness: Brightness.light,
-        scaffoldBackgroundColor: const Color(0xFF0F172A), // Latar belakang Slate 900
+        scaffoldBackgroundColor: const Color(0xFF0F172A), // Slate 900
         fontFamily: 'Roboto',
       ),
       home: const DashboardAtletPage(),
@@ -79,7 +79,7 @@ class DashboardAtletPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   const SizedBox(
-                    height: 200,
+                    height: 220, // Sedikit dinaikkan agar teks nilai tidak terpotong
                     child: BoxplotChart(),
                   ),
                   const SizedBox(height: 16),
@@ -147,7 +147,7 @@ class DashboardAtletPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   const SizedBox(
-                    height: 340, 
+                    height: 360, // Ruang vertikal tambahan untuk label nilai radar
                     child: RadarSpiderChart(),
                   ),
                 ],
@@ -202,61 +202,76 @@ class BoxplotChart extends StatelessWidget {
 }
 
 class BoxplotPainter extends CustomPainter {
+  // Fungsi pembantu untuk menggambar teks nilai di Canvas
+  void drawValueText(Canvas canvas, Offset offset, String text, Color color) {
+    TextPainter tp = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(fontSize: 7.5, fontWeight: FontWeight.bold, color: color),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    tp.paint(canvas, offset);
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     final Paint linePaint = Paint()..color = const Color(0xFF475569)..strokeWidth = 1.0..style = PaintingStyle.stroke;
     final Paint boxPaint = Paint()..color = const Color(0xFF0284C7)..style = PaintingStyle.fill;
 
-    // Garis dasar chart (X-Axis line) berada di paling bawah
     canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), linePaint);
     int dataCount = 7;
     double spacing = size.width / dataCount;
 
-    // Nilai data (0.0 sampai 1.0)
-    // Format indeks: [outlier, bottomWhisker, q1, median, q3, topWhisker]
-    List<List<double>> boxData = [
-      [0.82, 0.20, 0.35, 0.48, 0.60, 0.80], 
-      [0.88, 0.25, 0.40, 0.52, 0.65, 0.82], 
-      [0.00, 0.30, 0.45, 0.55, 0.70, 0.88], 
-      [0.00, 0.18, 0.32, 0.45, 0.58, 0.76], 
-      [0.00, 0.22, 0.38, 0.50, 0.62, 0.78], 
-      [0.00, 0.12, 0.28, 0.40, 0.55, 0.72], 
-      [0.90, 0.28, 0.42, 0.56, 0.68, 0.84], 
+    // Nilai skala asli (0-100) yang nanti akan dikonversi ke skala grafis (0.0 - 1.0)
+    // Format: [outlier, bottomWhisker, q1, median, q3, topWhisker]
+    List<List<double>> rawBoxData = [
+      [82.0, 20.0, 35.0, 48.0, 60.0, 80.0], 
+      [88.0, 25.0, 40.0, 52.0, 65.0, 82.0], 
+      [0.0,  30.0, 0.45, 55.0, 70.0, 88.0], 
+      [0.0,  18.0, 32.0, 45.0, 58.0, 76.0], 
+      [0.0,  22.0, 38.0, 50.0, 62.0, 78.0], 
+      [0.0,  12.0, 28.0, 40.0, 55.0, 72.0], 
+      [90.0, 28.0, 42.0, 56.0, 68.0, 84.0], 
     ];
 
     for (int i = 0; i < dataCount; i++) {
       double x = (spacing * i) + (spacing / 2);
-      var data = boxData[i];
+      var raw = rawBoxData[i];
       
-      // PERBAIKAN: Membalik titik koordinat Y agar 0 berada di bawah dan 1 di atas canvas
-      double outlier = size.height - (data[0] * size.height);
-      double bottomWhisker = size.height - (data[1] * size.height);
-      double q1 = size.height - (data[2] * size.height);
-      double median = size.height - (data[3] * size.height);
-      double q3 = size.height - (data[4] * size.height);
-      double topWhisker = size.height - (data[5] * size.height);
+      // Konversi data ke skala 0.0 - 1.0 untuk kalkulasi posisi canvas
+      double outlierY = size.height - ((raw[0] / 100) * size.height);
+      double bottomWhiskerY = size.height - ((raw[1] / 100) * size.height);
+      double q1Y = size.height - ((raw[2] / 100) * size.height);
+      double medianY = size.height - ((raw[3] / 100) * size.height);
+      double q3Y = size.height - ((raw[4] / 100) * size.height);
+      double topWhiskerY = size.height - ((raw[5] / 100) * size.height);
       double boxWidth = spacing * 0.35;
 
-      // Gambar titik pencilan (outlier) jika nilainya > 0
-      if (data[0] > 0) {
-        canvas.drawCircle(Offset(x, outlier), 2.5, Paint()..color = const Color(0xFF38BDF8));
+      // 1. Gambar Outlier & Nilainya
+      if (raw[0] > 0) {
+        canvas.drawCircle(Offset(x, outlierY), 2.5, Paint()..color = const Color(0xFF38BDF8));
+        drawValueText(canvas, Offset(x + 5, outlierY - 4), raw[0].toStringAsFixed(0), const Color(0xFF38BDF8));
       }
       
-      // Garis Whisker Atas (dari Q3 ke Top Whisker)
-      canvas.drawLine(Offset(x, q3), Offset(x, topWhisker), linePaint);
-      canvas.drawLine(Offset(x - boxWidth/3, topWhisker), Offset(x + boxWidth/3, topWhisker), linePaint);
+      // 2. Gambar Garis Whisker Atas & Nilai Top
+      canvas.drawLine(Offset(x, q3Y), Offset(x, topWhiskerY), linePaint);
+      canvas.drawLine(Offset(x - boxWidth/3, topWhiskerY), Offset(x + boxWidth/3, topWhiskerY), linePaint);
+      drawValueText(canvas, Offset(x + boxWidth/2 + 2, topWhiskerY - 4), raw[5].toStringAsFixed(0), const Color(0xFF94A3B8));
       
-      // Garis Whisker Bawah (dari Q1 ke Bottom Whisker)
-      canvas.drawLine(Offset(x, q1), Offset(x, bottomWhisker), linePaint);
-      canvas.drawLine(Offset(x - boxWidth/3, bottomWhisker), Offset(x + boxWidth/3, bottomWhisker), linePaint);
+      // 3. Gambar Garis Whisker Bawah & Nilai Bottom
+      canvas.drawLine(Offset(x, q1Y), Offset(x, bottomWhiskerY), linePaint);
+      canvas.drawLine(Offset(x - boxWidth/3, bottomWhiskerY), Offset(x + boxWidth/3, bottomWhiskerY), linePaint);
+      drawValueText(canvas, Offset(x + boxWidth/2 + 2, bottomWhiskerY - 4), raw[1].toStringAsFixed(0), const Color(0xFF94A3B8));
 
-      // Gambar Kotak Boxplot (Rect dari Q3 ke Q1 secara visual koordinat inverted)
-      Rect boxRect = Rect.fromLTRB(x - boxWidth / 2, q3, x + boxWidth / 2, q1);
+      // 4. Gambar Kotak Utama
+      Rect boxRect = Rect.fromLTRB(x - boxWidth / 2, q3Y, x + boxWidth / 2, q1Y);
       canvas.drawRect(boxRect, boxPaint);
       canvas.drawRect(boxRect, Paint()..color = const Color(0xFF38BDF8)..style = PaintingStyle.stroke..strokeWidth = 1);
       
-      // Garis Median di dalam kotak
-      canvas.drawLine(Offset(x - boxWidth / 2, median), Offset(x + boxWidth / 2, median), Paint()..color = const Color(0xFFF8FAFC)..strokeWidth = 1.5);
+      // 5. Gambar Garis Median & Nilai Median
+      canvas.drawLine(Offset(x - boxWidth / 2, medianY), Offset(x + boxWidth / 2, medianY), Paint()..color = const Color(0xFFF8FAFC)..strokeWidth = 1.5);
+      drawValueText(canvas, Offset(x + boxWidth/2 + 2, medianY - 4), raw[3].toStringAsFixed(0), const Color(0xFFF8FAFC));
     }
   }
 
@@ -281,7 +296,7 @@ class RadarSpiderPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     Offset center = Offset(size.width / 2, size.height / 2);
-    double maxRadius = math.min(size.width, size.height) / 2.7; 
+    double maxRadius = math.min(size.width, size.height) / 2.8; 
     int numFeatures = 10;
 
     List<String> labels = [
@@ -348,20 +363,4 @@ class RadarSpiderPainter extends CustomPainter {
       double x = center.dx + currentRadius * math.cos(angle);
       double y = center.dy + currentRadius * math.sin(angle);
       studentPoints.add(Offset(x, y));
-      if (j == 0) studentPath.moveTo(x, y); else studentPath.lineTo(x, y);
-    }
-    studentPath.close();
-    canvas.drawPath(studentPath, Paint()..color = const Color(0xFFF43F5E).withOpacity(0.28)..style = PaintingStyle.fill);
-    canvas.drawPath(studentPath, Paint()..color = const Color(0xFFF43F5E)..style = PaintingStyle.stroke..strokeWidth = 2.0);
-
-    // Titik sudut nilai murid
-    Paint pointPaint = Paint()..color = const Color(0xFFFFF1F2);
-    for (Offset point in studentPoints) {
-      canvas.drawCircle(point, 3, pointPaint);
-      canvas.drawCircle(point, 1.5, Paint()..color = const Color(0xFFE11D48));
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
+      if (j ==
