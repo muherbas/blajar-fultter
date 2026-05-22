@@ -50,10 +50,15 @@ class MainNavigationHolder extends StatefulWidget {
   @override
   State<MainNavigationHolder> createState() => _MainNavigationHolderState();
 }
+class MainNavigationHolder extends StatefulWidget {
+  const MainNavigationHolder({Key? key}) : super(key: key);
+  @override
+  State<MainNavigationHolder> createState() => _MainNavigationHolderState();
+}
 
 class _MainNavigationHolderState extends State<MainNavigationHolder> {
   int _currentIndex = 0; 
-  String _selectedMuridId = "001"; 
+  String _selectedMuridId = ""; // Dikosongkan karena belum ada murid di awal
   final TextEditingController _namaController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
@@ -62,10 +67,15 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
   @override
   void initState() {
     super.initState();
-    _daftarMurid = [];
+    _daftarMurid = []; // BERSIH: Data contoh Budi & Ruri sudah dihapus
   }
 
-  Murid get _currentMurid => _daftarMurid.firstWhere((m) => m.id == _selectedMuridId, orElse: () => _daftarMurid.first);
+  Murid get _currentMurid => _daftarMurid.firstWhere(
+        (m) => m.id == _selectedMuridId, 
+        orElse: () => _daftarMurid.isNotEmpty 
+            ? _daftarMurid.first 
+            : Murid(id: "000", nama: "BELUM ADA SISWA", boxData: List.generate(7, (_) => [0,0,0,0,0,0]), radarData: List.generate(10, (_) => 0.0)),
+      );
 
   List<double> get _teamAverageBoxScores {
     List<double> averages = List.generate(7, (_) => 0.0);
@@ -165,6 +175,38 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     });
   }
 
+  void _showMoreMenu() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E293B),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.history, color: Colors.blue),
+              title: const Text("History Timeline", style: TextStyle(color: Colors.white)),
+              onTap: () {
+                setState(() => _currentIndex = 5);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.smart_toy, color: Colors.cyan),
+              title: const Text("AI Training Generator", style: TextStyle(color: Colors.white)),
+              onTap: () {
+                setState(() => _currentIndex = 6);
+                Navigator.pop(context);
+              },
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     List<Murid> filtered = _daftarMurid.where((m) => m.nama.contains(_searchQuery.toUpperCase()) || m.id.contains(_searchQuery)).toList();
@@ -186,13 +228,44 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
             }
             String nextId = (maxId + 1).toString().padLeft(3, '0');
             _daftarMurid.add(Murid(id: nextId, nama: _namaController.text.trim().toUpperCase(), boxData: List.generate(7, (_) => [20, 35, 50, 0, 65, 85]), radarData: List.generate(10, (_) => 0.0)));
+            if (_selectedMuridId.isEmpty) _selectedMuridId = nextId; // Pasang ID jika ini siswa pertama
           });
           _namaController.clear();
         },
       ),
       InputLatihanKuantitatifPage(daftarMurid: _daftarMurid, selectedMuridId: _selectedMuridId, onMuridChanged: (id) => setState(() => _selectedMuridId = id!), onSimpan: _simpanDataKuantitatif),
       InputLatihanDurasiPage(daftarMurid: _daftarMurid, selectedMuridId: _selectedMuridId, onMuridChanged: (id) => setState(() => _selectedMuridId = id!), onSimpan: _simpanDataDurasi),
+      const SizedBox.shrink(), 
       TimelineHistoryPage(activeMurid: _currentMurid), 
+      const AITrainingGeneratorPage(), 
+    ];
+
+    return Scaffold(
+      body: SafeArea(child: pages[_currentIndex]),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex >= 4 ? 4 : _currentIndex,
+        onTap: (index) {
+          if (index == 4) {
+            _showMoreMenu();
+          } else {
+            setState(() => _currentIndex = index);
+          }
+        },
+        backgroundColor: const Color(0xFF1E293B),
+        selectedItemColor: const Color(0xFF38BDF8),
+        unselectedItemColor: Colors.white54,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.analytics), label: 'Dash'),
+          BottomNavigationBarItem(icon: Icon(Icons.group), label: 'Siswa'),
+          BottomNavigationBarItem(icon: Icon(Icons.edit_note), label: 'Reps'),
+          BottomNavigationBarItem(icon: Icon(Icons.timer), label: 'Waktu'),
+          BottomNavigationBarItem(icon: Icon(Icons.more_horiz), label: 'More'),
+        ],
+      ),
+    );
+  }
+}
     ];
 
     return Scaffold(
@@ -951,4 +1024,270 @@ class MetaRadarChartPainter extends CustomPainter {
   }
 
   @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+// ==================== HALAMAN 6: AI TRAINING GENERATOR ====================
+class AITrainingGeneratorPage extends StatefulWidget {
+  const AITrainingGeneratorPage({Key? key}) : super(key: key);
+
+  @override
+  State<AITrainingGeneratorPage> createState() => _AITrainingGeneratorPageState();
+}
+
+class _AITrainingGeneratorPageState extends State<AITrainingGeneratorPage> {
+  int _selectedMode = 0; // 0: Mode Variasi Latihan, 1: Mode Filter Matriks
+  final TextEditingController _latihanController = TextEditingController();
+  
+  String _selectedKlasifikasi = kDaftarKlasifikasiLatihan.first;
+  String _selectedTipe = "Repetisi";
+  String _selectedBagian = "Tangan";
+  bool _showResult = false;
+
+  // Simulasi Bank Data Pengetahuan Internal sebelum dihubungkan ke API Online Gemini
+  final Map<String, String> _mockMatrixData = {
+    "STRENGTH": "Diamond Push Up / Weighted Push Up",
+    "ENDURANCE": "Regular Push Up (High Reps Over time)",
+    "SPEED": "Explosive / Clapping Push Up",
+    "COORDINATION": "Asphymmetric Push Up / Spiderman Push Up",
+    "FLEXIBILITY": "Hindu Push Up / Cobra Stretch Transition",
+    "BALANCE": "Medicine Ball Push Up / One Hand Push Up",
+    "REACTION TIME": "Whistle-Responsive Plyo Push Up",
+    "MUSCULAR ENDURANCE": "Decline Push Up (Slow Negative Tempo)",
+    "POWER": "Incline Bench Plyo Push Up",
+    "CORE STABILITY": "Plank-to-Push Up / Plank Rotation",
+    "DYNAMIC FLEXIBILITY": "Scapula Push Up / Shoulder Tap",
+    "SPEED ENDURANCE": "Interval Tabata Push Up (20s On / 10s Off)",
+    "REACTIVE SPEED / QUICKNESS": "Drop and Catch Push Up",
+    "AGILITY": "Side-to-Side Moving Push Up",
+    "ANTICIPATION & SPATIAL AWARENESS": "Blindfolded Reactive Push Up",
+    "MOBILITY": "Deep Deficit Push Up using Blocks",
+    "OPEN/REACTIVE AGILITY": "Partner Hand-Tap Push Up Drill"
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF0F172A),
+      appBar: AppBar(
+        title: const Text("AI COACH GENERATOR", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        backgroundColor: const Color(0xFF1E293B),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Toggle Tab Mode Input
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.styleFrom(
+                    backgroundColor: _selectedMode == 0 ? Colors.cyan.shade700 : const Color(0xFF1E293B),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ).onPressed(() => setState(() { _selectedMode = 0; _showResult = false; })),
+                  child: const Text("Mode 1: Cari Variasi"),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton.styleFrom(
+                    backgroundColor: _selectedMode == 1 ? Colors.cyan.shade700 : const Color(0xFF1E293B),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ).onPressed(() => setState(() { _selectedMode = 1; _showResult = false; })),
+                  child: const Text("Mode 2: Filter Matriks"),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+
+            // FORM INPUT BERDASARKAN MODE
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(12)),
+              child: _selectedMode == 0
+                  ? TextField(
+                      controller: _latihanController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        labelText: "Masukkan Nama Latihan Pokok",
+                        hintText: "Contoh: Push Up, Squat, Sit Up...",
+                        labelStyle: TextStyle(color: Colors.cyan),
+                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
+                        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.cyan)),
+                      ),
+                    )
+                  : Column(
+                      children: [
+                        DropdownButtonFormField<String>(
+                          value: _selectedKlasifikasi,
+                          dropdownColor: const Color(0xFF1E293B),
+                          decoration: const InputDecoration(labelText: "17 Klasifikasi Kemampuan", labelStyle: TextStyle(color: Colors.cyan)),
+                          items: kDaftarKlasifikasiLatihan.map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(fontSize: 13)))).toList(),
+                          onChanged: (v) => setState(() => _selectedKlasifikasi = v!),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: DropdownButtonFormField<String>(
+                                value: _selectedTipe,
+                                dropdownColor: const Color(0xFF1E293B),
+                                decoration: const InputDecoration(labelText: "Opsi Tipe", labelStyle: TextStyle(color: Colors.cyan)),
+                                items: ["Repetisi", "Waktu"].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                                onChanged: (v) => setState(() => _selectedTipe = v!),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: DropdownButtonFormField<String>(
+                                value: _selectedBagian,
+                                dropdownColor: const Color(0xFF1E293B),
+                                decoration: const InputDecoration(labelText: "Opsi Fokus Otot", labelStyle: TextStyle(color: Colors.cyan)),
+                                items: ["Tangan", "Kaki", "Core (Anterior)", "Core (Posterior)", "Pelvic Floor"].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                                onChanged: (v) => setState(() => _selectedBagian = v!),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+            ),
+            const SizedBox(height: 20),
+
+            // TOMBOL GENERATE
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.cyan.shade600,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                onPressed: () => setState(() => _showResult = true),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.bolt),
+                    SizedBox(width: 8),
+                    Text("GENERATE VIA GEMINI AI", style: TextStyle(fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 25),
+
+            // TEMPAT OUTPUT TABEL MATRIKS
+            if (_showResult) ...[
+              Text(
+                _selectedMode == 0 
+                    ? "MATRIKS 17 KLASIFIKASI: ${_latihanController.text.toUpperCase()}"
+                    : "RANGKUMAN GERAKAN YANG SESUAI:",
+                style: const TextStyle(color: Colors.cyan, fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+              const SizedBox(height: 12),
+              _selectedMode == 0 ? _buildMatrixTable() : _buildSummaryTable(),
+            ] else
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(40.0),
+                  child: Text("Silakan isi input dan tekan tombol di atas untuk memuat data.", style: TextStyle(color: Colors.white38), textAlign: Center( )),
+                ),
+              )
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Desain Tabel Output Mode 1
+  Widget _buildMatrixTable() {
+    String namaLatihan = _latihanController.text.isEmpty ? "Push Up" : _latihanController.text;
+    return Table(
+      border: TableBorder.all(color: Colors.white10, width: 1),
+      columnWidths: const {
+        0: FlexColumnWidth(4),
+        1: FlexColumnWidth(6),
+      },
+      children: [
+        const TableRow(
+          backgroundColor: Color(0xFF334155),
+          children: [
+            Padding(padding: EdgeInsets.all(10), child: Text("Klasifikasi", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.cyan))),
+            Padding(padding: EdgeInsets.all(10), child: Text("Jenis Gerakan Variasi", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.cyan))),
+          ]
+        ),
+        ..._mockMatrixData.entries.map((entry) {
+          return TableRow(
+            backgroundColor: const Color(0xFF1E293B),
+            children: [
+              Padding(padding: const EdgeInsets.all(10), child: Text(entry.key, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white70))),
+              Padding(padding: const EdgeInsets.all(10), child: Text(entry.value.replaceAll("Push Up", namaLatihan), style: const TextStyle(fontSize: 12, color: Colors.white))),
+            ]
+          );
+        }).toList()
+      ],
+    );
+  }
+
+  // Desain Tabel Output Mode 2
+  Widget _buildSummaryTable() {
+    return Table(
+      border: TableBorder.all(color: Colors.white10, width: 1),
+      columnWidths: const {
+        0: FlexColumnWidth(3),
+        1: FlexColumnWidth(3),
+        2: FlexColumnWidth(4),
+      },
+      children: [
+        TableRow(
+          backgroundColor: const Color(0xFF334155),
+          children: [
+            Padding(padding: const EdgeInsets.all(10), child: Text("Kriteria Pencarian", style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.cyan))),
+            const Padding(padding: EdgeInsets.all(10), child: Text("Target / Metode", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.cyan))),
+            const Padding(padding: EdgeInsets.all(10), child: Text("Rekomendasi Menu Gerakan", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.cyan))),
+          ]
+        ),
+        TableRow(
+          backgroundColor: const Color(0xFF1E293B),
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Text("• $_selectedKlasifikasi\n• $_selectedTipe\n• $_selectedBagian", style: const TextStyle(fontSize: 11, height: 1.5)),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Text("Fokus Zona:\n$_selectedBagian via $_selectedTipe", style: const TextStyle(fontSize: 11, color: Colors.amber, height: 1.4)),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Text(
+                _selectedBagian.contains("Core") || _selectedBagian == "Pelvic Floor"
+                    ? "1. Plank Dynamic Stability\n2. Bird-Dog Holds\n3. Dead Bug Press\n4. Pelvic Bridge Iso"
+                    : _selectedBagian == "Tangan"
+                        ? "1. Plyo Diamond Drops\n2. Isometric Push-Hold\n3. Hand Release Acceleration"
+                        : "1. Explosive Squat Jumps\n2. Lunge Matrix Rebounds\n3. Calf Raise Rim Pulses",
+                style: const TextStyle(fontSize: 12, height: 1.5),
+              ),
+            ),
+          ]
+        ),
+      ],
+    );
+  }
+}
+
+// Ekstensi helper kecil untuk merangkai fungsi onPressed secara estetik
+extension OnPressedExtension on Widget {
+  Widget onPressed(VoidCallback action) {
+    if (this is ElevatedButton) {
+      return ElevatedButton(
+        onPressed: action,
+        style: (this as ElevatedButton).style,
+        child: (this as ElevatedButton).child,
+      );
+    }
+    return this;
+  }
 }
