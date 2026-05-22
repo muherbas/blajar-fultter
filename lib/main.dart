@@ -74,7 +74,7 @@ class MainNavigationHolder extends StatefulWidget {
 }
 
 class _MainNavigationHolderState extends State<MainNavigationHolder> {
-  int _currentIndex = 0; // Tetap fokus terkunci di DASHBOARD
+  int _currentIndex = 0; // Halaman default terbuka di Dashboard
   String _selectedMuridId = "001"; 
 
   final TextEditingController _namaController = TextEditingController();
@@ -166,7 +166,6 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
       }
       String nextId = (maxId + 1).toString().padLeft(3, '0');
 
-      // Atlet baru otomatis dikunci mulai dari nol (0.0)
       _daftarMurid.add(Murid(
         id: nextId,
         nama: _namaController.text.trim().toUpperCase(),
@@ -199,7 +198,6 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     return -1;
   }
 
-  // Menyesuaikan nilai dashboard berdasarkan inputan Halaman Reps (Halaman ke-3)
   void _simpanDataKuantitatif(String idMurid, String jenis, String klasifikasi, double reps, double sets, DateTime tgl) {
     setState(() {
       int idx = _daftarMurid.indexWhere((m) => m.id == idMurid);
@@ -227,7 +225,6 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     });
   }
 
-  // Menyesuaikan nilai dashboard berdasarkan inputan Halaman Waktu (Halaman ke-4)
   void _simpanDataDurasi(String idMurid, String jenis, String klasifikasi, double waktu, double sets, DateTime tgl) {
     setState(() {
       int idx = _daftarMurid.indexWhere((m) => m.id == idMurid);
@@ -261,6 +258,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
       return m.nama.toLowerCase().contains(_searchQuery.toLowerCase()) || m.id.contains(_searchQuery);
     }).toList();
 
+    // Halaman diatur dalam struktur daftar widget fungsional penuh
     final List<Widget> pages = [
       DashboardAtletPage(
         activeMurid: _currentMurid,
@@ -293,10 +291,14 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     ];
 
     return Scaffold(
-      body: SafeArea(child: pages[_currentIndex]),
+      body: SafeArea(child: pages[_currentIndex]), // Kunci perbaikan: Konten mengikuti _currentIndex secara real-time
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index; // Membuka penuh kunci perpindahan halaman sistem
+          });
+        },
         backgroundColor: const Color(0xFF1E293B),
         selectedItemColor: const Color(0xFF38BDF8),
         unselectedItemColor: const Color(0xFF64748B),
@@ -333,7 +335,7 @@ class DashboardAtletPage extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
-            // Identitas Atlet
+            // Identitas Atlet aktif
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(12),
@@ -372,7 +374,7 @@ class DashboardAtletPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('PROFIL BIOMOTORIK METRIKS RADAR (10 DIMENSI)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFFDashboardAtletPage.radarColor))),
+                  const Text('PROFIL BIOMOTORIK METRIKS RADAR (10 DIMENSI)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFFA855F7))),
                   const SizedBox(height: 10),
                   SizedBox(
                     height: 240,
@@ -455,17 +457,16 @@ class DashboardAtletPage extends StatelessWidget {
     );
   }
 
-  static const Color radarColor = Color(0xFFA855F7);
-
   Widget _buildHeaderCell(String text) {
     return Padding(padding: const EdgeInsets.all(8.0), child: Text(text, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF38BDF8), fontSize: 9, fontWeight: FontWeight.bold)));
   }
 
-  Map<String, String> _analisisKomplet40Pola(int idx) {
-    if (idx >= activeMurid.boxData.length) return {"pola": "Symmetrical Normal", "arti": "Sebaran ideal rata seimbang."};
-    
-    // Jika data inputan masih kosong / bernilai 0, kembalikan status inisialisasi awal yang bersih
-    if (activeMurid.boxData[idx][3] == 0.0) {
+  Map<String, String> _analisisKomplet40Pola(int idx, String namaKomponen) {
+    // SINKRONISASI TOTAL: Periksa riwayat inputan yang sebenarnya untuk komponen ini
+    bool adaDataInput = activeMurid.riwayatLatihanKuantitatif.any((element) => element['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase()) ||
+                        activeMurid.riwayatLatihanDurasi.any((element) => element['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase());
+
+    if (!adaDataInput || idx >= activeMurid.boxData.length) {
       return {"pola": "Belum Ada Data", "arti": "Menunggu input performa fungsional dari latihan."};
     }
 
@@ -539,27 +540,31 @@ class DashboardAtletPage extends StatelessWidget {
 
   TableRow _buildEvaluasiRow(String namaKomponen, String tipeGrafik, int dataIdx) {
     bool diAtasRataTim = false;
-    bool belumAdaData = false;
+    bool belumAdaData = true;
     String labelPola = "-";
     String labelArti = "-";
     
+    // Sinkronisasi pendeteksian data murni dari log aktivitas halaman input ke-2 dan ke-3
+    bool adaDataDiInput = activeMurid.riwayatLatihanKuantitatif.any((element) => element['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase()) ||
+                        activeMurid.riwayatLatihanDurasi.any((element) => element['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase());
+
     if (tipeGrafik == "BOXPLOT") {
-      Map<String, String> hasilPola = _analisisKomplet40Pola(dataIdx);
+      Map<String, String> hasilPola = _analisisKomplet40Pola(dataIdx, namaKomponen);
       labelPola = hasilPola["pola"]!;
       labelArti = hasilPola["arti"]!;
       
-      if (dataIdx < activeMurid.boxData.length && activeMurid.boxData[dataIdx].length >= 4) {
+      if (adaDataDiInput && dataIdx < activeMurid.boxData.length && activeMurid.boxData[dataIdx].length >= 4) {
+        belumAdaData = false;
         double sk = activeMurid.boxData[dataIdx][3];
-        if (sk == 0.0) belumAdaData = true;
         double avg = dataIdx < teamBoxAverages.length ? teamBoxAverages[dataIdx] : 0.0;
         diAtasRataTim = sk >= avg;
       }
     } else {
-      labelPola = "-"; // Komponen Radar murni terkunci strip sesuai amanah
+      labelPola = "-"; // Menjaga pola radar murni strip sesuai format baku Sabeumnim
       labelArti = "-";
-      if (dataIdx < activeMurid.radarData.length) {
+      if (adaDataDiInput && dataIdx < activeMurid.radarData.length) {
+        belumAdaData = false;
         double radVal = activeMurid.radarData[dataIdx];
-        if (radVal == 0.0) belumAdaData = true;
         double avg = dataIdx < teamRadarAverages.length ? teamRadarAverages[dataIdx] : 0.0;
         diAtasRataTim = radVal >= avg;
       }
@@ -580,14 +585,12 @@ class DashboardAtletPage extends StatelessWidget {
         Padding(padding: const EdgeInsets.all(6.0), child: Text(labelPola, style: TextStyle(color: (labelPola == '-' || belumAdaData) ? Colors.white30 : Colors.amber[400], fontSize: 7, fontWeight: FontWeight.w600))),
         Padding(padding: const EdgeInsets.all(6.0), child: Text(labelArti, style: TextStyle(color: (labelArti == '-' || belumAdaData) ? Colors.white30 : Colors.teal[300], fontSize: 7, fontWeight: FontWeight.w500))),
         Padding(padding: const EdgeInsets.all(6.0), child: Text(kelebihanText, style: TextStyle(color: belumAdaData ? Colors.white30 : const Color(0xFF10B981), fontSize: 8))),
-        Padding(padding: const EdgeInsets.all(6.0), child: Text(kekuranganText, style: TextStyle(color: belumAdaData ? Colors.white30 : const Color(0xFFOpenAgility), fontSize: 8))),
+        Padding(padding: const EdgeInsets.all(6.0), child: Text(kekuranganText, style: TextStyle(color: belumAdaData ? Colors.white30 : const Color(0xFFEF4444), fontSize: 8))),
         Padding(padding: const EdgeInsets.all(6.0), child: Text(rekomendasiText, style: TextStyle(color: belumAdaData ? Colors.amber.withOpacity(0.6) : const Color(0xFF94A3B8), fontSize: 8))),
       ],
     );
   }
 }
-
-const int _OpenAgility = 0xFFEF4444;
 
 // ==================== HALAMAN 2: DAFTAR MURID ====================
 class DaftarMuridPage extends StatelessWidget {
@@ -885,102 +888,4 @@ class _MetaBoxplotPainter extends CustomPainter {
       canvas.drawLine(Offset(colWidth - 10, gy), Offset(size.width - 10, gy), Paint()..color = const Color(0xFF1E293B));
     }
 
-    final textPainter = TextPainter(textDirection: TextDirection.ltr);
-
-    for (int i = 0; i < 7; i++) {
-      if (i >= boxData.length || boxData[i].length < 6) continue;
-      double x = (i + 1) * colWidth + 10;
-      double personalScore = boxData[i][3];
-
-      canvas.drawLine(Offset(x, getY(boxData[i][0])), Offset(x, getY(boxData[i][5])), linePaint);
-      canvas.drawLine(Offset(x - 6, getY(boxData[i][0])), Offset(x + 6, getY(boxData[i][0])), linePaint);
-      canvas.drawLine(Offset(x - 6, getY(boxData[i][5])), Offset(x + 6, getY(boxData[i][5])), linePaint);
-
-      canvas.drawRect(Rect.fromLTRB(x - 12, getY(boxData[i][4]), x + 12, getY(boxData[i][1])), boxPaint);
-      canvas.drawRect(Rect.fromLTRB(x - 12, getY(boxData[i][4]), x + 12, getY(boxData[i][1])), borderBoxPaint);
-      canvas.drawLine(Offset(x - 12, getY(boxData[i][2])), Offset(x + 12, getY(boxData[i][2])), medianPaint);
-      
-      // Plot titik lingkaran personal (hanya merender lingkaran jika nilai > 0 agar grafik bersih saat reset)
-      double py = getY(personalScore);
-      canvas.drawCircle(Offset(x, py), 5.5, personalScorePaint);
-      
-      textPainter.text = TextSpan(
-        text: personalScore.toStringAsFixed(0),
-        style: const TextStyle(color: Color(0xFF00E5FF), fontSize: 8, fontWeight: FontWeight.bold),
-      );
-      textPainter.layout();
-      textPainter.paint(canvas, Offset(x - (textPainter.width / 2), py - 12));
-      
-      double teamAvgValue = i < teamAverages.length ? teamAverages[i] : 0.0;
-      canvas.drawRect(Rect.fromCenter(center: Offset(x, getY(teamAvgValue)), width: 7, height: 7), teamMeanPaint);
-
-      canvas.save();
-      canvas.translate(x, chartHeight + 22);
-      canvas.rotate(0.35);
-      textPainter.text = TextSpan(text: longLabels[i], style: const TextStyle(color: Colors.white70, fontSize: 7, fontWeight: FontWeight.bold));
-      textPainter.layout();
-      textPainter.paint(canvas, Offset(-textPainter.width / 2, 0));
-      canvas.restore();
-    }
-  }
-  @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
-
-// ==================== RENDERING VISUAL GRAPH RADAR ====================
-class MetaRadarChartPainter extends CustomPainter {
-  final List<double> activeRadar;
-  final List<double> teamRadar;
-  MetaRadarChartPainter({required this.activeRadar, required this.teamRadar});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final centerX = size.width / 2;
-    final centerY = size.height / 2;
-    final radius = math.min(centerX, centerY) * 0.75;
-    final baseGridPaint = Paint()..color = const Color(0xFF334155)..style = PaintingStyle.stroke;
-    
-    final personalFillPaint = Paint()..color = const Color(0xFF00E5FF).withOpacity(0.22)..style = PaintingStyle.fill;
-    final personalBorderPaint = Paint()..color = const Color(0xFF00E5FF)..style = PaintingStyle.stroke..strokeWidth = 2.5;
-    final teamBorderPaint = Paint()..color = const Color(0xFFFF1744)..style = PaintingStyle.stroke..strokeWidth = 1.5;
-
-    for (int g = 1; g <= 4; g++) canvas.drawCircle(Offset(centerX, centerY), radius * (g / 4), baseGridPaint);
-
-    final teamPath = Path();
-    final personalPath = Path();
-
-    int loopBound = math.min(10, math.min(activeRadar.length, teamRadar.length));
-
-    for (int i = 0; i < loopBound; i++) {
-      final angle = (i * 2 * math.pi / 10) - (math.pi / 2);
-      
-      double tx = centerX + radius * teamRadar[i] * math.cos(angle);
-      double ty = centerY + radius * teamRadar[i] * math.sin(angle);
-      if (i == 0) teamPath.moveTo(tx, ty); else teamPath.lineTo(tx, ty);
-
-      double px = centerX + radius * activeRadar[i] * math.cos(angle);
-      double py = centerY + radius * activeRadar[i] * math.sin(angle);
-      if (i == 0) personalPath.moveTo(px, py); else personalPath.lineTo(px, py);
-
-      canvas.drawLine(Offset(centerX, centerY), Offset(centerX + radius * math.cos(angle), centerY + radius * math.sin(angle)), baseGridPaint);
-      
-      final textPainter = TextPainter(textDirection: TextDirection.ltr);
-      textPainter.text = TextSpan(
-        text: (activeRadar[i] * 100).toStringAsFixed(0),
-        style: const TextStyle(color: Color(0xFF00E5FF), fontSize: 7, fontWeight: FontWeight.bold),
-      );
-      textPainter.layout();
-      canvas.drawCircle(Offset(px, py), 2.5, Paint()..color = const Color(0xFF00E5FF));
-      textPainter.paint(canvas, Offset(px + 4, py - 4));
-    }
-    
-    if (loopBound > 0) {
-      teamPath.close(); 
-      personalPath.close();
-      
-      canvas.drawPath(teamPath, teamBorderPaint);
-      canvas.drawPath(personalPath, personalFillPaint);
-      canvas.drawPath(personalPath, personalBorderPaint);
-    }
-  }
-  @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
+    final
