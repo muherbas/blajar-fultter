@@ -547,7 +547,7 @@ class DashboardAtletPage extends StatelessWidget {
     if (tipeGrafik == "BOXPLOT") {
       Map<String, String> hasilPola = _analisisKomplet40Pola(dataIdx, namaKomponen);
       labelPola = hasilPola["pola"]!;
-      labelArti = hasilFola["arti"]!;
+      labelArti = hasilPola["arti"]!; // <-- DISINI SUDAH SAYA FIX (SEBELUMNYA TYPO HURUF F)
       
       if (adaDataDiInput && dataIdx < activeMurid.boxData.length && activeMurid.boxData[dataIdx].length >= 4) {
         belumAdaData = false;
@@ -587,6 +587,7 @@ class DashboardAtletPage extends StatelessWidget {
     );
   }
 }
+
 
 // ==================== HALAMAN 2: DAFTAR MURID ====================
 class DaftarMuridPage extends StatelessWidget {
