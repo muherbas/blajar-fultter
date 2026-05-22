@@ -53,18 +53,38 @@ class Murid {
 
   // Pemetaan Volume latihan masuk ke 7 Komponen Utama Boxplot (Skala 0-100)
   List<List<double>> get calculatedBoxData {
-    List<String> categories = ['STRENGTH', 'ENDURANCE', 'SPEED', 'COORD', 'FLEX', 'BALANCE', 'REACTION'];
+    // Pemetaan label grafik singkat ke teks input dropdown asli secara akurat
+    List<Map<String, String>> categories = [
+      {'label': 'STRENGTH', 'key': 'STRENGTH'},
+      {'label': 'ENDURANCE', 'key': 'ENDURANCE'},
+      {'label': 'SPEED', 'key': 'SPEED'},
+      {'label': 'COORD', 'key': 'COORDINATION'},
+      {'label': 'FLEX', 'key': 'FLEXI'},
+      {'label': 'BALANCE', 'key': 'BALANCE'},
+      {'label': 'REACTION', 'key': 'REACTION'},
+    ];
+
     return categories.map((cat) {
-      var catLogs = logs.where((l) => l.kategori.contains(cat)).toList();
-      double avgVolume = catLogs.isEmpty ? 30.0 : (catLogs.map((e) => e.volume).reduce((a, b) => a + b) / catLogs.length).clamp(10, 100).toDouble();
+      // Menyaring log berdasarkan kategori utama ataupun kategori turunan yang relevan
+      var catLogs = logs.where((l) => 
+        l.kategori.contains(cat['key']!) || 
+        (cat['label'] == 'STRENGTH' && l.kategori.contains('POWER')) ||
+        (cat['label'] == 'COORD' && (l.kategori.contains('AGILITY') || l.kategori.contains('ANTICIPATION') || l.kategori.contains('MOBILITY')))
+      ).toList();
+
+      // Jika data kosong diberi baseline 25, jika ada dihitung rata-rata volumenya
+      double avgVolume = catLogs.isEmpty 
+          ? 25.0 
+          : (catLogs.map((e) => e.volume).reduce((a, b) => a + b) / catLogs.length).clamp(15, 90).toDouble();
       
+      // Mengembalikan bentuk struktur Boxplot seimbang: [outlier, min, q1, median, q3, max]
       return [
-        avgVolume > 85 ? avgVolume + 8 : 0.0, 
+        avgVolume > 80 ? avgVolume + 8 : 0.0, 
         (avgVolume - 15).clamp(5, 100), 
-        (avgVolume - 5).clamp(8, 100), 
+        (avgVolume - 6).clamp(10, 100), 
         avgVolume, 
-        (avgVolume + 8).clamp(10, 95), 
-        (avgVolume + 15).clamp(12, 100)
+        (avgVolume + 6).clamp(12, 95), 
+        (avgVolume + 14).clamp(15, 100)
       ];
     }).toList();
   }
@@ -77,7 +97,7 @@ class Murid {
     ];
     return categories.map((cat) {
       var catLogs = logs.where((l) => l.kategori == cat).toList();
-      if (catLogs.isEmpty) return 0.5; // Baseline default sebelum ada latihan
+      if (catLogs.isEmpty) return 0.3; // Baseline default titik tengah radar sebelum latihan diinput
       double avgVolume = catLogs.map((e) => e.volume).reduce((a, b) => a + b) / catLogs.length;
       return (avgVolume / 50).clamp(0.2, 1.0); 
     }).toList();
@@ -474,7 +494,7 @@ class _InputLatihanPageState extends State<InputLatihanPage> {
   }
 }
 
-// ==================== HALAMAN: DASHBOARD PERFORMANCE (FIXED SCROLL) ====================
+// ==================== HALAMAN: DASHBOARD PERFORMANCE ====================
 
 class DashboardAtletPage extends StatelessWidget {
   final Murid activeMurid;
@@ -485,7 +505,7 @@ class DashboardAtletPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(), // Memastikan halaman bisa di-scroll dengan aman tanpa overflow
+        physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
@@ -517,7 +537,7 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 14),
 
-            // Card Radar Spider (Komponen Turunan - RESIZED & RESPONSIVE)
+            // Card Radar Spider (Komponen Turunan)
             Container(
               width: double.infinity,
               decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(16)),
@@ -527,7 +547,6 @@ class DashboardAtletPage extends StatelessWidget {
                 children: [
                   const Text('KOMPONEN TURUNAN (REAL-TIME)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFFF43F5E))),
                   const SizedBox(height: 16),
-                  // Diperkecil dari 340 ke 280 agar pas di layar device mobile
                   SizedBox(height: 280, child: RadarSpiderChart(studentValues: activeMurid.calculatedRadarData)),
                 ],
               ),
