@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
       title: 'Premium Athlete Dashboard',
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0F172A), // Warna latar belakang HTML (slate-900)
+        scaffoldBackgroundColor: const Color(0xFF0F172A),
         fontFamily: 'Roboto',
       ),
       home: const MainNavigationHolder(),
@@ -62,7 +62,6 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
   @override
   void initState() {
     super.initState();
-    // Data inisialisasi awal murni mulai dari nol sesuai logika real-time Sabeumnim
     _daftarMurid = [
       Murid(
         id: "001", nama: "BUDI SANTOSO",
@@ -228,7 +227,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (i) => setState(() => _currentIndex = i),
-        backgroundColor: const Color(0xFF1E293B), // Bg navigasi beralur gelap modern kustom HTML
+        backgroundColor: const Color(0xFF1E293B), 
         selectedItemColor: const Color(0xFF38BDF8),
         unselectedItemColor: const Color(0xFF64748B),
         type: BottomNavigationBarType.fixed,
@@ -246,7 +245,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
   }
 }
 
-// ==================== REKAYASA TOTAL HALAMAN 1: CONVERT HTML TO FLUTTER ====================
+// ==================== HALAMAN 1: DASHBOARD PERFORMANCE ====================
 class DashboardAtletPage extends StatelessWidget {
   final Murid activeMurid;
   final List<double> teamBoxAverages;
@@ -258,40 +257,43 @@ class DashboardAtletPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A), // HTML body background (slate-900)
+      backgroundColor: const Color(0xFF0F172A), 
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Persis HTML Desain Container
+            // PERBAIKAN FONT HEADER: Menyesuaikan ukuran, ketebalan, dan kerapatan agar mirip HTML asli
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
               decoration: BoxDecoration(
-                color: const Color(0xFF1E293B), // HTML bg-slate-800
+                color: const Color(0xFF1E293B), 
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF334155), width: 1), // border-slate-700
+                border: Border.all(color: const Color(0xFF334155), width: 1), 
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
                     'COMPREHENSIVE PERFORMANCE DASHBOARD',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.blueGrey[300],
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.5,
+                      color: Colors.slate[400],
+                      fontSize: 13, // Diperbesar agar seimbang
+                      fontWeight: FontWeight.w800, // Dipertebal ekstra
+                      letterSpacing: -0.2, // Dirapatkan kembali agar padat solid
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Text(
                     '${activeMurid.id} - ${activeMurid.nama}',
+                    textAlign: TextAlign.center,
                     style: const TextStyle(
-                      color: Color(0xFF38BDF8), // HTML text-sky-400
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF38BDF8), 
+                      fontSize: 22, // Ukuran nama dipertegas dominan
+                      fontWeight: FontWeight.w900, // Ketebalan maksimal (bold pekat)
+                      letterSpacing: -0.5, // Kerapatan teks diperketat fungsional
                     ),
                   ),
                 ],
@@ -299,7 +301,6 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Kontainer Boxplot Kustom Elemen HTML
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -328,7 +329,6 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Kontainer Radar Chart Kustom Elemen HTML
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -363,7 +363,6 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Tabel Matriks Evaluasi Fisik 100% Persis Struktur HTML/CSS
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -389,9 +388,9 @@ class DashboardAtletPage extends StatelessWidget {
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: SizedBox(
-                      width: 1050, // Mengunci lebar kolom agar presisi saat di-scroll menyamping
+                      width: 1050, 
                       child: Table(
-                        border: TableBorder.all(color: const Color(0xFF334155), width: 1), // border-slate-700
+                        border: TableBorder.all(color: const Color(0xFF334155), width: 1), 
                         columnWidths: const {
                           0: FlexColumnWidth(1.8),
                           1: FlexColumnWidth(2.3),
@@ -402,7 +401,7 @@ class DashboardAtletPage extends StatelessWidget {
                         },
                         children: [
                           TableRow(
-                            decoration: const BoxDecoration(color: Color(0xFF0F172A)), // Header Baris HTML
+                            decoration: const BoxDecoration(color: Color(0xFF0F172A)), 
                             children: [
                               _buildHeaderCell('KOMPONEN'),
                               _buildHeaderCell('POLA BOXPLOT'),
@@ -851,12 +850,15 @@ class _BoxplotPainter extends CustomPainter {
     final Paint pBorderBox = Paint()..color = const Color(0xFF38BDF8)..strokeWidth = 1.2..style = PaintingStyle.stroke;
     final Paint pMedian = Paint()..color = Colors.amber..strokeWidth = 2.0;
     final Paint pSkorKini = Paint()..color = const Color(0xFFF43F5E)..style = PaintingStyle.fill;
+    final Paint pGarisHubungScore = Paint()..color = const Color(0xFFF43F5E).withOpacity(0.4)..strokeWidth = 1.0;
     final Paint pRataTim = Paint()..color = const Color(0xFF10B981)..strokeWidth = 1.5..style = PaintingStyle.stroke;
 
     for (int i = 0; i <= 4; i++) {
       double y = 10 + (chartHeight / 4) * i;
       canvas.drawLine(Offset(40, y), Offset(size.width, y), pGaris);
     }
+
+    Offset? prevScoreOffset;
 
     for (int i = 0; i < itemLength; i++) {
       double x = 55 + (spacing * i) + (spacing / 4);
@@ -890,7 +892,14 @@ class _BoxplotPainter extends CustomPainter {
         canvas.drawLine(Offset(x - 15, yAvg), Offset(x + 15, yAvg), pRataTim);
       }
 
-      canvas.drawCircle(Offset(x, yScore), 5.0, pSkorKini);
+      // Hubungkan garis antar titik skor (Tren Line) jika berurutan ada datanya
+      Offset currentScoreOffset = Offset(x, yScore);
+      if (prevScoreOffset != null) {
+        canvas.drawLine(prevScoreOffset, currentScoreOffset, pGarisHubungScore);
+      }
+      prevScoreOffset = currentScoreOffset;
+
+      canvas.drawCircle(currentScoreOffset, 5.0, pSkorKini);
 
       final List<String> labels = ["STR", "END", "SPD", "CRD", "FLX", "BAL", "REA"];
       final txt = TextPainter(text: TextSpan(text: labels[i], style: const TextStyle(fontSize: 8, color: Colors.white60)), textDirection: TextDirection.ltr)..layout();
