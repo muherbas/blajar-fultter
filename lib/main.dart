@@ -44,7 +44,7 @@ const List<String> kDaftarKlasifikasiLatihan = [
   "OPEN/REACTIVE AGILITY"
 ];
 
-// Model Struktur Data Murid
+// Model Struktur Data Murid - Tipe Data Diperketat untuk Hindari Error Compiler
 class Murid {
   final String id;
   final String nama;
@@ -74,7 +74,7 @@ class MainNavigationHolder extends StatefulWidget {
 }
 
 class _MainNavigationHolderState extends State<MainNavigationHolder> {
-  int _currentIndex = 0; // Halaman default terbuka di Dashboard
+  int _currentIndex = 0; 
   String _selectedMuridId = "001"; 
 
   final TextEditingController _namaController = TextEditingController();
@@ -86,7 +86,6 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
   @override
   void initState() {
     super.initState();
-    // RESET VALUE KE NOL: CurrentScore diinisialisasi 0.0 agar grafik mulai dari bawah
     _daftarMurid = [
       Murid(
         id: "001",
@@ -187,7 +186,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
   }
 
   int _dapatkanBoxIndex(String klasifikasi) {
-    String upper = klasifikasi.toUpperCase();
+    final String upper = klasifikasi.toUpperCase();
     if (upper == "STRENGTH" || upper == "POWER" || upper == "CORE STABILITY") return 0;
     if (upper == "ENDURANCE" || upper == "MUSCULAR ENDURANCE") return 1;
     if (upper == "SPEED" || upper == "SPEED ENDURANCE") return 2;
@@ -263,7 +262,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
         activeMurid: _currentMurid,
         teamBoxAverages: _teamAverageBoxScores,
         teamRadarAverages: _teamAverageRadar,
-        dapatkanBoxIndexFunc: _dapatkanBoxIndex, // Oper fungsi resolver ke Halaman Dashboard
+        dapatkanBoxIndexFunc: _dapatkanBoxIndex,
       ),
       DaftarMuridPage(
         daftarMurid: filteredList,
@@ -319,7 +318,7 @@ class DashboardAtletPage extends StatelessWidget {
   final Murid activeMurid;
   final List<double> teamBoxAverages;
   final List<double> teamRadarAverages;
-  final int Function(String) dapatkanBoxIndexFunc; // Pemicu validasi string terpusat
+  final int Function(String) dapatkanBoxIndexFunc;
 
   const DashboardAtletPage({
     Key? key, 
@@ -337,7 +336,6 @@ class DashboardAtletPage extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
-            // Identitas Atlet
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(12),
@@ -352,7 +350,6 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             
-            // Boxplot Panel
             Container(
               width: double.infinity,
               decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(12)),
@@ -368,7 +365,6 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // Radar Panel
             Container(
               width: double.infinity,
               decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(12)),
@@ -390,7 +386,6 @@ class DashboardAtletPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // Matriks Kontrol Evaluasi
             Container(
               width: double.infinity,
               decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(12)),
@@ -463,21 +458,20 @@ class DashboardAtletPage extends StatelessWidget {
     return Padding(padding: const EdgeInsets.all(8.0), child: Text(text, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF38BDF8), fontSize: 9, fontWeight: FontWeight.bold)));
   }
 
-  // Kunci Perbaikan Utama: Deteksi keberadaan data disamakan dengan indeks grafik boxplotnya
   Map<String, String> _analisisKomplet40Pola(int idx, String namaKomponen) {
-    // Memeriksa riwayat inputan yang sebenarnya berdasarkan nama komponen atau tujuan indeks boxplotnya
-    bool adaDataInput = activeMurid.riwayatLatihanKuantitatif.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi']) == idx) ||
-                        activeMurid.riwayatLatihanDurasi.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi']) == idx);
+    bool adaDataInput = activeMurid.riwayatLatihanKuantitatif.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == idx) ||
+                        activeMurid.riwayatLatihanDurasi.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == idx);
 
     if (!adaDataInput || idx >= activeMurid.boxData.length) {
       return {"pola": "Belum Ada Data", "arti": "Menunggu input performa fungsional dari latihan."};
     }
 
-    double min = activeMurid.boxData[idx][0];
-    double q1 = activeMurid.boxData[idx][1];
-    double q2 = activeMurid.boxData[idx][2];
-    double q3 = activeMurid.boxData[idx][4];
-    double max = activeMurid.boxData[idx][5];
+    final List<double> data = activeMurid.boxData[idx];
+    double min = data[0];
+    double q1 = data[1];
+    double q2 = data[2];
+    double q3 = data[4];
+    double max = data[5];
     
     double dLower = q2 - q1;
     double dUpper = q3 - q2;
@@ -547,14 +541,13 @@ class DashboardAtletPage extends StatelessWidget {
     String labelPola = "-";
     String labelArti = "-";
     
-    // Sinkronisasi pendeteksian disamakan dengan index map boxplot agar sinkron instan
-    bool adaDataDiInput = activeMurid.riwayatLatihanKuantitatif.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi']) == dataIdx) ||
-                        activeMurid.riwayatLatihanDurasi.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi']) == dataIdx);
+    bool adaDataDiInput = activeMurid.riwayatLatihanKuantitatif.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == dataIdx) ||
+                        activeMurid.riwayatLatihanDurasi.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == dataIdx);
 
     if (tipeGrafik == "BOXPLOT") {
       Map<String, String> hasilPola = _analisisKomplet40Pola(dataIdx, namaKomponen);
       labelPola = hasilPola["pola"]!;
-      labelArti = hasilPola["arti"]!;
+      labelArti = hasilFola["arti"]!;
       
       if (adaDataDiInput && dataIdx < activeMurid.boxData.length && activeMurid.boxData[dataIdx].length >= 4) {
         belumAdaData = false;
@@ -914,4 +907,82 @@ class _MetaBoxplotPainter extends CustomPainter {
         style: const TextStyle(color: Color(0xFF00E5FF), fontSize: 8, fontWeight: FontWeight.bold),
       );
       textPainter.layout();
-      textPainter.
+      textPainter.paint(canvas, Offset(x - (textPainter.width / 2), py - 12));
+      
+      double teamAvgValue = i < teamAverages.length ? teamAverages[i] : 0.0;
+      canvas.drawRect(Rect.fromCenter(center: Offset(x, getY(teamAvgValue)), width: 7, height: 7), teamMeanPaint);
+
+      canvas.save();
+      canvas.translate(x, chartHeight + 22);
+      canvas.rotate(0.35);
+      textPainter.text = TextSpan(text: longLabels[i], style: const TextStyle(color: Colors.white70, fontSize: 7, fontWeight: FontWeight.bold));
+      textPainter.layout();
+      textPainter.paint(canvas, Offset(-textPainter.width / 2, 0));
+      canvas.restore();
+    }
+  }
+
+  @override 
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+// ==================== RENDERING VISUAL GRAPH RADAR ====================
+class MetaRadarChartPainter extends CustomPainter {
+  final List<double> activeRadar;
+  final List<double> teamRadar;
+  MetaRadarChartPainter({required this.activeRadar, required this.teamRadar});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final centerX = size.width / 2;
+    final centerY = size.height / 2;
+    final radius = math.min(centerX, centerY) * 0.75;
+    final baseGridPaint = Paint()..color = const Color(0xFF334155)..style = PaintingStyle.stroke;
+    
+    final personalFillPaint = Paint()..color = const Color(0xFF00E5FF).withOpacity(0.22)..style = PaintingStyle.fill;
+    final personalBorderPaint = Paint()..color = const Color(0xFF00E5FF)..style = PaintingStyle.stroke..strokeWidth = 2.5;
+    final teamBorderPaint = Paint()..color = const Color(0xFFFF1744)..style = PaintingStyle.stroke..strokeWidth = 1.5;
+
+    for (int g = 1; g <= 4; g++) canvas.drawCircle(Offset(centerX, centerY), radius * (g / 4), baseGridPaint);
+
+    final teamPath = Path();
+    final personalPath = Path();
+
+    int loopBound = math.min(10, math.min(activeRadar.length, teamRadar.length));
+
+    for (int i = 0; i < loopBound; i++) {
+      final angle = (i * 2 * math.pi / 10) - (math.pi / 2);
+      
+      double tx = centerX + radius * teamRadar[i] * math.cos(angle);
+      double ty = centerY + radius * teamRadar[i] * math.sin(angle);
+      if (i == 0) teamPath.moveTo(tx, ty); else teamPath.lineTo(tx, ty);
+
+      double px = centerX + radius * activeRadar[i] * math.cos(angle);
+      double py = centerY + radius * activeRadar[i] * math.sin(angle);
+      if (i == 0) personalPath.moveTo(px, py); else personalPath.lineTo(px, py);
+
+      canvas.drawLine(Offset(centerX, centerY), Offset(centerX + radius * math.cos(angle), centerY + radius * math.sin(angle)), baseGridPaint);
+      
+      final textPainter = TextPainter(textDirection: TextDirection.ltr);
+      textPainter.text = TextSpan(
+        text: (activeRadar[i] * 100).toStringAsFixed(0),
+        style: const TextStyle(color: Color(0xFF00E5FF), fontSize: 7, fontWeight: FontWeight.bold),
+      );
+      textPainter.layout();
+      canvas.drawCircle(Offset(px, py), 2.5, Paint()..color = const Color(0xFF00E5FF));
+      textPainter.paint(canvas, Offset(px + 4, py - 4));
+    }
+    
+    if (loopBound > 0) {
+      teamPath.close(); 
+      personalPath.close();
+      
+      canvas.drawPath(teamPath, teamBorderPaint);
+      canvas.drawPath(personalPath, personalFillPaint);
+      canvas.drawPath(personalPath, personalBorderPaint);
+    }
+  }
+
+  @override 
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
