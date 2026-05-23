@@ -76114,8 +76114,8 @@ if(q===0)return l
 for(p=0;p<40;++p){for(o=0,n=0,s=0;s<q;++s){m=r[s].c
 if(p<m.length&&!0){m=m[p][3]
 if(m>0){o+=m;++n}}}l[p]=n>0?o/n:0}return l},
-ga7w(){var s,r,q,p,o,n,m,l,k,j=J.i0(40,t.i)
-for(s=0;s<40;++s)j[s]=0
+ga7w(){var s,r,q,p,o,n,m,l,k,j=J.i0(10,t.i)
+for(s=0;s<10;++s)j[s]=0
 r=this.x
 r===$&&A.a()
 q=r.length
@@ -76323,7 +76323,7 @@ o=f>=(c<40?h.d[c]:0)
 n=!1}else{o=!1
 n=!0}m=p
 l=s}else{if(r&&c<10){f=f.d[c]
-o=f>=(c<40?h.e[c]:0)
+o=f>=(c<10?h.e[c]:0)
 n=!1}else{o=!1
 n=!0}l="-"
 m="-"}if(n)k="Data rekam kosong."
@@ -76603,7 +76603,7 @@ if(l===0)f.d6(a2,i)
 else f.bK(a2,i)}f.bq()
 if(e){a5.co(f,r)
 a5.co(f,q)}c=$.V().bD()
-for(a0=this.c,b=!1,l=0;l<10;++l){d=a0[l]
+for(a0=this.c,b=!1,l=0;a2=l<10,a2;++l){d=a2?a0[l]:0
 if(d>0)b=!0
 k=l*2*3.141592653589793/10-1.5707963267948966
 n=a4*B.c.e3(d,0,1)
