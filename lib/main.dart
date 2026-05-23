@@ -99,7 +99,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
   }
 
   List<double> get _teamAverageRadar {
-    List<double> averages = List.generate(40, (_) => 0.0);
+    List<double> averages = List.generate(10, (_) => 0.0);
     if (_daftarMurid.isEmpty) return averages;
     for (int i = 0; i < 10; i++) {
       double sum = 0;
