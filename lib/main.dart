@@ -916,11 +916,24 @@ class MetaRadarChartPainter extends CustomPainter {
       canvas.drawPath(pJaring, pGrid);
     }
 
+    // --- TEMPATKAN KODE LABEL DI SINI ---
+    final List<String> labels = ["STR", "END", "SPD", "CRD", "FLX", "BAL", "REA", "PWR", "AGI", "MOB"];
     for (int j = 0; j < kDimensi; j++) {
       double angle = (j * 2 * math.pi / kDimensi) - (math.pi / 2);
-      Offset endPoint = Offset(center.dx + maxRadius * math.cos(angle), center.dy + maxRadius * math.sin(angle));
-      canvas.drawLine(center, endPoint, pGrid);
+      Offset labelPos = Offset(
+        center.dx + (maxRadius + 20) * math.cos(angle), 
+        center.dy + (maxRadius + 20) * math.sin(angle)
+      );
+      final txt = TextPainter(
+        text: TextSpan(text: labels[j], style: const TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold)),
+        textDirection: TextDirection.ltr
+      )..layout();
+      txt.paint(canvas, Offset(labelPos.dx - (txt.width / 2), labelPos.dy - (txt.height / 2)));
     }
+    // --- AKHIR PENEMPATAN KODE LABEL ---
+
+    // ... (kode selanjutnya: penggambaran pathAtlet dan pathTim)
+
 
     Path pathAtlet = Path();
     bool hasDataAtlet = false;
