@@ -284,7 +284,7 @@ class RadarChartCustomPainter extends CustomPainter {
 
       Offset labelPt = Offset(center.dx + (maxRadius + 14) * math.cos(angle) - 10, center.dy + (maxRadius + 14) * math.sin(angle) - 6);
       TextPainter(
-        text: TextSpan(text: fitur[j], style: const TextStyle(color: Colors.white64, fontSize: 10, fontWeight: FontWeight.bold)),
+        text: TextSpan(text: fitur[j], style: const TextStyle(color: Color(0xA3FFFFFF), fontSize: 10, fontWeight: FontWeight.bold)),
         textDirection: TextDirection.ltr,
       )..layout()..paint(canvas, labelPt);
     }
