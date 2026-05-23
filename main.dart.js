@@ -76105,16 +76105,15 @@ this.x=A.b([],t._r)},
 gIm(){var s=this.x
 s===$&&A.a()
 return B.b.wu(s,new A.a8R(this),new A.a8S(this))},
-ga7v(){var s,r,q,p,o,n,m,l,k,j=J.i0(7,t.i)
-for(s=0;s<7;++s)j[s]=0
+ga7v(){var s,r,q,p,o,n,m,l=J.i0(40,t.i)
+for(s=0;s<40;++s)l[s]=0
 r=this.x
 r===$&&A.a()
 q=r.length
-if(q===0)return j
-for(p=0;o=p<7,o;++p){for(n=0,m=0,s=0;s<q;++s){l=r[s]
-l.toString
-if(o&&!0){k=l.c[p][3]
-if(k>0){n+=k;++m}}}j[p]=m>0?n/m:0}return j},
+if(q===0)return l
+for(p=0;p<40;++p){for(o=0,n=0,s=0;s<q;++s){m=r[s].c
+if(p<m.length&&!0){m=m[p][3]
+if(m>0){o+=m;++n}}}l[p]=n>0?o/n:0}return l},
 ga7w(){var s,r,q,p,o,n,m,l,k,j=J.i0(10,t.i)
 for(s=0;s<10;++s)j[s]=0
 r=this.x
@@ -76156,8 +76155,8 @@ A.a8S.prototype={
 $0(){var s,r,q,p=this.a.x
 p===$&&A.a()
 if(p.length!==0)p=B.b.gO(p)
-else{s=J.i0(7,t.Ly)
-for(p=t.F,r=0;r<7;++r)s[r]=A.b([0,0,0,0,0,0],p)
+else{s=J.i0(40,t.Ly)
+for(p=t.F,r=0;r<40;++r)s[r]=A.b([0,0,0,0,0,0],p)
 q=J.i0(10,t.i)
 for(r=0;r<10;++r)q[r]=0
 p=A.ajN(s,"000","BELUM ADA SISWA",q)}return p},
@@ -76288,7 +76287,7 @@ j=A.tw(B.bu,1)
 q=new A.aG(B.bu,1,B.w,-1)
 return A.x1(o,B.c_,A.a2K(A.fi(A.b([l,B.eA,k,B.eA,s,B.eA,A.ct(o,A.fi(A.b([A.eB(A.b([A.ct(o,o,B.q,B.f_,o,o,o,16,o,o,o,o,4),B.dg,B.RM],i),B.ak,B.a3,B.a9),B.bQ,A.a2K(A.dT(A.auv(new A.Il(q,q,q,q,q,q,B.a7),A.b([new A.hi(B.zP,A.b([new A.bl(B.cT,A.bC("KOMPONEN",o,o,o,B.dk,B.bR,o),o),new A.bl(B.cT,A.bC("POLA BOXPLOT",o,o,o,B.dk,B.bR,o),o),new A.bl(B.cT,A.bC("ARTI POLA",o,o,o,B.dk,B.bR,o),o),new A.bl(B.cT,A.bC("KELEBIHAN",o,o,o,B.dk,B.bR,o),o),new A.bl(B.cT,A.bC("KEKURANGAN",o,o,o,B.dk,B.bR,o),o),new A.bl(B.cT,A.bC("REKOMENDASI",o,o,o,B.dk,B.bR,o),o)],i)),p.ew("STRENGTH",n,0),p.ew("ENDURANCE",n,1),p.ew("SPEED",n,2),p.ew("COORDINATION",n,3),p.ew("FLEXIBILITY",n,4),p.ew("BALANCE",n,5),p.ew("REACTION TIME",n,6),p.ew("MUSCULAR ENDURANCE",n,1),p.ew("POWER",n,0),p.ew("CORE STABILITY",n,0),p.ew("DYNAMIC FLEXIBILITY",n,4),p.ew("SPEED ENDURANCE",n,2),p.ew("REACTIVE SPEED / QUICKNESS",n,6),p.ew("ANTICIPATION & SPATIAL AWARENESS",n,3),p.ew("AGILITY",m,8),p.ew("MOBILITY",m,9),p.ew("OPEN/REACTIVE AGILITY",m,2)],t.nk),B.It),o,1050),o,B.ay)],i),B.bx,B.a3,B.a9),B.q,o,o,new A.cc(B.aT,o,j,r,o,o,B.am),o,o,o,B.bJ,o,o,1/0)],i),B.bx,B.a3,B.a9),B.bJ,B.az),o)},
 XW(a,b){var s,r,q,p,o,n,m,l,k,j,i,h,g=this.c
-if(!(B.b.fz(g.e,new A.TJ(this,b,a))||B.b.fz(g.f,new A.TK(this,b,a))||g.c[a][3]>0)||a>=7){g=t.N
+if(!(B.b.fz(g.e,new A.TJ(this,b,a))||B.b.fz(g.f,new A.TK(this,b,a))||g.c[a][3]>0)||a>=g.c.length){g=t.N
 return A.aw(["pola","Belum Ada Data","arti","Menunggu input performa fungsional dari latihan."],g,g)}s=g.c[a]
 r=s[0]
 q=s[1]
@@ -76308,7 +76307,9 @@ else h=l>38?"Platykurtic (Wide)":"Mesokurtic (Optimal)"
 g=t.N
 return A.aw(["pola",i+" - "+h,"arti","Kombinasi adaptasi sirkuit & fluktuatif atlet fisik."],g,g)},
 ew(a,b,c){var s,r,q,p,o,n,m,l,k,j,i,h=this,g=null,f=h.c
-if(!B.b.fz(f.e,new A.TL(h,a,c)))if(!B.b.fz(f.f,new A.TM(h,a,c))){if(!(b==="BOXPLOT"&&c<7&&f.c[c][3]>0))s=b==="RADAR"&&c<10&&f.d[c]>0
+if(!B.b.fz(f.e,new A.TL(h,a,c)))if(!B.b.fz(f.f,new A.TM(h,a,c))){if(b==="BOXPLOT"){s=f.c
+s=c<s.length&&s[c][3]>0}else s=!1
+if(!s)s=b==="RADAR"&&c<10&&f.d[c]>0
 else s=!0
 r=s}else r=!0
 else r=!0
@@ -76317,8 +76318,8 @@ s=q.h(0,"pola")
 s.toString
 p=q.h(0,"arti")
 p.toString
-if(r&&c<7){f=f.c[c][3]
-o=f>=(c<7?h.d[c]:0)
+if(r&&c<f.c.length){f=f.c[c][3]
+o=f>=(c<40?h.d[c]:0)
 n=!1}else{o=!1
 n=!0}m=p
 l=s}else{if(r&&c<10){f=f.d[c]
@@ -76491,59 +76492,66 @@ A.FR.prototype={
 I(a){var s=null
 return A.ct(s,A.fk(s,s,s,new A.JK(this.c,this.d,s),B.y7),B.q,s,s,s,s,s,s,B.dP,s,s,s)}}
 A.JK.prototype={
-al(b4,b5){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7=null,a8=b5.a,a9=b5.b,b0=a9-40,b1=(a8-50)/7,b2=$.V(),b3=b2.aS()
-b3.sag(B.bu)
-b3.se_(1)
-s=b2.aS()
-s.sag(A.M(B.c.bL(76.5),56,189,248))
-s.sbp(B.aQ)
-r=b2.aS()
-r.sag(B.bl)
-r.se_(1.2)
-r.sbp(B.O)
-q=b2.aS()
-q.sag(B.IT)
-q.se_(2)
-p=b2.aS()
-p.sag(B.Cm)
-p.sbp(B.aQ)
-o=b2.aS()
-o.sag(A.M(102,244,63,94))
-o.se_(1)
-n=b2.aS()
-n.sag(B.f_)
-n.se_(1.5)
-n.sbp(B.O)
-for(b2=b0/4,m=0;m<=4;++m){l=10+b2*m
-b4.ej(new A.e(40,l),new A.e(a8,l),b3)}for(a8=a9-22,a9=b1/4,b2=this.b,k=this.c,j=a7,m=0;i=m<7,i;++m){h=55+b1*m+a9
-g=b2[m]
-f=new A.a5K(b0)
-e=f.$1(g[0])
-d=f.$1(g[1])
-c=f.$1(g[2])
-b=f.$1(g[3])
-a=f.$1(g[4])
-a0=f.$1(g[5])
-b4.ej(new A.e(h,e),new A.e(h,a0),r)
-a1=h-5
-a2=h+5
-b4.ej(new A.e(a1,e),new A.e(a2,e),r)
-b4.ej(new A.e(a1,a0),new A.e(a2,a0),r)
-a2=h-12
-a1=h+12
-a3=new A.v(a2,a,a1,d)
-b4.cp(a3,s)
-b4.cp(a3,r)
-b4.ej(new A.e(a2,c),new A.e(a1,c),q)
-if(i&&k[m]>0){a4=f.$1(k[m])
-b4.ej(new A.e(h-15,a4),new A.e(h+15,a4),n)}a5=new A.e(h,b)
-if(j!=null)b4.ej(j,a5,o)
-b4.hF(a5,5,p)
-i=A.c3(a7,B.Pi,["STR","END","SPD","CRD","FLX","BAL","REA"][m])
-a6=new A.qv(i,B.b0,B.m,B.a2.j(0,B.a2)?new A.fQ(1):B.a2,a7,a7,a7,a7,B.aG,a7)
-a6.wP()
-a6.al(b4,new A.e(h-a6.b.b/2,a8))
-j=a5}},
+al(b4,b5){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,b0,b1=null,b2=this.b,b3=b2.length
+if(b3===0)return
+s=b5.a
+r=b5.b
+q=r-40
+p=(s-50)/b3
+o=$.V()
+n=o.aS()
+n.sag(B.bu)
+n.se_(1)
+m=o.aS()
+m.sag(A.M(B.c.bL(76.5),56,189,248))
+m.sbp(B.aQ)
+l=o.aS()
+l.sag(B.bl)
+l.se_(1.2)
+l.sbp(B.O)
+k=o.aS()
+k.sag(B.IT)
+k.se_(2)
+j=o.aS()
+j.sag(B.Cm)
+j.sbp(B.aQ)
+i=o.aS()
+i.sag(A.M(102,244,63,94))
+i.se_(1)
+h=o.aS()
+h.sag(B.f_)
+h.se_(1.5)
+h.sbp(B.O)
+for(o=q/4,g=0;g<=4;++g){f=10+o*g
+b4.ej(new A.e(40,f),new A.e(s,f),n)}for(s=r-22,r=p/4,o=this.c,e=b1,g=0;g<b3;++g){d=55+p*g+r
+c=b2[g]
+b=new A.a5K(q)
+a=b.$1(c[0])
+a0=b.$1(c[1])
+a1=b.$1(c[2])
+a2=b.$1(c[3])
+a3=b.$1(c[4])
+a4=b.$1(c[5])
+b4.ej(new A.e(d,a),new A.e(d,a4),l)
+a5=d-5
+a6=d+5
+b4.ej(new A.e(a5,a),new A.e(a6,a),l)
+b4.ej(new A.e(a5,a4),new A.e(a6,a4),l)
+a6=d-12
+a5=d+12
+a7=new A.v(a6,a3,a5,a0)
+b4.cp(a7,m)
+b4.cp(a7,l)
+b4.ej(new A.e(a6,a1),new A.e(a5,a1),k)
+if(g<40&&o[g]>0){a8=b.$1(o[g])
+b4.ej(new A.e(d-15,a8),new A.e(d+15,a8),h)}a9=new A.e(d,a2)
+if(e!=null)b4.ej(e,a9,i)
+b4.hF(a9,5,j)
+b=A.c3(b1,B.Pi,["STR","END","SPD","CRD","FLX","BAL","REA"][g])
+b0=new A.qv(b,B.b0,B.m,B.a2.j(0,B.a2)?new A.fQ(1):B.a2,b1,b1,b1,b1,B.aG,b1)
+b0.wP()
+b0.al(b4,new A.e(d-b0.b.b/2,s))
+e=a9}},
 dA(a){return!0}}
 A.a5K.prototype={
 $1(a){var s
