@@ -62,37 +62,16 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
   @override
   void initState() {
     super.initState();
-    _daftarMurid = [
-      Murid(
-        id: "001", nama: "BUDI SANTOSO",
-        boxData: [
-          [20.0, 35.0, 48.0, 0.0, 60.0, 85.0],
-          [25.0, 40.0, 52.0, 0.0, 65.0, 88.0],
-          [30.0, 42.0, 65.0, 0.0, 75.0, 90.0],
-          [18.0, 32.0, 45.0, 0.0, 58.0, 76.0],
-          [22.0, 48.0, 52.0, 0.0, 56.0, 78.0],
-          [12.0, 38.0, 40.0, 0.0, 42.0, 72.0],
-          [28.0, 42.0, 56.0, 0.0, 68.0, 92.0],
-        ],
-        radarData: List.generate(10, (_) => 0.0),
-      ),
-      Murid(
-        id: "100", nama: "RURI",
-        boxData: [
-          [20.0, 35.0, 50.0, 0.0, 65.0, 85.0],
-          [25.0, 40.0, 55.0, 0.0, 70.0, 90.0],
-          [22.0, 38.0, 48.0, 0.0, 62.0, 86.0],
-          [15.0, 30.0, 42.0, 0.0, 58.0, 75.0],
-          [20.0, 35.0, 50.0, 0.0, 65.0, 88.0],
-          [18.0, 32.0, 46.0, 0.0, 60.0, 78.0],
-          [25.0, 40.0, 52.0, 0.0, 66.0, 90.0],
-        ],
-        radarData: List.generate(10, (_) => 0.0),
-      ),
-    ];
+    _daftarMurid = []; // BERSIH: Data contoh Budi & Ruri sudah dihapus
   }
 
-  Murid get _currentMurid => _daftarMurid.firstWhere((m) => m.id == _selectedMuridId, orElse: () => _daftarMurid.first);
+  Murid get _currentMurid => _daftarMurid.firstWhere(
+        (m) => m.id == _selectedMuridId, 
+        orElse: () => _daftarMurid.isNotEmpty 
+            ? _daftarMurid.first 
+            : Murid(id: "000", nama: "BELUM ADA SISWA", boxData: List.generate(7, (_) => [0,0,0,0,0,0]), radarData: List.generate(10, (_) => 0.0)),
+      );
+
 
   List<double> get _teamAverageBoxScores {
     List<double> averages = List.generate(7, (_) => 0.0);
