@@ -75,14 +75,14 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
         (m) => m.id == _selectedMuridId, 
         orElse: () => _daftarMurid.isNotEmpty 
             ? _daftarMurid.first 
-            : Murid(id: "000", nama: "BELUM ADA SISWA", boxData: List.generate(7, (_) => [0,0,0,0,0,0]), radarData: List.generate(10, (_) => 0.0)),
+            : Murid(id: "000", nama: "BELUM ADA SISWA", boxData: List.generate(40, (_) => [0,0,0,0,0,0]), radarData: List.generate(10, (_) => 0.0)),
       );
 
 
   List<double> get _teamAverageBoxScores {
-    List<double> averages = List.generate(7, (_) => 0.0);
+    List<double> averages = List.generate(40, (_) => 0.0);
     if (_daftarMurid.isEmpty) return averages;
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 40; i++) {
       double sum = 0;
       int count = 0;
       for (var murid in _daftarMurid) {
