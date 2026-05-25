@@ -185,7 +185,15 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
         // --- BARIS YANG BERUBAH (BOXPLOT DATA LANGSUNG PAKAI SKOR GRAFIK) ---
         int bIdx = _dapatkanBoxIndex(klas);
         if (bIdx != -1 && bIdx < _daftarMurid[idx].boxData.length) {
-          _daftarMurid[idx].boxData[bIdx][3] = skorGrafik; // Tanpa dikali 100
+          double nilaiBaru = skorGrafik * 100;
+          
+          // Kita set data statistikanya secara bertahap agar membentuk kotak proporsional
+          _daftarMurid[idx].boxData[bIdx] = [
+            nilaiBaru * 0.5,  // Nilai Minimum (di bawah kotak)
+            nilaiBaru * 0.8,  // Kuartil 1 (Garis bawah kotak)
+            nilaiBaru * 0.9,  // Kuartil 3 (Garis atas kotak)
+            nilaiBaru,        // Nilai Maksimum / Current (Ujung antena atas)
+          ];
         }
 
         _selectedMuridId = id;
@@ -224,7 +232,14 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
         // --- BARIS YANG BERUBAH (BOXPLOT DATA LANGSUNG PAKAI SKOR GRAFIK) ---
         int bIdx = _dapatkanBoxIndex(klas);
         if (bIdx != -1 && bIdx < _daftarMurid[idx].boxData.length) {
-          _daftarMurid[idx].boxData[bIdx][3] = skorGrafik; // Tanpa dikali 100
+          double nilaiBaru = skorGrafik * 100;
+          
+          _daftarMurid[idx].boxData[bIdx] = [
+            nilaiBaru * 0.5,
+            nilaiBaru * 0.8,
+            nilaiBaru * 0.9,
+            nilaiBaru,
+          ];
         }
 
         _selectedMuridId = id;
