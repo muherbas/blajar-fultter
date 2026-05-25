@@ -837,7 +837,25 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text("INPUT TARGET REPETISI (KUANTITATIF)", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.cyan)),
+            const Text("INPUT TARGET REPETISI (KUANTITATIF)", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.cyan)),const SizedBox(height: 10),
+Container(
+  width: double.infinity,
+  padding: const EdgeInsets.all(10),
+  decoration: BoxDecoration(
+    color: Colors.cyan.withOpacity(0.1),
+    borderRadius: BorderRadius.circular(8),
+    border: Border.all(color: Colors.cyan.withOpacity(0.3)),
+  ),
+  child: const Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text("RUMUS SKOR REPS:", style: TextStyle(color: Colors.cyan, fontWeight: FontWeight.bold, fontSize: 11)),
+      SizedBox(height: 4),
+      Text("• Tipe J (Junior): (Reps × Sets) ÷ 15", style: TextStyle(color: Colors.white70, fontSize: 11)),
+      Text("• Tipe S (Senior): (Reps × Sets) ÷ 25", style: TextStyle(color: Colors.white70, fontSize: 11)),
+    ],
+  ),
+),
             const SizedBox(height: 15),
             DropdownButtonFormField<String>(
               value: widget.selectedMuridId, 
