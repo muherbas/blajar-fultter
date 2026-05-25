@@ -78,13 +78,16 @@ class Murid {
     return Murid(
       id: json['id'],
       nama: json['nama'],
-      boxData: (json['boxData'] as List)
-          .map((e) => (e as List).map((v) => v.toDouble()).toList())
-          .toList(),
-      radarData: (json['radarData'] as List)
-          .map((e) => e.toDouble())
-          .toList(),
-      // Ditambahkan .from() agar tipenya resmi menjadi List<Map<String, dynamic>>
+      // Perbaikan 1: Paksa list luar menjadi List<List<double>> dan list dalam menjadi List<double>
+      boxData: List<List<double>>.from(
+        (json['boxData'] as List).map(
+          (e) => List<double>.from((e as List).map((v) => v.toDouble())),
+        ),
+      ),
+      // Perbaikan 2: Paksa radarData menjadi List<double> secara eksplisit
+      radarData: List<double>.from(
+        (json['radarData'] as List).map((e) => e.toDouble()),
+      ),
       riwayatLatihanKuantitatif: List<Map<String, dynamic>>.from(
         (json['riwayatKuantitatif'] as List).map((e) => {
           ...e as Map<String, dynamic>,
@@ -99,7 +102,6 @@ class Murid {
       ),
     );
   }
-}
 class MainNavigationHolder extends StatefulWidget {
   const MainNavigationHolder({Key? key}) : super(key: key);
   @override
