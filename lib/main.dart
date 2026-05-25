@@ -212,6 +212,8 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
           // 6. Kunci kembali ke memori dengan format TEPAT 6 ELEMEN
           _daftarMurid[idx].boxData[bIdx] = [min, q1, median, current, q3, max];
         }
+        _selectedMuridId = id;
+      }
     });
   //  _simpanKeStorage();
   }
