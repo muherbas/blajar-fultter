@@ -99,7 +99,7 @@ class Murid {
       ),
     );
   }
-
+}
 class MainNavigationHolder extends StatefulWidget {
   const MainNavigationHolder({Key? key}) : super(key: key);
   @override
