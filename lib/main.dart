@@ -183,19 +183,37 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
         }
 
         // --- BARIS YANG BERUBAH (BOXPLOT DATA LANGSUNG PAKAI SKOR GRAFIK) ---
+                // --- PROSES AKUMULASI OTOMATIS UNTUK GRAFIK BOXPLOT ---
+                // --- PROSES AKUMULASI OTOMATIS UNTUK GRAFIK BOXPLOT ---
         int bIdx = _dapatkanBoxIndex(klas);
         if (bIdx != -1 && bIdx < _daftarMurid[idx].boxData.length) {
-          double nilaiBaru = skorGrafik * 100;
           
-          // Kita set data statistikanya secara bertahap agar membentuk kotak proporsional
-          _daftarMurid[idx].boxData[bIdx] = [
-            nilaiBaru * 0.5,  // Nilai Minimum (di bawah kotak)
-            nilaiBaru * 0.8,  // Kuartil 1 (Garis bawah kotak)
-            nilaiBaru * 0.9,  // Kuartil 3 (Garis atas kotak)
-            nilaiBaru,        // Nilai Maksimum / Current (Ujung antena atas)
-          ];
-        }
+          // 1. Ambil semua skor kuantitatif milik murid ini yang memiliki klasifikasi yang sama
+          List<double> semuaSkorKlasifikasi = _daftarMurid[idx].riwayatLatihanKuantitatif
+              .where((item) => item['klasifikasi'] == klas)
+              .map((item) {
+                // Konversi kembali dari volume riil ke skor desimal grafik untuk kalkulasi boxplot
+                double pembagi = (item['tipePembagi'] == 'J') ? 15.0 : 25.0;
+                return (item['skor'] as double) / pembagi;
+              }).toList();
 
+          // 2. Lakukan kalkulasi jika data sudah terkumpul
+          if (semuaSkorKlasifikasi.isNotEmpty) {
+            // Urutkan data dari terkecil ke terbesar agar hukum statistikanya valid
+            semuaSkorKlasifikasi.sort();
+
+            double min = semuaSkorKlasifikasi.first;
+            double max = semuaSkorKlasifikasi.last;
+            
+            // Rumus sederhana mencari nilai tengah (Median/Kuartil) berdasarkan akumulasi data riil
+            int midIndex = semuaSkorKlasifikasi.length ~/ 2;
+            double q1 = semuaSkorKlasifikasi[midIndex / 2 >= 0 ? (midIndex / 2).toString().split('.')[0] as int : 0];
+            double q3 = semuaSkorKlasifikasi[(midIndex + (midIndex / 2)).toString().split('.')[0] as int ?? semuaSkorKlasifikasi.length - 1];
+
+            // 3. Masukkan ke Boxplot. Data lama TIDAK hilang, tapi melebur membentuk akumulasi baru!
+            _daftarMurid[idx].boxData[bIdx] = [min, q1, q3, max];
+          }
+        }
         _selectedMuridId = id;
       }
     });
@@ -230,16 +248,29 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
         }
 
         // --- BARIS YANG BERUBAH (BOXPLOT DATA LANGSUNG PAKAI SKOR GRAFIK) ---
+                // --- PROSES AKUMULASI OTOMATIS UNTUK GRAFIK BOXPLOT ---
         int bIdx = _dapatkanBoxIndex(klas);
         if (bIdx != -1 && bIdx < _daftarMurid[idx].boxData.length) {
-          double nilaiBaru = skorGrafik * 100;
           
-          _daftarMurid[idx].boxData[bIdx] = [
-            nilaiBaru * 0.5,
-            nilaiBaru * 0.8,
-            nilaiBaru * 0.9,
-            nilaiBaru,
-          ];
+          List<double> semuaSkorKlasifikasi = _daftarMurid[idx].riwayatLatihanDurasi
+              .where((item) => item['klasifikasi'] == klas)
+              .map((item) {
+                double pembagi = (item['tipePembagi'] == 'J') ? 60.0 : 90.0;
+                return (item['skor'] as double) / pembagi;
+              }).toList();
+
+          if (semuaSkorKlasifikasi.isNotEmpty) {
+            semuaSkorKlasifikasi.sort();
+
+            double min = semuaSkorKlasifikasi.first;
+            double max = semuaSkorKlasifikasi.last;
+            
+            int midIndex = semuaSkorKlasifikasi.length ~/ 2;
+            double q1 = semuaSkorKlasifikasi[(midIndex / 2).floor()];
+            double q3 = semuaSkorKlasifikasi[(midIndex + (midIndex / 2)).floor().clamp(0, semuaSkorKlasifikasi.length - 1)];
+
+            _daftarMurid[idx].boxData[bIdx] = [min, q1, q3, max];
+          }
         }
 
         _selectedMuridId = id;
