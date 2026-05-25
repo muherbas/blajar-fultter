@@ -776,7 +776,7 @@ class InputLatihanKuantitatifPage extends StatefulWidget {
   final List<Murid> daftarMurid;
   final String selectedMuridId;
   final ValueChanged<String?> onMuridChanged;
-  final Function(String, String, String, double, double, DateTime) onSimpan;
+  final Function(String, String, String, double, double, String, DateTime) onSimpan; // Update Signature
 
   const InputLatihanKuantitatifPage({Key? key, required this.daftarMurid, required this.selectedMuridId, required this.onMuridChanged, required this.onSimpan}) : super(key: key);
 
@@ -789,6 +789,7 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
   final TextEditingController _repsController = TextEditingController();
   final TextEditingController _setsController = TextEditingController();
   String _selectedKlasifikasi = kDaftarKlasifikasiLatihan.first;
+  String _selectedTipePembagi = 'J'; // Default awal pada tipe J
 
   @override
   Widget build(BuildContext context) {
@@ -814,6 +815,18 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
               onChanged: (v) => setState(() => _selectedKlasifikasi = v!), decoration: const InputDecoration(labelText: "Klasifikasi Kemampuan", border: OutlineInputBorder()),
             ),
             const SizedBox(height: 12),
+            // --- DROPDOWN BARU UNTUK PARAMETER PEMBAGI J / S ---
+            DropdownButtonFormField<String>(
+              value: _selectedTipePembagi,
+              dropdownColor: const Color(0xFF1E293B),
+              items: const [
+                DropdownMenuItem(value: 'J', child: Text("J (Target Base: 15 Reps)", style: TextStyle(color: Colors.white))),
+                DropdownMenuItem(value: 'S', child: Text("S (Target Base: 25 Reps)", style: TextStyle(color: Colors.white))),
+              ],
+              onChanged: (v) => setState(() => _selectedTipePembagi = v!),
+              decoration: const InputDecoration(labelText: "Parameter Pembagi Skoring", border: OutlineInputBorder()),
+            ),
+            const SizedBox(height: 12),
             TextField(controller: _jenisController, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: "Nama Latihan (cth: Push Up, Sit Up)", border: OutlineInputBorder())),
             const SizedBox(height: 12),
             Row(children: [
@@ -828,8 +841,9 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
                 double reps = double.tryParse(_repsController.text) ?? 0.0;
                 double sets = double.tryParse(_setsController.text) ?? 0.0;
                 if (_jenisController.text.isNotEmpty && reps > 0 && sets > 0) {
-                  widget.onSimpan(widget.selectedMuridId, _jenisController.text, _selectedKlasifikasi, reps, sets, DateTime.now());
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Data Repetisi Berhasil Disimpan!")));
+                  // Mengirimkan _selectedTipePembagi ke fungsi simpan
+                  widget.onSimpan(widget.selectedMuridId, _jenisController.text, _selectedKlasifikasi, reps, sets, _selectedTipePembagi, DateTime.now());
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Data Repetisi Tipe $_selectedTipePembagi Berhasil Disimpan!")));
                   _jenisController.clear(); _repsController.clear(); _setsController.clear();
                 }
               },
@@ -847,7 +861,7 @@ class InputLatihanDurasiPage extends StatefulWidget {
   final List<Murid> daftarMurid;
   final String selectedMuridId;
   final ValueChanged<String?> onMuridChanged;
-  final Function(String, String, String, double, double, DateTime) onSimpan;
+  final Function(String, String, String, double, double, String, DateTime) onSimpan; // Update Signature
 
   const InputLatihanDurasiPage({Key? key, required this.daftarMurid, required this.selectedMuridId, required this.onMuridChanged, required this.onSimpan}) : super(key: key);
 
@@ -861,6 +875,7 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
   final TextEditingController _detikController = TextEditingController();
   final TextEditingController _setsController = TextEditingController();
   String _selectedKlasifikasi = kDaftarKlasifikasiLatihan.first;
+  String _selectedTipePembagi = 'J'; // Default awal pada tipe J
 
   @override
   Widget build(BuildContext context) {
@@ -886,6 +901,18 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
               onChanged: (v) => setState(() => _selectedKlasifikasi = v!), decoration: const InputDecoration(labelText: "Klasifikasi Kemampuan", border: OutlineInputBorder()),
             ),
             const SizedBox(height: 12),
+            // --- DROPDOWN BARU UNTUK PARAMETER PEMBAGI J / S ---
+            DropdownButtonFormField<String>(
+              value: _selectedTipePembagi,
+              dropdownColor: const Color(0xFF1E293B),
+              items: const [
+                DropdownMenuItem(value: 'J', child: Text("J (Target Base: 60 Detik)", style: TextStyle(color: Colors.white))),
+                DropdownMenuItem(value: 'S', child: Text("S (Target Base: 90 Detik)", style: TextStyle(color: Colors.white))),
+              ],
+              onChanged: (v) => setState(() => _selectedTipePembagi = v!),
+              decoration: const InputDecoration(labelText: "Parameter Pembagi Skoring", border: OutlineInputBorder()),
+            ),
+            const SizedBox(height: 12),
             TextField(controller: _jenisController, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: "Nama Latihan (cth: Plank, Kuda-Kuda)", border: OutlineInputBorder())),
             const SizedBox(height: 12),
             Row(children: [
@@ -904,8 +931,9 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
                 double sets = double.tryParse(_setsController.text) ?? 0.0;
                 double totalDetik = (mnt * 60) + dtk;
                 if (_jenisController.text.isNotEmpty && totalDetik > 0 && sets > 0) {
-                  widget.onSimpan(widget.selectedMuridId, _jenisController.text, _selectedKlasifikasi, totalDetik, sets, DateTime.now());
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Data Durasi Berhasil Disimpan!")));
+                  // Mengirimkan _selectedTipePembagi ke fungsi simpan
+                  widget.onSimpan(widget.selectedMuridId, _jenisController.text, _selectedKlasifikasi, totalDetik, sets, _selectedTipePembagi, DateTime.now());
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Data Durasi Tipe $_selectedTipePembagi Berhasil Disimpan!")));
                   _jenisController.clear(); _menitController.clear(); _detikController.clear(); _setsController.clear();
                 }
               },
@@ -917,7 +945,6 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
     );
   }
 }
-
 // ==================== ENGINE GRAFIK 1: BOXPLOT CUSTOM PAINT ====================
 class MetaBoxplotChart extends StatelessWidget {
   final List<List<double>> boxData;
