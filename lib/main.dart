@@ -61,7 +61,7 @@ class Murid {
     List<Map<String, dynamic>>? riwayatLatihanDurasi,
   })  : this.riwayatLatihanKuantitatif = riwayatLatihanKuantitatif ?? [],
         this.riwayatLatihanDurasi = riwayatLatihanDurasi ?? [];
-}
+
   // --- TAMBAHKAN INI UNTUK MENYIMPAN ---
   Map<String, dynamic> toJson() => {
     'id': id,
