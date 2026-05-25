@@ -74,23 +74,31 @@ class Murid {
   };
 
   // --- TAMBAHKAN INI UNTUK MEMBACA ---
-  factory Murid.fromJson(Map<String, dynamic> json) {
+    factory Murid.fromJson(Map<String, dynamic> json) {
     return Murid(
       id: json['id'],
       nama: json['nama'],
-      boxData: (json['boxData'] as List).map((e) => (e as List).map((v) => v.toDouble()).toList()).toList(),
-      radarData: (json['radarData'] as List).map((e) => e.toDouble()).toList(),
-      riwayatLatihanKuantitatif: (json['riwayatKuantitatif'] as List).map((e) => {
-        ...e as Map<String, dynamic>,
-        'tanggal': DateTime.parse(e['tanggal']),
-      }).toList(),
-      riwayatLatihanDurasi: (json['riwayatDurasi'] as List).map((e) => {
-        ...e as Map<String, dynamic>,
-        'tanggal': DateTime.parse(e['tanggal']),
-      }).toList(),
+      boxData: (json['boxData'] as List)
+          .map((e) => (e as List).map((v) => v.toDouble()).toList())
+          .toList(),
+      radarData: (json['radarData'] as List)
+          .map((e) => e.toDouble())
+          .toList(),
+      // Ditambahkan .from() agar tipenya resmi menjadi List<Map<String, dynamic>>
+      riwayatLatihanKuantitatif: List<Map<String, dynamic>>.from(
+        (json['riwayatKuantitatif'] as List).map((e) => {
+          ...e as Map<String, dynamic>,
+          'tanggal': DateTime.parse(e['tanggal']),
+        }),
+      ),
+      riwayatLatihanDurasi: List<Map<String, dynamic>>.from(
+        (json['riwayatDurasi'] as List).map((e) => {
+          ...e as Map<String, dynamic>,
+          'tanggal': DateTime.parse(e['tanggal']),
+        }),
+      ),
     );
   }
-}
 
 class MainNavigationHolder extends StatefulWidget {
   const MainNavigationHolder({Key? key}) : super(key: key);
