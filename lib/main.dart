@@ -1,9 +1,89 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+// 1. TAMBAHKAN IMPORT INI
+import 'package:flutter_native_splash/flutter_native_splash.dart'; 
+import 'dart:async';
 
-void main() {
-  runApp(const MyApp());
+// ==========================================
+// 1. SEMUA CLASS DI TARUH DI ATAS
+// ==========================================
+
+class AdaptiveSplashScreen extends StatefulWidget {
+  const AdaptiveSplashScreen({Key? key}) : super(key: key);
+
+  @override
+  State<AdaptiveSplashScreen> createState() => _AdaptiveSplashScreenState();
 }
+
+class _AdaptiveSplashScreenState extends State<AdaptiveSplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Setelah 3 detik, otomatis pindah ke halaman navigasi utama Anda
+    Timer(const Duration(seconds: 3), () {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const MainNavigationHolder()),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFF0F172A), // Menyesuaikan warna background tema gelap Anda
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center, // Membuat semua konten tetap di tengah layar
+          children: [
+            // 1. TULISAN DI ATAS GAMBAR
+            const Text(
+              'dibuat oleh Heru Wingchun Hapki!!!',
+              style: TextStyle(
+                fontSize: 16,               // Ukuran huruf tulisan
+                fontWeight: FontWeight.bold, // Membuat tulisan tebal
+                color: Colors.white,        // Warna tulisan (bisa diganti)
+                fontFamily: 'Roboto',       // Mengikuti font aplikasi Anda
+              ),
+            ),
+
+            // 2. JARAK ANTARA TULISAN DAN GAMBAR
+            const SizedBox(height: 24), // Naikkan angka ini jika ingin jaraknya lebih jauh
+
+            // 3. GAMBAR SPLASH SCREEN (70% Layar)
+            SizedBox(
+              width: screenWidth * 0.70, 
+              child: Image.asset(
+                'assets/splash.png',
+                fit: BoxFit.contain, 
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+// ==========================================
+// 2. VOID MAIN() DI TARUH DI PALING BAWAH
+// ==========================================
+void main() {
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+
+  runApp(const MyApp());
+
+  // 3. HAPUS SPLASH SCREEN SETELAH 2 DETIK
+  Future.delayed(const Duration(seconds: 2), () {
+    FlutterNativeSplash.remove();
+  });
+}
+
+// ... (kode class MyApp dkk tetap sama)
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -12,7 +92,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Premium Athlete Dashboard',
+      title: 'Papan Performa Member',
       theme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF0F172A),
@@ -35,6 +115,7 @@ const List<String> kDaftarKlasifikasiLatihan = [
   "FLEXIBILITY-NEURAL INTEGRATION", "ANAEROBIC CAPACITY", "AEROBIC EFFICIENCY", 
   "BALANCE RECOVERY", "MENTAL TOUGHNESS"
 ];
+
 class Murid {
   final String id;
   final String nama;
@@ -59,6 +140,7 @@ class MainNavigationHolder extends StatefulWidget {
 
 class _MainNavigationHolderState extends State<MainNavigationHolder> {
   int _currentIndex = 0; 
+  bool _isPageLoading = false;
   String _selectedMuridId = "001"; 
   final TextEditingController _namaController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
@@ -68,21 +150,21 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
   @override
   void initState() {
     super.initState();
-    _daftarMurid = []; // BERSIH: Data contoh Budi & Ruri sudah dihapus
+    _daftarMurid = [];
   }
 
   Murid get _currentMurid => _daftarMurid.firstWhere(
         (m) => m.id == _selectedMuridId, 
         orElse: () => _daftarMurid.isNotEmpty 
             ? _daftarMurid.first 
-            : Murid(id: "000", nama: "BELUM ADA SISWA", boxData: List.generate(40, (_) => [0,0,0,0,0,0]), radarData: List.generate(10, (_) => 0.0)),
+            : Murid(id: "000", nama: "BELUM ADA SISWA", boxData: List.generate(7, (_) => [0,0,0,0,0,0]), radarData: List.generate(10, (_) => 0.0)),
       );
 
 
   List<double> get _teamAverageBoxScores {
-    List<double> averages = List.generate(40, (_) => 0.0);
+    List<double> averages = List.generate(7, (_) => 0.0);
     if (_daftarMurid.isEmpty) return averages;
-    for (int i = 0; i < 40; i++) {
+    for (int i = 0; i < 7; i++) {
       double sum = 0;
       int count = 0;
       for (var murid in _daftarMurid) {
@@ -207,12 +289,45 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
       TimelineHistoryPage(activeMurid: _currentMurid), 
     ];
 
-    return Scaffold(
-      body: SafeArea(child: pages[_currentIndex]),
-      bottomNavigationBar: BottomNavigationBar(
+        return Scaffold(
+      body: Stack(
+        children: [
+          SafeArea(child: pages[_currentIndex]),
+
+          // <-- KODE FAKE SPLASH SAAT PINDAH HALAMAN -->
+          if (_isPageLoading)
+            Container(
+              width: double.infinity,
+              height: double.infinity,
+              color: const Color(0xFF0F172A), 
+              child: Center(
+                child: Image.asset(
+                  'assets/splash.png', 
+                  width: 200, 
+                ),
+              ),
+            ),
+        ],
+      ),
+// ...
+
+            bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (i) => setState(() => _currentIndex = i),
+        // <-- UBAH onTap MENJADI SEPERTI INI -->
+        onTap: (i) async {
+          if (_currentIndex == i) return; 
+
+          setState(() => _isPageLoading = true); 
+
+          await Future.delayed(const Duration(seconds: 1)); 
+
+          setState(() {
+            _currentIndex = i; 
+            _isPageLoading = false; 
+          });
+        },
         backgroundColor: const Color(0xFF1E293B), 
+// ...
         selectedItemColor: const Color(0xFF38BDF8),
         unselectedItemColor: const Color(0xFF64748B),
         type: BottomNavigationBarType.fixed,
@@ -237,7 +352,13 @@ class DashboardAtletPage extends StatelessWidget {
   final List<double> teamRadarAverages;
   final int Function(String) dapatkanBoxIndexFunc;
 
-  const DashboardAtletPage({Key? key, required this.activeMurid, required this.teamBoxAverages, required this.teamRadarAverages, required this.dapatkanBoxIndexFunc}) : super(key: key);
+  const DashboardAtletPage({
+    Key? key, 
+    required this.activeMurid, 
+    required this.teamBoxAverages, 
+    required this.teamRadarAverages, 
+    required this.dapatkanBoxIndexFunc
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -260,7 +381,7 @@ class DashboardAtletPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    'COMPREHENSIVE PERFORMANCE DASHBOARD',
+                    'PAPAN PERFORMA KOMPREHENSIF',
                     style: TextStyle(
                       color: Colors.blueGrey[300],
                       fontSize: 11,
@@ -433,35 +554,103 @@ class DashboardAtletPage extends StatelessWidget {
     );
   }
 
+  // NAMA METHOD DISESUAIKAN MENJADI_analisisKomplet40Pola AGAR COCOK DENGAN PANGGILAN DI TABLE
   Map<String, String> _analisisKomplet40Pola(int idx, String namaKomponen) {
-    bool adaDataInput = activeMurid.riwayatLatihanKuantitatif.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == idx) ||
-                        activeMurid.riwayatLatihanDurasi.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == idx) ||
-                        (activeMurid.boxData[idx][3] > 0);
-
-    if (!adaDataInput || idx >= activeMurid.boxData.length) {
-      return {"pola": "Belum Ada Data", "arti": "Menunggu input performa fungsional dari latihan."};
+    if (idx >= activeMurid.boxData.length || activeMurid.boxData[idx].length < 6) {
+      return {"pola": "-", "arti": "Data fungsional belum lengkap."};
     }
 
     final List<double> data = activeMurid.boxData[idx];
-    double min = data[0]; double q1 = data[1]; double q2 = data[2]; double q3 = data[4]; double max = data[5];
-    double dLower = q2 - q1; double dUpper = q3 - q2; double iqr = q3 - q1; double wLower = q1 - min; double wUpper = max - q3;
+    double min = data[0]; 
+    double q1 = data[1]; 
+    double q2 = data[2]; 
+    double q3 = data[4]; // Sesuai indeks data Coach
+    double max = data[5];
 
-    String skew = ""; String kurtosis = "";
-    if ((dUpper - dLower).abs() <= 2.0 && (wUpper - wLower).abs() <= 3.0) skew = "Symmetrical";
-    else if (dUpper > dLower && wUpper > wLower) skew = "Extremely Skewed Right";
-    else if (dUpper > dLower) skew = "Mildly Skewed Right";
-    else if (dLower > dUpper && wLower > wUpper) skew = "Extremely Skewed Left";
-    else skew = "Mildly Skewed Left";
+    double dLower = q2 - q1; 
+    double dUpper = q3 - q2; 
+    double iqr = q3 - q1; 
+    double wLower = q1 - min; 
+    double wUpper = max - q3;
 
-    if (iqr < 10) kurtosis = "Leptokurtic (Narrow)";
-    else if (iqr > 38) kurtosis = "Platykurtic (Wide)";
-    else kurtosis = "Mesokurtic (Optimal)";
+    String skew = ""; 
+    String kurtosis = "";
 
-    return {"pola": "$skew - $kurtosis", "arti": "Kombinasi adaptasi sirkuit & fluktuatif atlet fisik."};
+    // 1. PENENTUAN BENTUK KEMIRINGAN (SKEWNESS)
+    if ((dUpper - dLower).abs() <= 2.0 && (wUpper - wLower).abs() <= 3.0) {
+      skew = "Symmetrical";
+    } else if (dUpper > dLower && wUpper > wLower) {
+      skew = "Extremely Skewed Right";
+    } else if (dUpper > dLower) {
+      skew = "Mildly Skewed Right";
+    } else if (dLower > dUpper && wLower > wUpper) {
+      skew = "Extremely Skewed Left";
+    } else {
+      skew = "Mildly Skewed Left";
+    }
+
+    // 2. PENENTUAN BENTUK KERAPATAN (KURTOSIS)
+    if (iqr < 10) {
+      kurtosis = "Leptokurtic (Narrow)";
+    } else if (iqr > 38) {
+      kurtosis = "Platykurtic (Wide)";
+    } else {
+      kurtosis = "Mesokurtic (Optimal)";
+    }
+
+    // 3. LOGIKA SPORT SCIENCE
+    String artiFisik = "";
+    if (skew == "Symmetrical") {
+      if (kurtosis == "Mesokurtic (Optimal)") {
+        artiFisik = "Kondisi Peak Performance. Distribusi energi ideal & stabil.";
+      } else if (kurtosis == "Leptokurtic (Narrow)") {
+        artiFisik = "Stagnan/Plato. Konsisten, tapi butuh variasi beban baru.";
+      } else {
+        artiFisik = "Performa labil. Kadang sangat bagus, kadang drop. Fokus repetisi dasar.";
+      }
+    } else if (skew == "Mildly Skewed Right") {
+      if (kurtosis == "Mesokurtic (Optimal)") {
+        artiFisik = "Fase adaptasi positif. Otot merespons program latihan dengan baik.";
+      } else if (kurtosis == "Leptokurtic (Narrow)") {
+        artiFisik = "Perkembangan lambat tapi pasti. Pertahankan volume latihan sirkuit.";
+      } else { 
+        artiFisik = "Adaptasi tak merata. Ada potensi, tapi teknik eksekusi masih goyah.";
+      }
+    } else if (skew == "Extremely Skewed Right") {
+      if (kurtosis == "Mesokurtic (Optimal)") {
+        artiFisik = "Potensi lonjakan daya. Jaga waktu recovery agar tidak overtraining.";
+      } else if (kurtosis == "Leptokurtic (Narrow)") {
+        artiFisik = "Bakat terpendam di area ini. Dorong limit perlahan saat tes fungsional.";
+      } else { 
+        artiFisik = "Hasil anomali. Evaluasi apakah form/postur gerakan sudah sesuai standar.";
+      }
+    } else if (skew == "Mildly Skewed Left") {
+      if (kurtosis == "Mesokurtic (Optimal)") {
+        artiFisik = "Tanda awal kelelahan. Kapasitas ada, tapi eksekusi mulai terasa berat.";
+      } else if (kurtosis == "Leptokurtic (Narrow)") {
+        artiFisik = "Kapasitas terkunci di bawah rata-rata. Perlu drilling teknik perbaikan.";
+      } else { 
+        artiFisik = "Inkonsistensi akibat fatigue ringan. Kurangi durasi, tingkatkan presisi.";
+      }
+    } else if (skew == "Extremely Skewed Left") {
+      if (kurtosis == "Mesokurtic (Optimal)") {
+        artiFisik = "Kelelahan saraf pusat (CNS Fatigue). Segera turunkan beban (Deloading)!";
+      } else if (kurtosis == "Leptokurtic (Narrow)") {
+        artiFisik = "Titik lemah fatal. Wajib remedial & intervensi program biomekanik spesifik.";
+      } else { 
+        artiFisik = "Drop performa drastis. Periksa faktor luar (sakit, stres, kurang tidur).";
+      }
+    }
+
+    return {"pola": "$skew\n($kurtosis)", "arti": artiFisik};
   }
 
   TableRow _buildEvaluasiRow(String namaKomponen, String tipeGrafik, int dataIdx) {
-    bool diAtasRataTim = false; bool belumAdaData = true; String labelPola = "-"; String labelArti = "-";
+    bool diAtasRataTim = false; 
+    bool belumAdaData = true; 
+    String labelPola = "-"; 
+    String labelArti = "-";
+
     bool adaDataDiInput = activeMurid.riwayatLatihanKuantitatif.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == dataIdx) ||
                         activeMurid.riwayatLatihanDurasi.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == dataIdx) ||
                         (tipeGrafik == "BOXPLOT" && dataIdx < activeMurid.boxData.length && activeMurid.boxData[dataIdx][3] > 0) ||
@@ -469,7 +658,8 @@ class DashboardAtletPage extends StatelessWidget {
 
     if (tipeGrafik == "BOXPLOT") {
       Map<String, String> hasilPola = _analisisKomplet40Pola(dataIdx, namaKomponen);
-      labelPola = hasilPola["pola"]!; labelArti = hasilPola["arti"]!;
+      labelPola = hasilPola["pola"]!; 
+      labelArti = hasilPola["arti"]!;
       if (adaDataDiInput && dataIdx < activeMurid.boxData.length) {
         belumAdaData = false;
         diAtasRataTim = activeMurid.boxData[dataIdx][3] >= (dataIdx < teamBoxAverages.length ? teamBoxAverages[dataIdx] : 0.0);
@@ -488,7 +678,6 @@ class DashboardAtletPage extends StatelessWidget {
     return TableRow(
       children: [
         Padding(padding: const EdgeInsets.all(8.0), child: Text(namaKomponen, style: const TextStyle(color: Colors.white, fontSize: 8.5, fontWeight: FontWeight.bold))),
-        // DI SINI PERBAIKANNYA: Mengubah Colors.white20 menjadi const Color(0x33FFFFFF)
         Padding(padding: const EdgeInsets.all(8.0), child: Text(labelPola, style: TextStyle(color: belumAdaData ? const Color(0x33FFFFFF) : Colors.amber[400], fontSize: 8))),
         Padding(padding: const EdgeInsets.all(8.0), child: Text(labelArti, style: TextStyle(color: belumAdaData ? const Color(0x33FFFFFF) : const Color(0xFF34D399), fontSize: 8))),
         Padding(padding: const EdgeInsets.all(8.0), child: Text(kelebihanText, style: const TextStyle(fontSize: 8.5, color: Colors.white70))),
@@ -708,7 +897,7 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
                   _jenisController.clear(); _repsController.clear(); _setsController.clear();
                 }
               },
-              child: const Text("SIMPAN PERFORMANCE DATA", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+              child: const Text("SIMPAN PERFORMA REPS", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
             ))
           ]),
         ),
@@ -784,7 +973,7 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
                   _jenisController.clear(); _menitController.clear(); _detikController.clear(); _setsController.clear();
                 }
               },
-              child: const Text("SIMPAN PERFORMANCE DATA", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+              child: const Text("SIMPAN PERFORMA WAKTU", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
             ))
           ]),
         ),
@@ -922,13 +1111,13 @@ class MetaRadarChartPainter extends CustomPainter {
       canvas.drawPath(pJaring, pGrid);
     }
 
-    // --- TEMPATKAN KODE LABEL DI SINI ---
-    final List<String> labels = ["STR", "END", "SPD", "CRD", "FLX", "BAL", "REA", "PWR", "AGI", "MOB"];
+    // --- TEMPATKAN KODE LABEL RADAR DI SINI ---
+    final List<String> labels = ["MUSC END", "POWER", "CORE STAB", "DYNAMIC FLEX", "SPEED END", "REACTIVE SPEED", "AGILITY", "ASA/FightIQ", "MOBILITY", "REAKSI LINCAH"];
     for (int j = 0; j < kDimensi; j++) {
       double angle = (j * 2 * math.pi / kDimensi) - (math.pi / 2);
       Offset labelPos = Offset(
-        center.dx + (maxRadius + 20) * math.cos(angle), 
-        center.dy + (maxRadius + 20) * math.sin(angle)
+        center.dx + (maxRadius + 15) * math.cos(angle), 
+        center.dy + (maxRadius + 15) * math.sin(angle)
       );
       final txt = TextPainter(
         text: TextSpan(text: labels[j], style: const TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold)),
@@ -937,7 +1126,6 @@ class MetaRadarChartPainter extends CustomPainter {
       txt.paint(canvas, Offset(labelPos.dx - (txt.width / 2), labelPos.dy - (txt.height / 2)));
     }
     // --- AKHIR PENEMPATAN KODE LABEL ---
-
     // ... (kode selanjutnya: penggambaran pathAtlet dan pathTim)
 
 
