@@ -183,11 +183,10 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
         }
 
         // --- BARIS YANG BERUBAH (BOXPLOT DATA LANGSUNG PAKAI SKOR GRAFIK) ---
-                         // --- PROSES AKUMULASI BOXPLOT YANG BENAR & AMAN ---
+                                // --- PROSES AKUMULASI BOXPLOT ANTI-ERROR ---
         int bIdx = _dapatkanBoxIndex(klas);
         if (bIdx != -1 && bIdx < _daftarMurid[idx].boxData.length) {
           
-          // Ambil semua riwayat kuantitatif, lalu filter berdasarkan APAKAH KATEGORI TERSEBUT MENGHASILKAN INDEKS BOXPLOT YANG SAMA
           List<double> semuaSkorPilarIni = _daftarMurid[idx].riwayatLatihanKuantitatif
               .where((item) => _dapatkanBoxIndex(item['klasifikasi'].toString()) == bIdx)
               .map((item) {
@@ -196,17 +195,17 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
               }).toList();
 
           if (semuaSkorPilarIni.isNotEmpty) {
-            semuaSkorPilarIni.sort(); // Urutkan untuk statistik riil
+            semuaSkorPilarIni.sort(); // Urutkan data secara statistik
 
             double min = semuaSkorPilarIni.first;
             double max = semuaSkorPilarIni.last;
             
-            // Cari nilai kuartil secara aman dan jujur
-            int mid = semuaSkorPilarIni.length ~/ 2;
-            double q1 = semuaSkorPilarIni[mid ~/ 2];
-            double q3 = semuaSkorPilarIni[(mid + (mid ~/ 2)).clamp(0, semuaSkorPilarIni.length - 1)];
+            // Perbaikan Logika Kuartil: Menggunakan pendekatan persentase posisi agar ANTI-ERROR
+            int len = semuaSkorPilarIni.length;
+            double q1 = semuaSkorPilarIni[(len * 0.25).floor().clamp(0, len - 1)];
+            double q3 = semuaSkorPilarIni[(len * 0.75).floor().clamp(0, len - 1)];
 
-            // Perbarui data tanpa merusak struktur List 7 pilar
+            // Masukkan ke Boxplot murid secara utuh 4 komponen
             _daftarMurid[idx].boxData[bIdx] = [min, q1, q3, max];
           }
         }
@@ -244,7 +243,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
         }
 
         // --- BARIS YANG BERUBAH (BOXPLOT DATA LANGSUNG PAKAI SKOR GRAFIK) ---
-                        // --- PROSES AKUMULASI BOXPLOT YANG BENAR & AMAN ---
+                                // --- PROSES AKUMULASI BOXPLOT ANTI-ERROR ---
         int bIdx = _dapatkanBoxIndex(klas);
         if (bIdx != -1 && bIdx < _daftarMurid[idx].boxData.length) {
           
@@ -258,12 +257,11 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
           if (semuaSkorPilarIni.isNotEmpty) {
             semuaSkorPilarIni.sort();
 
+            int len = semuaSkorPilarIni.length;
             double min = semuaSkorPilarIni.first;
             double max = semuaSkorPilarIni.last;
-            
-            int mid = semuaSkorPilarIni.length ~/ 2;
-            double q1 = semuaSkorPilarIni[mid ~/ 2];
-            double q3 = semuaSkorPilarIni[(mid + (mid ~/ 2)).clamp(0, semuaSkorPilarIni.length - 1)];
+            double q1 = semuaSkorPilarIni[(len * 0.25).floor().clamp(0, len - 1)];
+            double q3 = semuaSkorPilarIni[(len * 0.75).floor().clamp(0, len - 1)];
 
             _daftarMurid[idx].boxData[bIdx] = [min, q1, q3, max];
           }
