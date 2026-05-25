@@ -183,35 +183,34 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
         }
 
         // --- BARIS YANG BERUBAH (BOXPLOT DATA LANGSUNG PAKAI SKOR GRAFIK) ---
-                                                // --- AKUMULASI 6 ELEMEN BOXPLOT (ANTI-HILANG & AKTUAL) ---
+                                                        // --- LOGIKA BOXPLOT BARU: LANGSUNG MASUK, ANTI-HILANG ---
         int bIdx = _dapatkanBoxIndex(klas);
         if (bIdx != -1 && bIdx < _daftarMurid[idx].boxData.length) {
           
-          List<double> semuaSkorPilarIni = _daftarMurid[idx].riwayatLatihanKuantitatif
-              .where((item) => _dapatkanBoxIndex(item['klasifikasi'].toString()) == bIdx)
-              .map((item) {
-                double pembagi = (item['tipePembagi'] == 'J') ? 15.0 : 25.0;
-                // Menggunakan 'as num' agar aman jika data tersimpan sebagai int atau double
-                return ((item['skor'] ?? 0) as num).toDouble() / pembagi;
-              }).toList();
-
-          if (semuaSkorPilarIni.isNotEmpty) {
-            semuaSkorPilarIni.sort(); // Urutkan data secara statistik
-
-            double min = semuaSkorPilarIni.first;
-            double max = semuaSkorPilarIni.last;
-            
-            int len = semuaSkorPilarIni.length;
-            double median = semuaSkorPilarIni[len ~/ 2];
-            double q1 = semuaSkorPilarIni[(len * 0.25).floor()];
-            double q3 = semuaSkorPilarIni[(len * 0.75).floor().clamp(0, len - 1)];
-            
-            // Nilai paling baru yang diinput Coach saat ini
-            double current = skorGrafik; 
-
-            // ISI TEPAT 6 ANGKA SESUAI KEBUTUHAN WIDGET GRAPH COACH
-            _daftarMurid[idx].boxData[bIdx] = [min, q1, median, current, q3, max];
+          // 1. Ambil data boxData yang sudah ada saat ini di pilar tersebut
+          List<double> dataLama = List<double>.from(_daftarMurid[idx].boxData[bIdx]);
+          
+          // 2. Jika isi pilar tersebut masih nol semua (murid baru), bersihkan dulu list-nya
+          if (dataLama.every((v) => v == 0.0)) {
+            dataLama.clear();
           }
+
+          // 3. Masukkan skor desimal yang baru saja diinput Coach ke dalam kumpulan data
+          dataLama.add(skorGrafik);
+          
+          // 4. Urutkan dari terkecil ke terbesar agar hukum statistikanya valid
+          dataLama.sort();
+
+          // 5. Ekstrak 6 Nilai Statistik Sesuai Kebutuhan Grafik Coach
+          double min = dataLama.first;
+          double max = dataLama.last;
+          double median = dataLama[dataLama.length ~/ 2];
+          double q1 = dataLama[(dataLama.length * 0.25).floor()];
+          double q3 = dataLama[(dataLama.length * 0.75).floor().clamp(0, dataLama.length - 1)];
+          double current = skorGrafik; // Skor terbaru saat ini
+
+          // 6. Kunci kembali ke memori dengan format TEPAT 6 ELEMEN
+          _daftarMurid[idx].boxData[bIdx] = [min, q1, median, current, q3, max];
         }
     });
   //  _simpanKeStorage();
@@ -245,31 +244,27 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
         }
 
         // --- BARIS YANG BERUBAH (BOXPLOT DATA LANGSUNG PAKAI SKOR GRAFIK) ---
-                                        // --- AKUMULASI 6 ELEMEN BOXPLOT (ANTI-HILANG & AKTUAL) ---
+                                                // --- LOGIKA BOXPLOT BARU: LANGSUNG MASUK, ANTI-HILANG ---
         int bIdx = _dapatkanBoxIndex(klas);
         if (bIdx != -1 && bIdx < _daftarMurid[idx].boxData.length) {
           
-          List<double> semuaSkorPilarIni = _daftarMurid[idx].riwayatLatihanDurasi
-              .where((item) => _dapatkanBoxIndex(item['klasifikasi'].toString()) == bIdx)
-              .map((item) {
-                double pembagi = (item['tipePembagi'] == 'J') ? 60.0 : 90.0;
-                return ((item['skor'] ?? 0) as num).toDouble() / pembagi;
-              }).toList();
-
-          if (semuaSkorPilarIni.isNotEmpty) {
-            semuaSkorPilarIni.sort();
-
-            double min = semuaSkorPilarIni.first;
-            double max = semuaSkorPilarIni.last;
-            
-            int len = semuaSkorPilarIni.length;
-            double median = semuaSkorPilarIni[len ~/ 2];
-            double q1 = semuaSkorPilarIni[(len * 0.25).floor()];
-            double q3 = semuaSkorPilarIni[(len * 0.75).floor().clamp(0, len - 1)];
-            double current = skorGrafik;
-
-            _daftarMurid[idx].boxData[bIdx] = [min, q1, median, current, q3, max];
+          List<double> dataLama = List<double>.from(_daftarMurid[idx].boxData[bIdx]);
+          
+          if (dataLama.every((v) => v == 0.0)) {
+            dataLama.clear();
           }
+
+          dataLama.add(skorGrafik);
+          dataLama.sort();
+
+          double min = dataLama.first;
+          double max = dataLama.last;
+          double median = dataLama[dataLama.length ~/ 2];
+          double q1 = dataLama[(dataLama.length * 0.25).floor()];
+          double q3 = dataLama[(dataLama.length * 0.75).floor().clamp(0, dataLama.length - 1)];
+          double current = skorGrafik;
+
+          _daftarMurid[idx].boxData[bIdx] = [min, q1, median, current, q3, max];
         }
 
         _selectedMuridId = id;
