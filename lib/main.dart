@@ -42,6 +42,8 @@ const List<String> kDaftarKlasifikasiLatihan = [
   "BALANCE RECOVERY", "MENTAL TOUGHNESS"
 ];
 
+const List<String> kKlasifksKmampuan = ["STRENGTH" , "ENDURANCE" , "SPEED" , "COORDINATION" , "FLEXIBILITY" , "BALANCE" , "REACTION TIME" , "MUSCULAR ENDURANCE" , "POWER" , "CORE STABILITY" , "DYNAMIC FLEXIBILITY" , "SPEED ENDURANCE" , "REACTIVE SPEED" , "AGILITY" , "ANTICIPATION&SPATIAL AWARENESS" , "MOBILITY" , "OPEN AGILITY" ];
+
 class Murid {
   final String id;
   final String nama;
@@ -847,8 +849,8 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
             DropdownButtonFormField<String>(
               value: _selectedKlasifikasi, 
               dropdownColor: const Color(0xFF1E293B),
-              items: kDaftarKlasifikasiLatihan.map((k) => DropdownMenuItem(value: k, child: Text(k, style: const TextStyle(color: Colors.white)))).toList(),
-              onChanged: (v) => setState(() => _selectedKlasifikasi = v!), decoration: const InputDecoration(labelText: "Klasifikasi Kemampuan", border: OutlineInputBorder()),
+              items: kKlasifksKmampuan.map((k) => DropdownMenuItem(value: k, child: Text(k, style: const TextStyle(color: Colors.white)))).toList(),
+              onChanged: (v) => setState(() => _selectedKlasifikasi = v!), decoration: const InputDecoration(labelText:"BIOMOTORIK", border: OutlineInputBorder()),
             ),
             const SizedBox(height: 12),
             // --- DROPDOWN BARU UNTUK PARAMETER PEMBAGI J / S ---
@@ -933,8 +935,8 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
             DropdownButtonFormField<String>(
               value: _selectedKlasifikasi, 
               dropdownColor: const Color(0xFF1E293B),
-              items: kDaftarKlasifikasiLatihan.map((k) => DropdownMenuItem(value: k, child: Text(k, style: const TextStyle(color: Colors.white)))).toList(),
-              onChanged: (v) => setState(() => _selectedKlasifikasi = v!), decoration: const InputDecoration(labelText: "Klasifikasi Kemampuan", border: OutlineInputBorder()),
+              items: kKlasifksKmampuan.map((k) => DropdownMenuItem(value: k, child: Text(k, style: const TextStyle(color: Colors.white)))).toList(),
+              onChanged: (v) => setState(() => _selectedKlasifikasi = v!), decoration: const InputDecoration(labelText: "BIOMOTORIK", border: OutlineInputBorder()),
             ),
             const SizedBox(height: 12),
             // --- DROPDOWN BARU UNTUK PARAMETER PEMBAGI J / S ---
