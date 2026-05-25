@@ -1,20 +1,16 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+// 1. TAMBAHKAN IMPORT INI
 
-import 'dart:async';
-import 'dart:io';
-import 'dart:convert';
-import 'package:path_provider/path_provider.dart';
-
-
-  
-            
 void main() {
   
 
   runApp(const MyApp());
 
-  }
+
+}
+
+// ... (kode class MyApp dkk tetap sama)
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -23,7 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Papan Performa Member',
+      title: 'Premium Athlete Dashboard',
       theme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF0F172A),
@@ -61,47 +57,8 @@ class Murid {
     List<Map<String, dynamic>>? riwayatLatihanDurasi,
   })  : this.riwayatLatihanKuantitatif = riwayatLatihanKuantitatif ?? [],
         this.riwayatLatihanDurasi = riwayatLatihanDurasi ?? [];
+}
 
-  // --- TAMBAHKAN INI UNTUK MENYIMPAN ---
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'nama': nama,
-    'boxData': boxData,
-    'radarData': radarData,
-    // Kita simpan tanggal sebagai String ISO8601 agar bisa masuk JSON
-    'riwayatKuantitatif': riwayatLatihanKuantitatif.map((e) => {...e, 'tanggal': (e['tanggal'] as DateTime).toIso8601String()}).toList(),
-    'riwayatDurasi': riwayatLatihanDurasi.map((e) => {...e, 'tanggal': (e['tanggal'] as DateTime).toIso8601String()}).toList(),
-  };
-
-  // --- TAMBAHKAN INI UNTUK MEMBACA ---
-    factory Murid.fromJson(Map<String, dynamic> json) {
-    return Murid(
-      id: json['id'],
-      nama: json['nama'],
-      // Perbaikan 1: Paksa list luar menjadi List<List<double>> dan list dalam menjadi List<double>
-      boxData: List<List<double>>.from(
-        (json['boxData'] as List).map(
-          (e) => List<double>.from((e as List).map((v) => v.toDouble())),
-        ),
-      ),
-      // Perbaikan 2: Paksa radarData menjadi List<double> secara eksplisit
-      radarData: List<double>.from(
-        (json['radarData'] as List).map((e) => e.toDouble()),
-      ),
-      riwayatLatihanKuantitatif: List<Map<String, dynamic>>.from(
-        (json['riwayatKuantitatif'] as List).map((e) => {
-          ...e as Map<String, dynamic>,
-          'tanggal': DateTime.parse(e['tanggal']),
-        }),
-      ),
-      riwayatLatihanDurasi: List<Map<String, dynamic>>.from(
-        (json['riwayatDurasi'] as List).map((e) => {
-          ...e as Map<String, dynamic>,
-          'tanggal': DateTime.parse(e['tanggal']),
-        }),
-      ),
-    );
-  }
 class MainNavigationHolder extends StatefulWidget {
   const MainNavigationHolder({Key? key}) : super(key: key);
   @override
@@ -117,39 +74,10 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
   String _searchQuery = "";
   late List<Murid> _daftarMurid;
 
-// 1. Fungsi mendapatkan path file
-Future<File> get _localFile async {
-  final directory = await getApplicationDocumentsDirectory();
-  return File('${directory.path}/data_murid.json');
-}
-
-// 2. Fungsi Menyimpan Data (Panggil setiap kali ada perubahan data)
-Future<void> _simpanKeStorage() async {
-  final file = await _localFile;
-  List<Map<String, dynamic>> jsonList = _daftarMurid.map((m) => m.toJson()).toList();
-  await file.writeAsString(jsonEncode(jsonList));
-}
-
-// 3. Fungsi Memuat Data (Panggil di initState)
-Future<void> _muatDataDariStorage() async {
-  try {
-    final file = await _localFile;
-    if (await file.exists()) {
-      String contents = await file.readAsString();
-      List<dynamic> jsonList = jsonDecode(contents);
-      setState(() {
-        _daftarMurid = jsonList.map((m) => Murid.fromJson(m)).toList();
-      });
-    }
-  } catch (e) {
-    print("Error loading data: $e");
-  }
-}
   @override
   void initState() {
     super.initState();
     _daftarMurid = [];
-    _muatDataDariStorage();
   }
 
   Murid get _currentMurid => _daftarMurid.firstWhere(
@@ -218,7 +146,6 @@ Future<void> _muatDataDariStorage() async {
         _daftarMurid[idx].riwayatLatihanKuantitatif.add({
           'tanggal': tgl, 'jenis': jenis, 'klasifikasi': klas, 'skor': skor, 'isReps': true
         });
-     _simpanKeStorage();
 
         int bIdx = _dapatkanBoxIndex(klas);
         if (bIdx != -1) {
@@ -243,7 +170,7 @@ Future<void> _muatDataDariStorage() async {
         _daftarMurid[idx].riwayatLatihanDurasi.add({
           'tanggal': tgl, 'jenis': jenis, 'klasifikasi': klas, 'skor': skor, 'isReps': false
         });
-     _simpanKeStorage();
+
         int bIdx = _dapatkanBoxIndex(klas);
         if (bIdx != -1) {
           _daftarMurid[idx].boxData[bIdx][3] = skor;
@@ -281,7 +208,6 @@ Future<void> _muatDataDariStorage() async {
             String nextId = (maxId + 1).toString().padLeft(3, '0');
             _daftarMurid.add(Murid(id: nextId, nama: _namaController.text.trim().toUpperCase(), boxData: List.generate(7, (_) => [20, 35, 50, 0, 65, 85]), radarData: List.generate(10, (_) => 0.0)));
           });
-          _simpanKeStorage();
           _namaController.clear();
         },
       ),
@@ -353,13 +279,7 @@ class DashboardAtletPage extends StatelessWidget {
   final List<double> teamRadarAverages;
   final int Function(String) dapatkanBoxIndexFunc;
 
-  const DashboardAtletPage({
-    Key? key, 
-    required this.activeMurid, 
-    required this.teamBoxAverages, 
-    required this.teamRadarAverages, 
-    required this.dapatkanBoxIndexFunc
-  }) : super(key: key);
+  const DashboardAtletPage({Key? key, required this.activeMurid, required this.teamBoxAverages, required this.teamRadarAverages, required this.dapatkanBoxIndexFunc}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -382,7 +302,7 @@ class DashboardAtletPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    'PAPAN PERFORMA KOMPREHENSIF',
+                    'COMPREHENSIVE PERFORMANCE DASHBOARD',
                     style: TextStyle(
                       color: Colors.blueGrey[300],
                       fontSize: 11,
@@ -555,90 +475,78 @@ class DashboardAtletPage extends StatelessWidget {
     );
   }
 
-  // NAMA METHOD DISESUAIKAN MENJADI_analisisKomplet40Pola AGAR COCOK DENGAN PANGGILAN DI TABLE
-  Map<String, String> _analisisKomplet40Pola(int idx, String namaKomponen) {
-    if (idx >= activeMurid.boxData.length || activeMurid.boxData[idx].length < 6) {
-      return {"pola": "-", "arti": "Data fungsional belum lengkap."};
-    }
+    Map<String, String> _analisisKomplet40Pola(int idx, String namaKomponen) {
+    bool adaDataInput = activeMurid.riwayatLatihanKuantitatif.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == idx) ||
+                        activeMurid.riwayatLatihanDurasi.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == idx) ||
+                        (activeMurid.boxData[idx][3] > 0)[span_3](start_span);
 
-    final List<double> data = activeMurid.boxData[idx];
-    double min = data[0]; 
-    double q1 = data[1]; 
-    double q2 = data[2]; 
-    double q3 = data[4]; // Sesuai indeks data Coach
-    double max = data[5];
+    if (!adaDataInput || idx >= activeMurid.boxData.length) {[span_3](end_span)
+      [span_4](start_span)return {"pola": "Belum Ada Data", "arti": "Menunggu input performa fungsional dari latihan."};[span_4](end_span)
+    [span_5](start_span)}
 
-    double dLower = q2 - q1; 
-    double dUpper = q3 - q2; 
-    double iqr = q3 - q1; 
-    double wLower = q1 - min; 
-    double wUpper = max - q3;
+    final List<double> data = activeMurid.boxData[idx];[span_5](end_span)
+    [span_6](start_span)double min = data[0]; double q1 = data[1]; double q2 = data[2]; double q3 = data[4]; double max = data[5];[span_6](end_span)
+    [span_7](start_span)double dLower = q2 - q1; double dUpper = q3 - q2; double iqr = q3 - q1; double wLower = q1 - min; double wUpper = max - q3;[span_7](end_span)
 
-    String skew = ""; 
-    String kurtosis = "";
+    String skew = ""; [span_8](start_span)String kurtosis = "";[span_8](end_span)
 
     // 1. PENENTUAN BENTUK KEMIRINGAN (SKEWNESS)
-    if ((dUpper - dLower).abs() <= 2.0 && (wUpper - wLower).abs() <= 3.0) {
-      skew = "Symmetrical";
-    } else if (dUpper > dLower && wUpper > wLower) {
-      skew = "Extremely Skewed Right";
-    } else if (dUpper > dLower) {
-      skew = "Mildly Skewed Right";
-    } else if (dLower > dUpper && wLower > wUpper) {
-      skew = "Extremely Skewed Left";
-    } else {
-      skew = "Mildly Skewed Left";
-    }
+    [span_9](start_span)if ((dUpper - dLower).abs() <= 2.0 && (wUpper - wLower).abs() <= 3.0) skew = "Symmetrical";[span_9](end_span)
+    [span_10](start_span)else if (dUpper > dLower && wUpper > wLower) skew = "Extremely Skewed Right";[span_10](end_span)
+    [span_11](start_span)else if (dUpper > dLower) skew = "Mildly Skewed Right";[span_11](end_span)
+    [span_12](start_span)else if (dLower > dUpper && wLower > wUpper) skew = "Extremely Skewed Left";[span_12](end_span)
+    [span_13](start_span)else skew = "Mildly Skewed Left";[span_13](end_span)
 
     // 2. PENENTUAN BENTUK KERAPATAN (KURTOSIS)
-    if (iqr < 10) {
-      kurtosis = "Leptokurtic (Narrow)";
-    } else if (iqr > 38) {
-      kurtosis = "Platykurtic (Wide)";
-    } else {
-      kurtosis = "Mesokurtic (Optimal)";
-    }
+    [span_14](start_span)if (iqr < 10) kurtosis = "Leptokurtic (Narrow)";[span_14](end_span)
+    [span_15](start_span)else if (iqr > 38) kurtosis = "Platykurtic (Wide)";[span_15](end_span)
+    [span_16](start_span)else kurtosis = "Mesokurtic (Optimal)";[span_16](end_span)
 
-    // 3. LOGIKA SPORT SCIENCE
+    // 3. OTAK ANALISIS SPORT SCIENCE (15 KOMBINASI POLA KINERJA)
     String artiFisik = "";
+
     if (skew == "Symmetrical") {
       if (kurtosis == "Mesokurtic (Optimal)") {
         artiFisik = "Kondisi Peak Performance. Distribusi energi ideal & stabil.";
       } else if (kurtosis == "Leptokurtic (Narrow)") {
-        artiFisik = "Stagnan/Plato. Konsisten, tapi butuh variasi beban baru.";
-      } else {
+        artiFisik = "Stagnan/Plato. Konsisten, tapi butuh kejutan variasi beban baru.";
+      } else { // Platykurtic (Wide)
         artiFisik = "Performa labil. Kadang sangat bagus, kadang drop. Fokus repetisi dasar.";
       }
-    } else if (skew == "Mildly Skewed Right") {
+    } 
+    else if (skew == "Mildly Skewed Right") {
       if (kurtosis == "Mesokurtic (Optimal)") {
         artiFisik = "Fase adaptasi positif. Otot merespons program latihan dengan baik.";
       } else if (kurtosis == "Leptokurtic (Narrow)") {
         artiFisik = "Perkembangan lambat tapi pasti. Pertahankan volume latihan sirkuit.";
-      } else { 
+      } else { // Platykurtic (Wide)
         artiFisik = "Adaptasi tak merata. Ada potensi, tapi teknik eksekusi masih goyah.";
       }
-    } else if (skew == "Extremely Skewed Right") {
+    }
+    else if (skew == "Extremely Skewed Right") {
       if (kurtosis == "Mesokurtic (Optimal)") {
         artiFisik = "Potensi lonjakan daya. Jaga waktu recovery agar tidak overtraining.";
       } else if (kurtosis == "Leptokurtic (Narrow)") {
         artiFisik = "Bakat terpendam di area ini. Dorong limit perlahan saat tes fungsional.";
-      } else { 
+      } else { // Platykurtic (Wide)
         artiFisik = "Hasil anomali. Evaluasi apakah form/postur gerakan sudah sesuai standar.";
       }
-    } else if (skew == "Mildly Skewed Left") {
+    }
+    else if (skew == "Mildly Skewed Left") {
       if (kurtosis == "Mesokurtic (Optimal)") {
         artiFisik = "Tanda awal kelelahan. Kapasitas ada, tapi eksekusi mulai terasa berat.";
       } else if (kurtosis == "Leptokurtic (Narrow)") {
         artiFisik = "Kapasitas terkunci di bawah rata-rata. Perlu drilling teknik perbaikan.";
-      } else { 
+      } else { // Platykurtic (Wide)
         artiFisik = "Inkonsistensi akibat fatigue ringan. Kurangi durasi, tingkatkan presisi.";
       }
-    } else if (skew == "Extremely Skewed Left") {
+    }
+    else if (skew == "Extremely Skewed Left") {
       if (kurtosis == "Mesokurtic (Optimal)") {
         artiFisik = "Kelelahan saraf pusat (CNS Fatigue). Segera turunkan beban (Deloading)!";
       } else if (kurtosis == "Leptokurtic (Narrow)") {
         artiFisik = "Titik lemah fatal. Wajib remedial & intervensi program biomekanik spesifik.";
-      } else { 
+      } else { // Platykurtic (Wide)
         artiFisik = "Drop performa drastis. Periksa faktor luar (sakit, stres, kurang tidur).";
       }
     }
@@ -646,12 +554,27 @@ class DashboardAtletPage extends StatelessWidget {
     return {"pola": "$skew\n($kurtosis)", "arti": artiFisik};
   }
 
-  TableRow _buildEvaluasiRow(String namaKomponen, String tipeGrafik, int dataIdx) {
-    bool diAtasRataTim = false; 
-    bool belumAdaData = true; 
-    String labelPola = "-"; 
-    String labelArti = "-";
 
+    final List<double> data = activeMurid.boxData[idx];
+    double min = data[0]; double q1 = data[1]; double q2 = data[2]; double q3 = data[4]; double max = data[5];
+    double dLower = q2 - q1; double dUpper = q3 - q2; double iqr = q3 - q1; double wLower = q1 - min; double wUpper = max - q3;
+
+    String skew = ""; String kurtosis = "";
+    if ((dUpper - dLower).abs() <= 2.0 && (wUpper - wLower).abs() <= 3.0) skew = "Symmetrical";
+    else if (dUpper > dLower && wUpper > wLower) skew = "Extremely Skewed Right";
+    else if (dUpper > dLower) skew = "Mildly Skewed Right";
+    else if (dLower > dUpper && wLower > wUpper) skew = "Extremely Skewed Left";
+    else skew = "Mildly Skewed Left";
+
+    if (iqr < 10) kurtosis = "Leptokurtic (Narrow)";
+    else if (iqr > 38) kurtosis = "Platykurtic (Wide)";
+    else kurtosis = "Mesokurtic (Optimal)";
+
+    return {"pola": "$skew - $kurtosis", "arti": "Kombinasi adaptasi sirkuit & fluktuatif atlet fisik."};
+  }
+
+  TableRow _buildEvaluasiRow(String namaKomponen, String tipeGrafik, int dataIdx) {
+    bool diAtasRataTim = false; bool belumAdaData = true; String labelPola = "-"; String labelArti = "-";
     bool adaDataDiInput = activeMurid.riwayatLatihanKuantitatif.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == dataIdx) ||
                         activeMurid.riwayatLatihanDurasi.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == dataIdx) ||
                         (tipeGrafik == "BOXPLOT" && dataIdx < activeMurid.boxData.length && activeMurid.boxData[dataIdx][3] > 0) ||
@@ -659,8 +582,7 @@ class DashboardAtletPage extends StatelessWidget {
 
     if (tipeGrafik == "BOXPLOT") {
       Map<String, String> hasilPola = _analisisKomplet40Pola(dataIdx, namaKomponen);
-      labelPola = hasilPola["pola"]!; 
-      labelArti = hasilPola["arti"]!;
+      labelPola = hasilPola["pola"]!; labelArti = hasilPola["arti"]!;
       if (adaDataDiInput && dataIdx < activeMurid.boxData.length) {
         belumAdaData = false;
         diAtasRataTim = activeMurid.boxData[dataIdx][3] >= (dataIdx < teamBoxAverages.length ? teamBoxAverages[dataIdx] : 0.0);
@@ -679,6 +601,7 @@ class DashboardAtletPage extends StatelessWidget {
     return TableRow(
       children: [
         Padding(padding: const EdgeInsets.all(8.0), child: Text(namaKomponen, style: const TextStyle(color: Colors.white, fontSize: 8.5, fontWeight: FontWeight.bold))),
+        // DI SINI PERBAIKANNYA: Mengubah Colors.white20 menjadi const Color(0x33FFFFFF)
         Padding(padding: const EdgeInsets.all(8.0), child: Text(labelPola, style: TextStyle(color: belumAdaData ? const Color(0x33FFFFFF) : Colors.amber[400], fontSize: 8))),
         Padding(padding: const EdgeInsets.all(8.0), child: Text(labelArti, style: TextStyle(color: belumAdaData ? const Color(0x33FFFFFF) : const Color(0xFF34D399), fontSize: 8))),
         Padding(padding: const EdgeInsets.all(8.0), child: Text(kelebihanText, style: const TextStyle(fontSize: 8.5, color: Colors.white70))),
@@ -898,7 +821,7 @@ class _InputLatihanKuantitatifPageState extends State<InputLatihanKuantitatifPag
                   _jenisController.clear(); _repsController.clear(); _setsController.clear();
                 }
               },
-              child: const Text("SIMPAN PERFORMA REPS", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+              child: const Text("SIMPAN PERFORMANCE DATA", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
             ))
           ]),
         ),
@@ -974,7 +897,7 @@ class _InputLatihanDurasiPageState extends State<InputLatihanDurasiPage> {
                   _jenisController.clear(); _menitController.clear(); _detikController.clear(); _setsController.clear();
                 }
               },
-              child: const Text("SIMPAN PERFORMA WAKTU", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+              child: const Text("SIMPAN PERFORMANCE DATA", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
             ))
           ]),
         ),
@@ -1113,12 +1036,12 @@ class MetaRadarChartPainter extends CustomPainter {
     }
 
     // --- TEMPATKAN KODE LABEL RADAR DI SINI ---
-    final List<String> labels = ["MUSC END", "POWER", "CORE STAB", "DYNAMIC FLEX", "SPEED END", "REACTIVE SPEED", "AGILITY", "ASA/FightIQ", "MOBILITY", "REAKSI LINCAH"];
+    final List<String> labels = ["MUSCULAR ENDURANCE", "POWER", "CORE STABILITY", "DYNAMIC FLEXIBILITY", "SPEED ENDURANCE", "REACTIVE SPEED", "AGILITY", "ANTICIPATION & SPATIAL AWARENESS", "MOBILITY", "OPEN/REACTIVE AGILITY"];
     for (int j = 0; j < kDimensi; j++) {
       double angle = (j * 2 * math.pi / kDimensi) - (math.pi / 2);
       Offset labelPos = Offset(
-        center.dx + (maxRadius + 15) * math.cos(angle), 
-        center.dy + (maxRadius + 15) * math.sin(angle)
+        center.dx + (maxRadius + 20) * math.cos(angle), 
+        center.dy + (maxRadius + 20) * math.sin(angle)
       );
       final txt = TextPainter(
         text: TextSpan(text: labels[j], style: const TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold)),
