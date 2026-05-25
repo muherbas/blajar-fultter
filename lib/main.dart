@@ -183,7 +183,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
         }
 
         // --- BARIS YANG BERUBAH (BOXPLOT DATA LANGSUNG PAKAI SKOR GRAFIK) ---
-                                // --- PROSES AKUMULASI BOXPLOT ANTI-ERROR ---
+                                                // --- AKUMULASI 6 ELEMEN BOXPLOT (ANTI-HILANG & AKTUAL) ---
         int bIdx = _dapatkanBoxIndex(klas);
         if (bIdx != -1 && bIdx < _daftarMurid[idx].boxData.length) {
           
@@ -191,7 +191,8 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
               .where((item) => _dapatkanBoxIndex(item['klasifikasi'].toString()) == bIdx)
               .map((item) {
                 double pembagi = (item['tipePembagi'] == 'J') ? 15.0 : 25.0;
-                return (item['skor'] as double) / pembagi;
+                // Menggunakan 'as num' agar aman jika data tersimpan sebagai int atau double
+                return ((item['skor'] ?? 0) as num).toDouble() / pembagi;
               }).toList();
 
           if (semuaSkorPilarIni.isNotEmpty) {
@@ -200,17 +201,18 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
             double min = semuaSkorPilarIni.first;
             double max = semuaSkorPilarIni.last;
             
-            // Perbaikan Logika Kuartil: Menggunakan pendekatan persentase posisi agar ANTI-ERROR
             int len = semuaSkorPilarIni.length;
-            double q1 = semuaSkorPilarIni[(len * 0.25).floor().clamp(0, len - 1)];
+            double median = semuaSkorPilarIni[len ~/ 2];
+            double q1 = semuaSkorPilarIni[(len * 0.25).floor()];
             double q3 = semuaSkorPilarIni[(len * 0.75).floor().clamp(0, len - 1)];
+            
+            // Nilai paling baru yang diinput Coach saat ini
+            double current = skorGrafik; 
 
-            // Masukkan ke Boxplot murid secara utuh 4 komponen
-            _daftarMurid[idx].boxData[bIdx] = [min, q1, q3, max];
+            // ISI TEPAT 6 ANGKA SESUAI KEBUTUHAN WIDGET GRAPH COACH
+            _daftarMurid[idx].boxData[bIdx] = [min, q1, median, current, q3, max];
           }
         }
-        _selectedMuridId = id;
-      }
     });
   //  _simpanKeStorage();
   }
@@ -243,7 +245,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
         }
 
         // --- BARIS YANG BERUBAH (BOXPLOT DATA LANGSUNG PAKAI SKOR GRAFIK) ---
-                                // --- PROSES AKUMULASI BOXPLOT ANTI-ERROR ---
+                                        // --- AKUMULASI 6 ELEMEN BOXPLOT (ANTI-HILANG & AKTUAL) ---
         int bIdx = _dapatkanBoxIndex(klas);
         if (bIdx != -1 && bIdx < _daftarMurid[idx].boxData.length) {
           
@@ -251,19 +253,22 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
               .where((item) => _dapatkanBoxIndex(item['klasifikasi'].toString()) == bIdx)
               .map((item) {
                 double pembagi = (item['tipePembagi'] == 'J') ? 60.0 : 90.0;
-                return (item['skor'] as double) / pembagi;
+                return ((item['skor'] ?? 0) as num).toDouble() / pembagi;
               }).toList();
 
           if (semuaSkorPilarIni.isNotEmpty) {
             semuaSkorPilarIni.sort();
 
-            int len = semuaSkorPilarIni.length;
             double min = semuaSkorPilarIni.first;
             double max = semuaSkorPilarIni.last;
-            double q1 = semuaSkorPilarIni[(len * 0.25).floor().clamp(0, len - 1)];
+            
+            int len = semuaSkorPilarIni.length;
+            double median = semuaSkorPilarIni[len ~/ 2];
+            double q1 = semuaSkorPilarIni[(len * 0.25).floor()];
             double q3 = semuaSkorPilarIni[(len * 0.75).floor().clamp(0, len - 1)];
+            double current = skorGrafik;
 
-            _daftarMurid[idx].boxData[bIdx] = [min, q1, q3, max];
+            _daftarMurid[idx].boxData[bIdx] = [min, q1, median, current, q3, max];
           }
         }
 
