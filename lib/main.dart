@@ -137,62 +137,82 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     return -1;
   }
 
-    void _simpanDataKuantitatif(String id, String jenis, String klas, double reps, double sets, String tipePembagi, DateTime tgl) {
+      void _simpanDataKuantitatif(String id, String jenis, String klas, double reps, double sets, String tipePembagi, DateTime tgl) {
     setState(() {
       int idx = _daftarMurid.indexWhere((m) => m.id == id);
       if (idx != -1) {
-        // Penentuan nilai pembagi berdasarkan opsi J atau S
         double pembagi = (tipePembagi == 'J') ? 15.0 : 25.0;
-        // Rumus Coach dikali 100 agar sinkron dengan skala 0-100 pada grafik
-        double skor = ((reps * sets) / pembagi) * 100;
+        
+        // --- BARIS YANG BERUBAH (DASHBOARD TANPA * 100) ---
+        double skorGrafik = (reps * sets) / pembagi; 
+
+        // --- BARIS YANG BERUBAH (RIWAYAT MURNI REPS * SETS) ---
+        double volumeHistory = reps * sets;
 
         _daftarMurid[idx].riwayatLatihanKuantitatif.add({
-          'tanggal': tgl, 'jenis': jenis, 'klasifikasi': klas, 'skor': skor, 'isReps': true, 'tipePembagi': tipePembagi
+          'tanggal': tgl, 
+          'jenis': jenis, 
+          'klasifikasi': klas, 
+          'skor': volumeHistory, // Masuk ke riwayat murni reps * sets
+          'isReps': true, 
+          'tipePembagi': tipePembagi
         });
 
-        int bIdx = _dapatkanBoxIndex(klas);
-        if (bIdx != -1) {
-          _daftarMurid[idx].boxData[bIdx][3] = skor;
-          _daftarMurid[idx].radarData[bIdx] = (skor / 100).clamp(0.0, 1.0);
-        } else {
-          double normalisasi = (skor / 100).clamp(0.0, 1.0);
-          if (klas.contains("AGILITY") && !klas.contains("OPEN")) _daftarMurid[idx].radarData[8] = normalisasi;
-          if (klas.contains("MOBILITY")) _daftarMurid[idx].radarData[9] = normalisasi;
-          if (klas.contains("OPEN")) _daftarMurid[idx].radarData[2] = normalisasi;
+        // --- BARIS YANG BERUBAH (RADAR DATA LANGSUNG PAKAI SKOR GRAFIK) ---
+        int rIdx = _dapatkanRadarIndex(klas);
+        if (rIdx != -1 && rIdx < _daftarMurid[idx].radarData.length) {
+          _daftarMurid[idx].radarData[rIdx] = skorGrafik.clamp(0.0, 1.0); // Tanpa dibagi 100 lagi
         }
+
+        // --- BARIS YANG BERUBAH (BOXPLOT DATA LANGSUNG PAKAI SKOR GRAFIK) ---
+        int bIdx = _dapatkanBoxIndex(klas);
+        if (bIdx != -1 && bIdx < _daftarMurid[idx].boxData.length) {
+          _daftarMurid[idx].boxData[bIdx][3] = skorGrafik; // Tanpa dikali 100
+        }
+
         _selectedMuridId = id;
       }
     });
-   // _simpanKeStorage(); // Otomatis mengamankan data ke lokal storage
+  //  _simpanKeStorage();
   }
 
-  void _simpanDataDurasi(String id, String jenis, String klas, double waktu, double sets, String tipePembagi, DateTime tgl) {
+    void _simpanDataDurasi(String id, String jenis, String klas, double waktu, double sets, String tipePembagi, DateTime tgl) {
     setState(() {
       int idx = _daftarMurid.indexWhere((m) => m.id == id);
       if (idx != -1) {
-        // Penentuan nilai pembagi berdasarkan opsi J atau S (60 detik atau 90 detik)
         double pembagi = (tipePembagi == 'J') ? 60.0 : 90.0;
-        // Rumus Coach dikali 100 agar sinkron dengan skala 0-100 pada grafik
-        double skor = ((waktu * sets) / pembagi) * 100;
+        
+        // --- BARIS YANG BERUBAH (DASHBOARD TANPA * 100) ---
+        double skorGrafik = (waktu * sets) / pembagi;
+
+        // --- BARIS YANG BERUBAH (RIWAYAT MURNI DETIK * SETS) ---
+        double volumeHistory = waktu * sets;
 
         _daftarMurid[idx].riwayatLatihanDurasi.add({
-          'tanggal': tgl, 'jenis': jenis, 'klasifikasi': klas, 'skor': skor, 'isReps': false, 'tipePembagi': tipePembagi
+          'tanggal': tgl, 
+          'jenis': jenis, 
+          'klasifikasi': klas, 
+          'skor': volumeHistory, // Masuk ke riwayat murni detik * sets
+          'isReps': false, 
+          'tipePembagi': tipePembagi
         });
 
-        int bIdx = _dapatkanBoxIndex(klas);
-        if (bIdx != -1) {
-          _daftarMurid[idx].boxData[bIdx][3] = skor;
-          _daftarMurid[idx].radarData[bIdx] = (skor / 100).clamp(0.0, 1.0);
-        } else {
-          double normalisasi = (skor / 100).clamp(0.0, 1.0);
-          if (klas.contains("AGILITY") && !klas.contains("OPEN")) _daftarMurid[idx].radarData[8] = normalisasi;
-          if (klas.contains("MOBILITY")) _daftarMurid[idx].radarData[9] = normalisasi;
-          if (klas.contains("OPEN")) _daftarMurid[idx].radarData[2] = normalisasi;
+        // --- BARIS YANG BERUBAH (RADAR DATA LANGSUNG PAKAI SKOR GRAFIK) ---
+        int rIdx = _dapatkanRadarIndex(klas);
+        if (rIdx != -1 && rIdx < _daftarMurid[idx].radarData.length) {
+          _daftarMurid[idx].radarData[rIdx] = skorGrafik.clamp(0.0, 1.0); // Tanpa dibagi 100 lagi
         }
+
+        // --- BARIS YANG BERUBAH (BOXPLOT DATA LANGSUNG PAKAI SKOR GRAFIK) ---
+        int bIdx = _dapatkanBoxIndex(klas);
+        if (bIdx != -1 && bIdx < _daftarMurid[idx].boxData.length) {
+          _daftarMurid[idx].boxData[bIdx][3] = skorGrafik; // Tanpa dikali 100
+        }
+
         _selectedMuridId = id;
       }
     });
-  //  _simpanKeStorage(); // Otomatis mengamankan data ke lokal storage
+  //  _simpanKeStorage();
   }
 
   @override
