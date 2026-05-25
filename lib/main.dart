@@ -137,13 +137,17 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     return -1;
   }
 
-  void _simpanDataKuantitatif(String id, String jenis, String klas, double reps, double sets, DateTime tgl) {
+    void _simpanDataKuantitatif(String id, String jenis, String klas, double reps, double sets, String tipePembagi, DateTime tgl) {
     setState(() {
       int idx = _daftarMurid.indexWhere((m) => m.id == id);
       if (idx != -1) {
-        double skor = reps * sets;
+        // Penentuan nilai pembagi berdasarkan opsi J atau S
+        double pembagi = (tipePembagi == 'J') ? 15.0 : 25.0;
+        // Rumus Coach dikali 100 agar sinkron dengan skala 0-100 pada grafik
+        double skor = ((reps * sets) / pembagi) * 100;
+
         _daftarMurid[idx].riwayatLatihanKuantitatif.add({
-          'tanggal': tgl, 'jenis': jenis, 'klasifikasi': klas, 'skor': skor, 'isReps': true
+          'tanggal': tgl, 'jenis': jenis, 'klasifikasi': klas, 'skor': skor, 'isReps': true, 'tipePembagi': tipePembagi
         });
 
         int bIdx = _dapatkanBoxIndex(klas);
@@ -159,15 +163,20 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
         _selectedMuridId = id;
       }
     });
+    _simpanKeStorage(); // Otomatis mengamankan data ke lokal storage
   }
 
-  void _simpanDataDurasi(String id, String jenis, String klas, double waktu, double sets, DateTime tgl) {
+  void _simpanDataDurasi(String id, String jenis, String klas, double waktu, double sets, String tipePembagi, DateTime tgl) {
     setState(() {
       int idx = _daftarMurid.indexWhere((m) => m.id == id);
       if (idx != -1) {
-        double skor = waktu * sets;
+        // Penentuan nilai pembagi berdasarkan opsi J atau S (60 detik atau 90 detik)
+        double pembagi = (tipePembagi == 'J') ? 60.0 : 90.0;
+        // Rumus Coach dikali 100 agar sinkron dengan skala 0-100 pada grafik
+        double skor = ((waktu * sets) / pembagi) * 100;
+
         _daftarMurid[idx].riwayatLatihanDurasi.add({
-          'tanggal': tgl, 'jenis': jenis, 'klasifikasi': klas, 'skor': skor, 'isReps': false
+          'tanggal': tgl, 'jenis': jenis, 'klasifikasi': klas, 'skor': skor, 'isReps': false, 'tipePembagi': tipePembagi
         });
 
         int bIdx = _dapatkanBoxIndex(klas);
@@ -183,6 +192,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
         _selectedMuridId = id;
       }
     });
+    _simpanKeStorage(); // Otomatis mengamankan data ke lokal storage
   }
 
   @override
