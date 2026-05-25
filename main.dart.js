@@ -78105,7 +78105,7 @@ if(p!=null&&p>r)r=p}o=B.d.km(B.h.k(r+1),3,"0")
 k=l.y
 l=B.d.lG(l.r.a.a)
 n=J.ia(7,t.Ly)
-for(s=t.v,q=0;q<7;++q)n[q]=A.b([20,35,50,0,65,85],s)
+for(s=t.v,q=0;q<7;++q)n[q]=A.b([0,0,0,0,0,0],s)
 m=J.ia(10,t.i)
 for(q=0;q<10;++q)m[q]=0
 k.push(A.alv(n,o,l.toUpperCase(),m))},
