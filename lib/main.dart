@@ -253,7 +253,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
               if (cId != null && cId > maxId) maxId = cId;
             }
             String nextId = (maxId + 1).toString().padLeft(3, '0');
-            _daftarMurid.add(Murid(id: nextId, nama: _namaController.text.trim().toUpperCase(), boxData: List.generate(7, (_) => [20, 35, 50, 0, 65, 85]), radarData: List.generate(10, (_) => 0.0)));
+            _daftarMurid.add(Murid(id: nextId, nama: _namaController.text.trim().toUpperCase(), boxData: List.generate(7, (_) => [0, 0, 0, 0, 0, 0]), radarData: List.generate(10, (_) => 0.0)));
           });
           _namaController.clear();
         },
