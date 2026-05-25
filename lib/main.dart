@@ -1,89 +1,17 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
-// 1. TAMBAHKAN IMPORT INI
-import 'package:flutter_native_splash/flutter_native_splash.dart'; 
+
 import 'dart:async';
 
-// ==========================================
-// 1. SEMUA CLASS DI TARUH DI ATAS
-// ==========================================
 
-class AdaptiveSplashScreen extends StatefulWidget {
-  const AdaptiveSplashScreen({Key? key}) : super(key: key);
-
-  @override
-  State<AdaptiveSplashScreen> createState() => _AdaptiveSplashScreenState();
-}
-
-class _AdaptiveSplashScreenState extends State<AdaptiveSplashScreen> {
-  @override
-  void initState() {
-    super.initState();
-    // Setelah 3 detik, otomatis pindah ke halaman navigasi utama Anda
-    Timer(const Duration(seconds: 3), () {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const MainNavigationHolder()),
-      );
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-
-    return Scaffold(
-      backgroundColor: const Color(0xFF0F172A), // Menyesuaikan warna background tema gelap Anda
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center, // Membuat semua konten tetap di tengah layar
-          children: [
-            // 1. TULISAN DI ATAS GAMBAR
-            const Text(
-              'dibuat oleh Heru Wingchun Hapki!!!',
-              style: TextStyle(
-                fontSize: 16,               // Ukuran huruf tulisan
-                fontWeight: FontWeight.bold, // Membuat tulisan tebal
-                color: Colors.white,        // Warna tulisan (bisa diganti)
-                fontFamily: 'Roboto',       // Mengikuti font aplikasi Anda
-              ),
-            ),
-
-            // 2. JARAK ANTARA TULISAN DAN GAMBAR
-            const SizedBox(height: 24), // Naikkan angka ini jika ingin jaraknya lebih jauh
-
-            // 3. GAMBAR SPLASH SCREEN (70% Layar)
-            SizedBox(
-              width: screenWidth * 0.70, 
-              child: Image.asset(
-                'assets/splash.png',
-                fit: BoxFit.contain, 
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-
-// ==========================================
-// 2. VOID MAIN() DI TARUH DI PALING BAWAH
-// ==========================================
+  
+            
 void main() {
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-
+  
 
   runApp(const MyApp());
 
-  // 3. HAPUS SPLASH SCREEN SETELAH 2 DETIK
-  Future.delayed(const Duration(seconds: 2), () {
-    FlutterNativeSplash.remove();
-  });
-}
-
-// ... (kode class MyApp dkk tetap sama)
+  
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
