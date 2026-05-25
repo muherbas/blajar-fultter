@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
 const List<String> kDaftarKlasifikasiLatihan = [
   "STRENGTH", "ENDURANCE", "SPEED", "COORDINATION", "FLEXIBILITY", "BALANCE", "REACTION TIME", 
   "POWER", "AGILITY", "MOBILITY", "MUSCULAR ENDURANCE", "CORE STABILITY", "DYNAMIC FLEXIBILITY", 
-  "SPEED ENDURANCE", "REACTIVE SPEED / QUICKNESS", "ANTICIPATION", "SPATIAL AWARENESS", 
+  "SPEED ENDURANCE", "REACTIVE SPEED / QUICKNESS","ANTICIPATION&SPATIAL AWARENESS", "ANTICIPATION","SPATIAL AWARENESS", 
   "OPEN AGILITY", "EXPLOSIVE STRENGTH", "STRENGTH ENDURANCE", "RATE OF FORCE DEVELOPMENT", 
   "DECELERATION ABILITY", "CHANGE OF DIRECTION", "NEURAL DRIVE", "ISO-STRENGTH", 
   "ECCENTRIC STRENGTH", "FLEXIBILITY-STRENGTH BALANCE", "CORE ROTATIONAL POWER", 
@@ -135,6 +135,22 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     if (upper == "BALANCE") return 5;
     if (upper == "REACTION TIME" || upper == "REACTIVE SPEED / QUICKNESS") return 6;
     return -1;
+  }
+  // --- TAMBAHKAN FUNGSI INI DI DALAM _MainNavigationHolderState ---
+  int _dapatkanRadarIndex(String klasifikasi) {
+    switch (klasifikasi.toUpperCase()) {
+      case "MUSCULAR ENDURANCE": return 0;
+      case "POWER": return 1;
+      case "CORE STABILITY": return 2;
+      case "DYNAMIC FLEXIBILITY": return 3;
+      case "SPEED ENDURANCE": return 4;
+      case "REACTIVE SPEED": return 5;
+      case "AGILITY": return 6;
+      case "ANTICIPATION&SPATIAL AWARENESS": return 7;
+      case "MOBILITY": return 8;
+      case "OPEN AGILITY": return 9;
+      default: return -1;
+    }
   }
 
       void _simpanDataKuantitatif(String id, String jenis, String klas, double reps, double sets, String tipePembagi, DateTime tgl) {
