@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 import 'dart:async';
+import 'dart:io';
+import 'dart:convert';
+import 'package:path_provider/path_provider.dart';
 
 
   
@@ -58,6 +61,35 @@ class Murid {
     List<Map<String, dynamic>>? riwayatLatihanDurasi,
   })  : this.riwayatLatihanKuantitatif = riwayatLatihanKuantitatif ?? [],
         this.riwayatLatihanDurasi = riwayatLatihanDurasi ?? [];
+
+  // --- TAMBAHKAN INI UNTUK MENYIMPAN ---
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'nama': nama,
+    'boxData': boxData,
+    'radarData': radarData,
+    // Kita simpan tanggal sebagai String ISO8601 agar bisa masuk JSON
+    'riwayatKuantitatif': riwayatLatihanKuantitatif.map((e) => {...e, 'tanggal': (e['tanggal'] as DateTime).toIso8601String()}).toList(),
+    'riwayatDurasi': riwayatLatihanDurasi.map((e) => {...e, 'tanggal': (e['tanggal'] as DateTime).toIso8601String()}).toList(),
+  };
+
+  // --- TAMBAHKAN INI UNTUK MEMBACA ---
+  factory Murid.fromJson(Map<String, dynamic> json) {
+    return Murid(
+      id: json['id'],
+      nama: json['nama'],
+      boxData: (json['boxData'] as List).map((e) => (e as List).map((v) => v.toDouble()).toList()).toList(),
+      radarData: (json['radarData'] as List).map((e) => e.toDouble()).toList(),
+      riwayatLatihanKuantitatif: (json['riwayatKuantitatif'] as List).map((e) => {
+        ...e as Map<String, dynamic>,
+        'tanggal': DateTime.parse(e['tanggal']),
+      }).toList(),
+      riwayatLatihanDurasi: (json['riwayatDurasi'] as List).map((e) => {
+        ...e as Map<String, dynamic>,
+        'tanggal': DateTime.parse(e['tanggal']),
+      }).toList(),
+    );
+  }
 }
 
 class MainNavigationHolder extends StatefulWidget {
@@ -75,10 +107,39 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
   String _searchQuery = "";
   late List<Murid> _daftarMurid;
 
+// 1. Fungsi mendapatkan path file
+Future<File> get _localFile async {
+  final directory = await getApplicationDocumentsDirectory();
+  return File('${directory.path}/data_murid.json');
+}
+
+// 2. Fungsi Menyimpan Data (Panggil setiap kali ada perubahan data)
+Future<void> _simpanKeStorage() async {
+  final file = await _localFile;
+  List<Map<String, dynamic>> jsonList = _daftarMurid.map((m) => m.toJson()).toList();
+  await file.writeAsString(jsonEncode(jsonList));
+}
+
+// 3. Fungsi Memuat Data (Panggil di initState)
+Future<void> _muatDataDariStorage() async {
+  try {
+    final file = await _localFile;
+    if (await file.exists()) {
+      String contents = await file.readAsString();
+      List<dynamic> jsonList = jsonDecode(contents);
+      setState(() {
+        _daftarMurid = jsonList.map((m) => Murid.fromJson(m)).toList();
+      });
+    }
+  } catch (e) {
+    print("Error loading data: $e");
+  }
+}
   @override
   void initState() {
     super.initState();
     _daftarMurid = [];
+    _muatDataDariStorage();
   }
 
   Murid get _currentMurid => _daftarMurid.firstWhere(
@@ -147,6 +208,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
         _daftarMurid[idx].riwayatLatihanKuantitatif.add({
           'tanggal': tgl, 'jenis': jenis, 'klasifikasi': klas, 'skor': skor, 'isReps': true
         });
+     _simpanKeStorage();
 
         int bIdx = _dapatkanBoxIndex(klas);
         if (bIdx != -1) {
@@ -171,7 +233,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
         _daftarMurid[idx].riwayatLatihanDurasi.add({
           'tanggal': tgl, 'jenis': jenis, 'klasifikasi': klas, 'skor': skor, 'isReps': false
         });
-
+     _simpanKeStorage();
         int bIdx = _dapatkanBoxIndex(klas);
         if (bIdx != -1) {
           _daftarMurid[idx].boxData[bIdx][3] = skor;
@@ -209,6 +271,7 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
             String nextId = (maxId + 1).toString().padLeft(3, '0');
             _daftarMurid.add(Murid(id: nextId, nama: _namaController.text.trim().toUpperCase(), boxData: List.generate(7, (_) => [20, 35, 50, 0, 65, 85]), radarData: List.generate(10, (_) => 0.0)));
           });
+          _simpanKeStorage();
           _namaController.clear();
         },
       ),
