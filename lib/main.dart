@@ -785,14 +785,11 @@ class DashboardAtletPage extends StatelessWidget {
         Padding(padding: const EdgeInsets.all(8.0), child: Text(kelebihanText, style: const TextStyle(fontSize: 8.5, color: Colors.white70))),
         Padding(padding: const EdgeInsets.all(8.0), child: Text(kekuranganText, style: const TextStyle(fontSize: 8.5, color: Colors.white70))),
         Padding(padding: const EdgeInsets.all(8.0), child: Text(rekomendasiText, style: const TextStyle(fontSize: 8.5, color: Color(0xFF38BDF8), fontWeight: FontWeight.w500))),
-      ],
-    );
-  },
-            ),
-    );
-  }
-}
+       ],
+    ); // <--- Penutup TableRow
+  } // <--- Penutup fungsi _buildEvaluasiRow
 
+} // <--- PENUTUP UTAMA CLASS DI SINI YANG SERING HILANG!
 
 
 // ==================== HALAMAN 5: HISTORY TIMELINE ====================
