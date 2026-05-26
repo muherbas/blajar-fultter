@@ -179,7 +179,35 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
         // --- BARIS YANG BERUBAH (RADAR DATA LANGSUNG PAKAI SKOR GRAFIK) ---
         int rIdx = _dapatkanRadarIndex(klas);
         if (rIdx != -1 && rIdx < _daftarMurid[idx].radarData.length) {
-          _daftarMurid[idx].radarData[rIdx] = skorGrafik.clamp(0.0, 1.0); // Tanpa dibagi 100 lagi
+           List<double> semuaSkorRadar = _daftarMurid[idx].riwayatLatihanDurasi
+              .where((item) => item['klasifikasi'] == klas)
+              .map((item) {
+                double pembagi = (item['tipePembagi'] == 'J') ? 60.0 : 90.0;
+                double skorSederhana = ((item['skor'] ?? 0) as num).toDouble() / pembagi;
+                
+                // --- TUNING DETEKSI DURASI: MAKIN CEPAT MAKIN MELEVIT KE LUAR ---
+                // Kita balik kodenya: jika skorSederhana kecil (artinya atlet selesai sangat cepat),
+                // nilainya akan melonjak mendekati atau melewati 1.0 (luar biasa bagus).
+                if (skorSederhana > 0) {
+                  // Rumus pembalik kuadratik agar perbedaan milidetik saja langsung terasa kontras
+                  double skorDibalik = 1.0 / skorSederhana; 
+                  
+                  if (skorDibalik < 1.0) {
+                    return math.pow(skorDibalik, 1.5).toDouble(); // Lambat = jaring langsung ciut ke dalam
+                  } else {
+                    return skorDibalik; // Cepat = jaring melesat padat ke luar target!
+                  }
+                }
+                return 0.0;
+              }).toList();
+if (semuaSkorRadar.isNotEmpty) {
+            double total = semuaSkorRadar.reduce((a, b) => a + b);
+            double rataRata = total / semuaSkorRadar.length;
+            _daftarMurid[idx].radarData[rIdx] = rataRata.clamp(0.0, 1.2);
+          }
+        }
+      }
+    }); // Akhir setState
         }
 
         // --- BARIS YANG BERUBAH (BOXPLOT DATA LANGSUNG PAKAI SKOR GRAFIK) ---
@@ -239,11 +267,41 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
           'tipePembagi': tipePembagi
         });
 
-        // --- BARIS YANG BERUBAH (RADAR DATA LANGSUNG PAKAI SKOR GRAFIK) ---
+        // ================================================================
+        // --- PROSES AKUMULASI RADAR DATA KUANTITATIF (BARU & KONTRAS) ---
+        // ================================================================
         int rIdx = _dapatkanRadarIndex(klas);
         if (rIdx != -1 && rIdx < _daftarMurid[idx].radarData.length) {
-          _daftarMurid[idx].radarData[rIdx] = skorGrafik.clamp(0.0, 1.0); // Tanpa dibagi 100 lagi
+          
+          // 1. Ambil seluruh riwayat kuantitatif milik pilar biomotorik ini
+          List<double> semuaSkorRadar = _daftarMurid[idx].riwayatLatihanKuantitatif
+              .where((item) => item['klasifikasi'] == klas)
+              .map((item) {
+                double pembagiI = (item['tipePembagi'] == 'J') ? 15.0 : 25.0;
+                double skorSederhana = ((item['skor'] ?? 0) as num).toDouble() / pembagiI;
+                
+                // --- TUNING DETEKSI REPS: Memberikan hukuman bagi yang malas ---
+                // Jika reps di bawah target (1.0), nilainya sengaja diciutkan secara kuadratik.
+                // Jika reps memenuhi atau melampaui target, jaring bebas melesat lebar ke luar.
+                if (skorSederhana < 1.0) {
+                  return math.pow(skorSederhana, 1.5).toDouble(); // Reps sedikit = jaring anjlok ke dalam
+                } else {
+                  return skorSederhana; // Reps melimpah = jaring melesat gagah
+                }
+              }).toList();
+
+          if (semuaSkorRadar.isNotEmpty) {
+            // 2. Hitung nilai rata-rata historis perkembangan atlet
+            double total = semuaSkorRadar.reduce((a, b) => a + b);
+            double rataRata = total / semuaSkorRadar.length;
+
+            // 3. Kunci ke memori radar (maksimum skala 1.2 sesuai visualisasi grid baru Coach)
+            _daftarMurid[idx].radarData[rIdx] = rataRata.clamp(0.0, 1.2);
+          }
         }
+      }
+    }); // Akhir setState
+}
 
         // --- BARIS YANG BERUBAH (BOXPLOT DATA LANGSUNG PAKAI SKOR GRAFIK) ---
                                                 // --- LOGIKA BOXPLOT BARU: LANGSUNG MASUK, ANTI-HILANG ---
