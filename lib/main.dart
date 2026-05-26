@@ -1158,11 +1158,11 @@ class _BoxplotPainter extends CustomPainter {
 }
 
 // ================================================================
-// WIDGET UTAMA + LEGENDA KETERANGAN WARNA (SUDAH DIPERBAIKI)
+// WIDGET UTAMA (KUNCI DI SINI AGAR DASHBOARD COACH SINKRON)
 // ================================================================
 class MetaRadarChart extends StatelessWidget {
-  final List<double> dataIndividu; // Berisi 10 data desimal atlet (0.0 - 2.0)
-  final List<double> rataRataTim;  // Berisi 10 data desimal rata-rata tim (0.0 - 2.0)
+  final List<double> dataIndividu; 
+  final List<double> rataRataTim;  
 
   const MetaRadarChart({
     Key? key,
@@ -1172,31 +1172,24 @@ class MetaRadarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 10 Judul Dimensi Biomotorik Coach
-    final List<String> labelKategori = ["MUSC END", "POWER", "CORE STAB", "DYNAMIC FLEX", "SPEED END", "REACTIVE SPEED", "AGILITY", "ASA/FightIQ", "MOBILITY", "REAKSI LINCAH"];
-
     return Column(
       children: [
-        // 1. UNIT GRAFIK RADAR
         SizedBox(
           height: 260,
           width: double.infinity,
           child: CustomPaint(
-            painter: RadarChartPainter(
-              data: dataIndividu,
-              teamAverages: rataRataTim,
-              features: labelKategori,
+            // Menyesuaikan panggilan painter agar sesuai dengan error di DashboardAtletPage
+            painter: MetaRadarChartPainter(
+              activeRadar: dataIndividu,
+              teamRadar: rataRataTim,
             ),
           ),
         ),
-        
         const SizedBox(height: 12),
-
-        // 2. KOTAK KETERANGAN / LEGENDA (BIAR SEMUA ORANG TAHU)
+        // Legenda Keterangan Warna
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Indikator Atlet Individu
             Container(
               width: 12,
               height: 12,
@@ -1210,10 +1203,7 @@ class MetaRadarChart extends StatelessWidget {
               'Performa Atlet',
               style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
             ),
-            
-            const SizedBox(width: 24), // Jarak pemisah
-
-            // Indikator Rata-rata Tim
+            const SizedBox(width: 24), 
             Container(
               width: 12,
               height: 12,
@@ -1235,17 +1225,19 @@ class MetaRadarChart extends StatelessWidget {
 }
 
 // ================================================================
-// CUSTOM PAINTER (TETAP SAMA, TIDAK DIUBAH AGAR SKALA TETAP PRESISI)
+// CUSTOM PAINTER: NAMA DAN VARIABEL DISESUAIKAN DENGAN ERROR
 // ================================================================
-class RadarChartPainter extends CustomPainter {
-  final List<double> data;
-  final List<String> features;
-  final List<double> teamAverages;
+class MetaRadarChartPainter extends CustomPainter {
+  final List<double> activeRadar; // Menjawab 'activeRadar' dari error
+  final List<double> teamRadar;   // Menjawab 'teamRadar' dari error
+  
+  // 10 Judul Kategori Biomotorik Coach langsung dikunci di dalam Painter
+  final List<String> features = const ["MUSC END", "POWER", "CORE STAB", "DYNAMIC FLEX", "SPEED END", "REACTIVE SPEED", "AGILITY", "ASA/FightIQ", "MOBILITY", "REAKSI LINCAH"];
 
-  RadarChartPainter({
-    required this.data,
-    required this.features,
-    required this.teamAverages,
+
+  MetaRadarChartPainter({
+    required this.activeRadar,
+    required this.teamRadar,
   });
 
   @override
@@ -1266,7 +1258,7 @@ class RadarChartPainter extends CustomPainter {
       fontWeight: FontWeight.w900,
     );
 
-    // Grid Lingkaran
+    // 1. Grid Lingkaran Latar Belakang (Skala Desimal Coach)
     for (var i = 1; i <= 4; i++) {
       double nilaiSkala = i * 0.5;
       double r = (nilaiSkala / batasMaksimumSkala) * maxRadius;
@@ -1284,7 +1276,7 @@ class RadarChartPainter extends CustomPainter {
       }
     }
 
-    // Jari-jari & Label teks luar
+    // 2. Garis Jari-jari & Teks Kategori
     for (var i = 0; i < features.length; i++) {
       final angle = i * angleStep - math.pi / 2;
       final lineEnd = Offset(
@@ -1304,8 +1296,8 @@ class RadarChartPainter extends CustomPainter {
       textPainter.paint(canvas, Offset(labelX, labelY));
     }
 
-    // Gambar Jaring Rata-rata Tim (ALL)
-    if (teamAverages.isNotEmpty) {
+    // 3. Lapisan ALL / Rata-rata Tim (Garis Biru Muda Transparan)
+    if (teamRadar.isNotEmpty) {
       final teamPath = Path();
       final teamPaint = Paint()
         ..color = const Color(0xFF38BDF8).withOpacity(0.4) 
@@ -1316,9 +1308,9 @@ class RadarChartPainter extends CustomPainter {
         ..color = const Color(0xFF38BDF8).withOpacity(0.06) 
         ..style = PaintingStyle.fill;
 
-      for (var i = 0; i < teamAverages.length; i++) {
+      for (var i = 0; i < features.length; i++) {
         final angle = i * angleStep - math.pi / 2;
-        final val = (i < teamAverages.length ? teamAverages[i] : 0.0).clamp(0.0, batasMaksimumSkala);
+        final val = (i < teamRadar.length ? teamRadar[i] : 0.0).clamp(0.0, batasMaksimumSkala);
         final r = (val / batasMaksimumSkala) * maxRadius;
         final x = center.dx + r * math.cos(angle);
         final y = center.dy + r * math.sin(angle);
@@ -1334,8 +1326,8 @@ class RadarChartPainter extends CustomPainter {
       canvas.drawPath(teamPath, teamPaint);
     }
 
-    // Gambar Jaring Individu Atlet
-    if (data.isNotEmpty) {
+    // 4. Lapisan INDIVIDU / Atlet Aktif (Garis Hijau Neon Solid)
+    if (activeRadar.isNotEmpty) {
       final dataPath = Path();
       final dataPaint = Paint()
         ..color = const Color(0xFF22C55E) 
@@ -1346,9 +1338,9 @@ class RadarChartPainter extends CustomPainter {
         ..color = const Color(0xFF22C55E).withOpacity(0.18) 
         ..style = PaintingStyle.fill;
 
-      for (var i = 0; i < data.length; i++) {
+      for (var i = 0; i < features.length; i++) {
         final angle = i * angleStep - math.pi / 2;
-        final val = (i < data.length ? data[i] : 0.0).clamp(0.0, batasMaksimumSkala);
+        final val = (i < activeRadar.length ? activeRadar[i] : 0.0).clamp(0.0, batasMaksimumSkala);
         final r = (val / batasMaksimumSkala) * maxRadius;
         final x = center.dx + r * math.cos(angle);
         final y = center.dy + r * math.sin(angle);
@@ -1366,7 +1358,8 @@ class RadarChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant RadarChartPainter oldDelegate) {
-    return oldDelegate.data != data || oldDelegate.teamAverages != teamAverages;
+  bool shouldRepaint(covariant MetaRadarChartPainter oldDelegate) {
+    return oldDelegate.activeRadar != activeRadar || oldDelegate.teamRadar != teamRadar;
   }
 }
+
