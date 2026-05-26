@@ -1156,7 +1156,7 @@ class _BoxplotPainter extends CustomPainter {
 
   @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
-}
+
 
 // ================================================================
 // WIDGET UTAMA RADAR: SEKARANG LEBIH PADAT & MENANTANG
