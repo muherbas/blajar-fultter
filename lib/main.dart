@@ -155,161 +155,121 @@ class _MainNavigationHolderState extends State<MainNavigationHolder> {
     }
   }
 
-      void _simpanDataKuantitatif(String id, String jenis, String klas, double reps, double sets, String tipePembagi, DateTime tgl) {
+    void _simpanDataKuantitatif(String id, String jenis, String klas, double reps, double sets, String tipePembagi, DateTime tgl) {
     setState(() {
       int idx = _daftarMurid.indexWhere((m) => m.id == id);
       if (idx != -1) {
         double pembagi = (tipePembagi == 'J') ? 15.0 : 25.0;
-        
-        // --- BARIS YANG BERUBAH (DASHBOARD TANPA * 100) ---
         double skorGrafik = (reps * sets) / pembagi; 
-
-        // --- BARIS YANG BERUBAH (RIWAYAT MURNI REPS * SETS) ---
         double volumeHistory = reps * sets;
 
         _daftarMurid[idx].riwayatLatihanKuantitatif.add({
           'tanggal': tgl, 
           'jenis': jenis, 
           'klasifikasi': klas, 
-          'skor': volumeHistory, // Masuk ke riwayat murni reps * sets
+          'skor': volumeHistory, 
           'isReps': true, 
           'tipePembagi': tipePembagi
         });
 
-        // --- BARIS YANG BERUBAH (RADAR DATA LANGSUNG PAKAI SKOR GRAFIK) ---
+        // 1. RADAR KUANTITATIF (REPS)
         int rIdx = _dapatkanRadarIndex(klas);
         if (rIdx != -1 && rIdx < _daftarMurid[idx].radarData.length) {
-           List<double> semuaSkorRadar = _daftarMurid[idx].riwayatLatihanDurasi
+          List<double> semuaSkorRadar = _daftarMurid[idx].riwayatLatihanKuantitatif
               .where((item) => item['klasifikasi'] == klas)
               .map((item) {
-                double pembagi = (item['tipePembagi'] == 'J') ? 60.0 : 90.0;
-                double skorSederhana = ((item['skor'] ?? 0) as num).toDouble() / pembagi;
-                
-                // --- TUNING DETEKSI DURASI: MAKIN CEPAT MAKIN MELEVIT KE LUAR ---
-                // Kita balik kodenya: jika skorSederhana kecil (artinya atlet selesai sangat cepat),
-                // nilainya akan melonjak mendekati atau melewati 1.0 (luar biasa bagus).
-                if (skorSederhana > 0) {
-                  // Rumus pembalik kuadratik agar perbedaan milidetik saja langsung terasa kontras
-                  double skorDibalik = 1.0 / skorSederhana; 
-                  
-                  if (skorDibalik < 1.0) {
-                    return math.pow(skorDibalik, 1.5).toDouble(); // Lambat = jaring langsung ciut ke dalam
-                  } else {
-                    return skorDibalik; // Cepat = jaring melesat padat ke luar target!
-                  }
+                double pembagiI = (item['tipePembagi'] == 'J') ? 15.0 : 25.0;
+                double skorSederhana = ((item['skor'] ?? 0) as num).toDouble() / pembagiI;
+
+                if (skorSederhana < 1.0) {
+                  return math.pow(skorSederhana, 1.5).toDouble(); 
+                } else {
+                  return skorSederhana; 
                 }
-                return 0.0;
               }).toList();
-if (semuaSkorRadar.isNotEmpty) {
+
+          if (semuaSkorRadar.isNotEmpty) {
             double total = semuaSkorRadar.reduce((a, b) => a + b);
             double rataRata = total / semuaSkorRadar.length;
             _daftarMurid[idx].radarData[rIdx] = rataRata.clamp(0.0, 1.2);
           }
         }
-      }
-    }); // Akhir setState
-        }
 
-        // --- BARIS YANG BERUBAH (BOXPLOT DATA LANGSUNG PAKAI SKOR GRAFIK) ---
-                                                        // --- LOGIKA BOXPLOT BARU: LANGSUNG MASUK, ANTI-HILANG ---
+        // 2. BOXPLOT KUANTITATIF
         int bIdx = _dapatkanBoxIndex(klas);
         if (bIdx != -1 && bIdx < _daftarMurid[idx].boxData.length) {
-          
-          // 1. Ambil data boxData yang sudah ada saat ini di pilar tersebut
           List<double> dataLama = List<double>.from(_daftarMurid[idx].boxData[bIdx]);
-          
-          // 2. Jika isi pilar tersebut masih nol semua (murid baru), bersihkan dulu list-nya
           if (dataLama.every((v) => v == 0.0)) {
             dataLama.clear();
           }
 
-          // 3. Masukkan skor desimal yang baru saja diinput Coach ke dalam kumpulan data
           dataLama.add(skorGrafik);
-          
-          // 4. Urutkan dari terkecil ke terbesar agar hukum statistikanya valid
           dataLama.sort();
 
-          // 5. Ekstrak 6 Nilai Statistik Sesuai Kebutuhan Grafik Coach
           double min = dataLama.first;
           double max = dataLama.last;
           double median = dataLama[dataLama.length ~/ 2];
           double q1 = dataLama[(dataLama.length * 0.25).floor()];
           double q3 = dataLama[(dataLama.length * 0.75).floor().clamp(0, dataLama.length - 1)];
-          double current = skorGrafik; // Skor terbaru saat ini
+          double current = skorGrafik; 
 
-          // 6. Kunci kembali ke memori dengan format TEPAT 6 ELEMEN
           _daftarMurid[idx].boxData[bIdx] = [min, q1, median, current, q3, max];
         }
+
         _selectedMuridId = id;
       }
     });
-  //  _simpanKeStorage();
+    // _simpanKeStorage();
   }
 
-    void _simpanDataDurasi(String id, String jenis, String klas, double waktu, double sets, String tipePembagi, DateTime tgl) {
+  void _simpanDataDurasi(String id, String jenis, String klas, double waktu, double sets, String tipePembagi, DateTime tgl) {
     setState(() {
       int idx = _daftarMurid.indexWhere((m) => m.id == id);
       if (idx != -1) {
         double pembagi = (tipePembagi == 'J') ? 60.0 : 90.0;
-        
-        // --- BARIS YANG BERUBAH (DASHBOARD TANPA * 100) ---
         double skorGrafik = (waktu * sets) / pembagi;
-
-        // --- BARIS YANG BERUBAH (RIWAYAT MURNI DETIK * SETS) ---
         double volumeHistory = waktu * sets;
 
         _daftarMurid[idx].riwayatLatihanDurasi.add({
           'tanggal': tgl, 
           'jenis': jenis, 
           'klasifikasi': klas, 
-          'skor': volumeHistory, // Masuk ke riwayat murni detik * sets
+          'skor': volumeHistory, 
           'isReps': false, 
           'tipePembagi': tipePembagi
         });
 
-        // ================================================================
-        // --- PROSES AKUMULASI RADAR DATA KUANTITATIF (BARU & KONTRAS) ---
-        // ================================================================
+        // 1. RADAR DURASI (WAKTU)
         int rIdx = _dapatkanRadarIndex(klas);
         if (rIdx != -1 && rIdx < _daftarMurid[idx].radarData.length) {
-          
-          // 1. Ambil seluruh riwayat kuantitatif milik pilar biomotorik ini
-          List<double> semuaSkorRadar = _daftarMurid[idx].riwayatLatihanKuantitatif
+          List<double> semuaSkorRadar = _daftarMurid[idx].riwayatLatihanDurasi
               .where((item) => item['klasifikasi'] == klas)
               .map((item) {
-                double pembagiI = (item['tipePembagi'] == 'J') ? 15.0 : 25.0;
+                double pembagiI = (item['tipePembagi'] == 'J') ? 60.0 : 90.0;
                 double skorSederhana = ((item['skor'] ?? 0) as num).toDouble() / pembagiI;
-                
-                // --- TUNING DETEKSI REPS: Memberikan hukuman bagi yang malas ---
-                // Jika reps di bawah target (1.0), nilainya sengaja diciutkan secara kuadratik.
-                // Jika reps memenuhi atau melampaui target, jaring bebas melesat lebar ke luar.
-                if (skorSederhana < 1.0) {
-                  return math.pow(skorSederhana, 1.5).toDouble(); // Reps sedikit = jaring anjlok ke dalam
-                } else {
-                  return skorSederhana; // Reps melimpah = jaring melesat gagah
+
+                if (skorSederhana > 0) {
+                  double skorDibalik = 1.0 / skorSederhana; 
+                  if (skorDibalik < 1.0) {
+                    return math.pow(skorDibalik, 1.5).toDouble(); 
+                  } else {
+                    return skorDibalik; 
+                  }
                 }
+                return 0.0;
               }).toList();
 
           if (semuaSkorRadar.isNotEmpty) {
-            // 2. Hitung nilai rata-rata historis perkembangan atlet
             double total = semuaSkorRadar.reduce((a, b) => a + b);
             double rataRata = total / semuaSkorRadar.length;
-
-            // 3. Kunci ke memori radar (maksimum skala 1.2 sesuai visualisasi grid baru Coach)
             _daftarMurid[idx].radarData[rIdx] = rataRata.clamp(0.0, 1.2);
           }
         }
-      }
-    }); // Akhir setState
-}
 
-        // --- BARIS YANG BERUBAH (BOXPLOT DATA LANGSUNG PAKAI SKOR GRAFIK) ---
-                                                // --- LOGIKA BOXPLOT BARU: LANGSUNG MASUK, ANTI-HILANG ---
+        // 2. BOXPLOT DURASI
         int bIdx = _dapatkanBoxIndex(klas);
         if (bIdx != -1 && bIdx < _daftarMurid[idx].boxData.length) {
-          
           List<double> dataLama = List<double>.from(_daftarMurid[idx].boxData[bIdx]);
-          
           if (dataLama.every((v) => v == 0.0)) {
             dataLama.clear();
           }
@@ -330,9 +290,9 @@ if (semuaSkorRadar.isNotEmpty) {
         _selectedMuridId = id;
       }
     });
-  //  _simpanKeStorage();
+    // _simpanKeStorage();
   }
-
+    
   @override
   Widget build(BuildContext context) {
     List<Murid> filtered = _daftarMurid.where((m) => m.nama.contains(_searchQuery.toUpperCase()) || m.id.contains(_searchQuery)).toList();
