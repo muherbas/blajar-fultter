@@ -1157,88 +1157,216 @@ class _BoxplotPainter extends CustomPainter {
   @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
-// ==================== ENGINE GRAFIK 2: RADAR CHART PAINTER ====================
-class MetaRadarChartPainter extends CustomPainter {
-  final List<double> activeRadar;
-  final List<double> teamRadar;
+// ================================================================
+// WIDGET UTAMA + LEGENDA KETERANGAN WARNA (SUDAH DIPERBAIKI)
+// ================================================================
+class MetaRadarChart extends StatelessWidget {
+  final List<double> dataIndividu; // Berisi 10 data desimal atlet (0.0 - 2.0)
+  final List<double> rataRataTim;  // Berisi 10 data desimal rata-rata tim (0.0 - 2.0)
 
-  MetaRadarChartPainter({required this.activeRadar, required this.teamRadar});
+  const MetaRadarChart({
+    Key? key,
+    required this.dataIndividu,
+    required this.rataRataTim,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // 10 Judul Dimensi Biomotorik Coach
+    final List<String> labelKategori = ["MUSC END", "POWER", "CORE STAB", "DYNAMIC FLEX", "SPEED END", "REACTIVE SPEED", "AGILITY", "ASA/FightIQ", "MOBILITY", "REAKSI LINCAH"];
+
+    return Column(
+      children: [
+        // 1. UNIT GRAFIK RADAR
+        SizedBox(
+          height: 260,
+          width: double.infinity,
+          child: CustomPaint(
+            painter: RadarChartPainter(
+              data: dataIndividu,
+              teamAverages: rataRataTim,
+              features: labelKategori,
+            ),
+          ),
+        ),
+        
+        const SizedBox(height: 12),
+
+        // 2. KOTAK KETERANGAN / LEGENDA (BIAR SEMUA ORANG TAHU)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Indikator Atlet Individu
+            Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: const Color(0xFF22C55E), // Hijau Neon
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+            const SizedBox(width: 6),
+            const Text(
+              'Performa Atlet',
+              style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+            ),
+            
+            const SizedBox(width: 24), // Jarak pemisah
+
+            // Indikator Rata-rata Tim
+            Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: const Color(0xFF38BDF8), // Biru Muda
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+            const SizedBox(width: 6),
+            const Text(
+              'Rata-rata Tim (All)',
+              style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// ================================================================
+// CUSTOM PAINTER (TETAP SAMA, TIDAK DIUBAH AGAR SKALA TETAP PRESISI)
+// ================================================================
+class RadarChartPainter extends CustomPainter {
+  final List<double> data;
+  final List<String> features;
+  final List<double> teamAverages;
+
+  RadarChartPainter({
+    required this.data,
+    required this.features,
+    required this.teamAverages,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
-    Offset center = Offset(size.width / 2, size.height / 2);
-    double maxRadius = math.min(size.width, size.height) / 2.3;
-    int kDimensi = 10;
+    final center = Offset(size.width / 2, size.height / 2);
+    final maxRadius = math.min(size.width, size.height) / 2 * 0.72;
+    final angleStep = (2 * math.pi) / features.length;
+    const double batasMaksimumSkala = 2.0; 
 
-    final Paint pGrid = Paint()..color = const Color(0xFF334155)..style = PaintingStyle.stroke..strokeWidth = 1.0;
-    final Paint pAtlet = Paint()..color = const Color(0xFF22C55E).withOpacity(0.25)..style = PaintingStyle.fill; 
-    final Paint pBorderAtlet = Paint()..color = const Color(0xFF22C55E)..style = PaintingStyle.stroke..strokeWidth = 2.0;
-    final Paint pTim = Paint()..color = const Color(0xFF38BDF8)..style = PaintingStyle.stroke..strokeWidth = 1.2; 
+    final gridPaint = Paint()
+      ..color = const Color(0xFF334155) 
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
 
-    for (int i = 1; i <= 5; i++) {
-      double r = maxRadius * (i / 5.0);
-      Path pJaring = Path();
-      for (int j = 0; j < kDimensi; j++) {
-        double angle = (j * 2 * math.pi / kDimensi) - (math.pi / 2);
-        Offset pPoint = Offset(center.dx + r * math.cos(angle), center.dy + r * math.sin(angle));
-        if (j == 0) pJaring.moveTo(pPoint.dx, pPoint.dy);
-        else pJaring.lineTo(pPoint.dx, pPoint.dy);
+    final labelStyle = TextStyle(
+      color: Colors.blueGrey[300],
+      fontSize: 9,
+      fontWeight: FontWeight.w900,
+    );
+
+    // Grid Lingkaran
+    for (var i = 1; i <= 4; i++) {
+      double nilaiSkala = i * 0.5;
+      double r = (nilaiSkala / batasMaksimumSkala) * maxRadius;
+      canvas.drawCircle(center, r, gridPaint);
+
+      if (i == 2 || i == 4) {
+        final textPainter = TextPainter(
+          text: TextSpan(
+            text: nilaiSkala.toStringAsFixed(1),
+            style: TextStyle(color: Colors.blueGrey[600], fontSize: 8, fontWeight: FontWeight.bold),
+          ),
+          textDirection: TextDirection.ltr,
+        )..layout();
+        textPainter.paint(canvas, Offset(center.dx + 4, center.dy - r - 4));
       }
-      pJaring.close();
-      canvas.drawPath(pJaring, pGrid);
     }
 
-    // --- TEMPATKAN KODE LABEL RADAR DI SINI ---
-    final List<String> labels = ["MUSC END", "POWER", "CORE STAB", "DYNAMIC FLEX", "SPEED END", "REACTIVE SPEED", "AGILITY", "ASA/FightIQ", "MOBILITY", "REAKSI LINCAH"];
-    for (int j = 0; j < kDimensi; j++) {
-      double angle = (j * 2 * math.pi / kDimensi) - (math.pi / 2);
-      Offset labelPos = Offset(
-        center.dx + (maxRadius + 15) * math.cos(angle), 
-        center.dy + (maxRadius + 15) * math.sin(angle)
+    // Jari-jari & Label teks luar
+    for (var i = 0; i < features.length; i++) {
+      final angle = i * angleStep - math.pi / 2;
+      final lineEnd = Offset(
+        center.dx + maxRadius * math.cos(angle),
+        center.dy + maxRadius * math.sin(angle),
       );
-      final txt = TextPainter(
-        text: TextSpan(text: labels[j], style: const TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold)),
-        textDirection: TextDirection.ltr
+      canvas.drawLine(center, lineEnd, gridPaint);
+
+      final textPainter = TextPainter(
+        text: TextSpan(text: features[i], style: labelStyle),
+        textDirection: TextDirection.ltr,
       )..layout();
-      txt.paint(canvas, Offset(labelPos.dx - (txt.width / 2), labelPos.dy - (txt.height / 2)));
-    }
-    // --- AKHIR PENEMPATAN KODE LABEL ---
-    // ... (kode selanjutnya: penggambaran pathAtlet dan pathTim)
 
-
-    Path pathAtlet = Path();
-    bool hasDataAtlet = false;
-    for (int j = 0; j < kDimensi; j++) {
-      double val = j < activeRadar.length ? activeRadar[j] : 0.0;
-      if (val > 0) hasDataAtlet = true;
-      double angle = (j * 2 * math.pi / kDimensi) - (math.pi / 2);
-      double r = maxRadius * val.clamp(0.0, 1.0);
-      Offset pt = Offset(center.dx + r * math.cos(angle), center.dy + r * math.sin(angle));
-      if (j == 0) pathAtlet.moveTo(pt.dx, pt.dy);
-      else pathAtlet.lineTo(pt.dx, pt.dy);
-    }
-    pathAtlet.close();
-    if (hasDataAtlet) {
-      canvas.drawPath(pathAtlet, pAtlet);
-      canvas.drawPath(pathAtlet, pBorderAtlet);
+      final labelRadius = maxRadius + 14;
+      final labelX = center.dx + labelRadius * math.cos(angle) - (textPainter.width / 2);
+      final labelY = center.dy + labelRadius * math.sin(angle) - (textPainter.height / 2);
+      textPainter.paint(canvas, Offset(labelX, labelY));
     }
 
-    Path pathTim = Path();
-    bool hasDataTim = false;
-    for (int j = 0; j < kDimensi; j++) {
-      double val = j < teamRadar.length ? teamRadar[j] : 0.0;
-      if (val > 0) hasDataTim = true;
-      double angle = (j * 2 * math.pi / kDimensi) - (math.pi / 2);
-      double r = maxRadius * val.clamp(0.0, 1.0);
-      Offset pt = Offset(center.dx + r * math.cos(angle), center.dy + r * math.sin(angle));
-      if (j == 0) pathTim.moveTo(pt.dx, pt.dy);
-      else pathTim.lineTo(pt.dx, pt.dy);
+    // Gambar Jaring Rata-rata Tim (ALL)
+    if (teamAverages.isNotEmpty) {
+      final teamPath = Path();
+      final teamPaint = Paint()
+        ..color = const Color(0xFF38BDF8).withOpacity(0.4) 
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5;
+
+      final teamFillPaint = Paint()
+        ..color = const Color(0xFF38BDF8).withOpacity(0.06) 
+        ..style = PaintingStyle.fill;
+
+      for (var i = 0; i < teamAverages.length; i++) {
+        final angle = i * angleStep - math.pi / 2;
+        final val = (i < teamAverages.length ? teamAverages[i] : 0.0).clamp(0.0, batasMaksimumSkala);
+        final r = (val / batasMaksimumSkala) * maxRadius;
+        final x = center.dx + r * math.cos(angle);
+        final y = center.dy + r * math.sin(angle);
+
+        if (i == 0) {
+          teamPath.moveTo(x, y);
+        } else {
+          teamPath.lineTo(x, y);
+        }
+      }
+      teamPath.close();
+      canvas.drawPath(teamPath, teamFillPaint);
+      canvas.drawPath(teamPath, teamPaint);
     }
-    pathTim.close();
-    if (hasDataTim) {
-      canvas.drawPath(pathTim, pTim);
+
+    // Gambar Jaring Individu Atlet
+    if (data.isNotEmpty) {
+      final dataPath = Path();
+      final dataPaint = Paint()
+        ..color = const Color(0xFF22C55E) 
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.5;
+
+      final fillPaint = Paint()
+        ..color = const Color(0xFF22C55E).withOpacity(0.18) 
+        ..style = PaintingStyle.fill;
+
+      for (var i = 0; i < data.length; i++) {
+        final angle = i * angleStep - math.pi / 2;
+        final val = (i < data.length ? data[i] : 0.0).clamp(0.0, batasMaksimumSkala);
+        final r = (val / batasMaksimumSkala) * maxRadius;
+        final x = center.dx + r * math.cos(angle);
+        final y = center.dy + r * math.sin(angle);
+
+        if (i == 0) {
+          dataPath.moveTo(x, y);
+        } else {
+          dataPath.lineTo(x, y);
+        }
+      }
+      dataPath.close();
+      canvas.drawPath(dataPath, fillPaint);
+      canvas.drawPath(dataPath, dataPaint);
     }
   }
 
-  @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  @override
+  bool shouldRepaint(covariant RadarChartPainter oldDelegate) {
+    return oldDelegate.data != data || oldDelegate.teamAverages != teamAverages;
+  }
 }
