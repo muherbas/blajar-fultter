@@ -1225,15 +1225,79 @@ class MetaRadarChart extends StatelessWidget {
 }
 
 // ================================================================
-// CUSTOM PAINTER: NAMA DAN VARIABEL DISESUAIKAN DENGAN ERROR
+// WIDGET UTAMA RADAR: SEKARANG LEBIH PADAT & MENANTANG
+// ================================================================
+class MetaRadarChart extends StatelessWidget {
+  final List<double> dataIndividu; 
+  final List<double> rataRataTim;  
+
+  const MetaRadarChart({
+    Key? key,
+    required this.dataIndividu,
+    required this.rataRataTim,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          height: 280, // Sedikit dinaikkan agar visualisasi makin megah
+          width: double.infinity,
+          child: CustomPaint(
+            painter: MetaRadarChartPainter(
+              activeRadar: dataIndividu,
+              teamRadar: rataRataTim,
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
+        // Keterangan Legenda Warna
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: const Color(0xFF22C55E), 
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+            const SizedBox(width: 6),
+            const Text(
+              'Performa Atlet',
+              style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(width: 24), 
+            Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: const Color(0xFF38BDF8), 
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+            const SizedBox(width: 6),
+            const Text(
+              'Rata-rata Tim (All)',
+              style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// ================================================================
+// PAINTER RADAR: GRID LEBIH RAPAT, SKALA DIPERSEMPIT KE 1.2
 // ================================================================
 class MetaRadarChartPainter extends CustomPainter {
-  final List<double> activeRadar; // Menjawab 'activeRadar' dari error
-  final List<double> teamRadar;   // Menjawab 'teamRadar' dari error
+  final List<double> activeRadar; 
+  final List<double> teamRadar;   
   
-  // 10 Judul Kategori Biomotorik Coach langsung dikunci di dalam Painter
   final List<String> features = const ["MUSC END", "POWER", "CORE STAB", "DYNAMIC FLEX", "SPEED END", "REACTIVE SPEED", "AGILITY", "ASA/FightIQ", "MOBILITY", "REAKSI LINCAH"];
-
 
   MetaRadarChartPainter({
     required this.activeRadar,
@@ -1243,32 +1307,46 @@ class MetaRadarChartPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final maxRadius = math.min(size.width, size.height) / 2 * 0.72;
+    final maxRadius = math.min(size.width, size.height) / 2 * 0.75;
     final angleStep = (2 * math.pi) / features.length;
-    const double batasMaksimumSkala = 2.0; 
+
+    // --- DIKETATKAN: Batas maksimum diturunkan dari 2.0 ke 1.2 agar jaring melesat padat ke luar ---
+    const double batasMaksimumSkala = 1.2; 
 
     final gridPaint = Paint()
-      ..color = const Color(0xFF334155) 
+      ..color = const Color(0xFF334155).withOpacity(0.7) 
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
 
     final labelStyle = TextStyle(
-      color: Colors.blueGrey[300],
+      color: Colors.blueGrey[200],
       fontSize: 9,
       fontWeight: FontWeight.w900,
+      letterSpacing: 0.5,
     );
 
-    // 1. Grid Lingkaran Latar Belakang (Skala Desimal Coach)
-    for (var i = 1; i <= 4; i++) {
-      double nilaiSkala = i * 0.5;
+    // --- GRID LEBIH RAPAT: Membuat 6 lapisan lingkaran (jarak antar batang menyempit) ---
+    for (var i = 1; i <= 6; i++) {
+      double nilaiSkala = i * 0.2; // Menghasilkan lingkaran 0.2, 0.4, 0.6, 0.8, 1.0, 1.2
       double r = (nilaiSkala / batasMaksimumSkala) * maxRadius;
-      canvas.drawCircle(center, r, gridPaint);
+      
+      // Berikan warna pembeda khusus untuk lingkaran Target Ideal (1.0)
+      if (i == 5) {
+        canvas.drawCircle(center, r, gridPaint..color = const Color(0xFF64748B)..strokeWidth = 1.5);
+      } else {
+        canvas.drawCircle(center, r, gridPaint..color = const Color(0xFF334155).withOpacity(0.6)..strokeWidth = 1.0);
+      }
 
-      if (i == 2 || i == 4) {
+      // Tampilkan teks skala angka desimal di grid
+      if (i == 3 || i == 5) { // Tampilkan label di garis 0.6 dan 1.0 (Target)
         final textPainter = TextPainter(
           text: TextSpan(
-            text: nilaiSkala.toStringAsFixed(1),
-            style: TextStyle(color: Colors.blueGrey[600], fontSize: 8, fontWeight: FontWeight.bold),
+            text: i == 5 ? "1.0 (Target)" : nilaiSkala.toStringAsFixed(1),
+            style: TextStyle(
+              color: i == 5 ? const Color(0xFF94A3B8) : Colors.blueGrey[600], 
+              fontSize: 8, 
+              fontWeight: FontWeight.bold
+            ),
           ),
           textDirection: TextDirection.ltr,
         )..layout();
@@ -1276,7 +1354,10 @@ class MetaRadarChartPainter extends CustomPainter {
       }
     }
 
-    // 2. Garis Jari-jari & Teks Kategori
+    // Mengembalikan warna grid ke semula untuk garis jari-jari
+    gridPaint..color = const Color(0xFF334155).withOpacity(0.7)..strokeWidth = 1.0;
+
+    // Garis Jari-jari & Teks Kategori
     for (var i = 0; i < features.length; i++) {
       final angle = i * angleStep - math.pi / 2;
       final lineEnd = Offset(
@@ -1296,21 +1377,22 @@ class MetaRadarChartPainter extends CustomPainter {
       textPainter.paint(canvas, Offset(labelX, labelY));
     }
 
-    // 3. Lapisan ALL / Rata-rata Tim (Garis Biru Muda Transparan)
+    // LAPISAN TIM (BIRU): Lebih solid dan padat
     if (teamRadar.isNotEmpty) {
       final teamPath = Path();
       final teamPaint = Paint()
-        ..color = const Color(0xFF38BDF8).withOpacity(0.4) 
+        ..color = const Color(0xFF38BDF8).withOpacity(0.6) 
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5;
+        ..strokeWidth = 1.8;
 
       final teamFillPaint = Paint()
-        ..color = const Color(0xFF38BDF8).withOpacity(0.06) 
+        ..color = const Color(0xFF38BDF8).withOpacity(0.1) 
         ..style = PaintingStyle.fill;
 
       for (var i = 0; i < features.length; i++) {
         final angle = i * angleStep - math.pi / 2;
-        final val = (i < teamRadar.length ? teamRadar[i] : 0.0).clamp(0.0, batasMaksimumSkala);
+        double skorAman = i < teamRadar.length ? teamRadar[i] : 0.0;
+        final val = skorAman.clamp(0.0, batasMaksimumSkala);
         final r = (val / batasMaksimumSkala) * maxRadius;
         final x = center.dx + r * math.cos(angle);
         final y = center.dy + r * math.sin(angle);
@@ -1326,21 +1408,22 @@ class MetaRadarChartPainter extends CustomPainter {
       canvas.drawPath(teamPath, teamPaint);
     }
 
-    // 4. Lapisan INDIVIDU / Atlet Aktif (Garis Hijau Neon Solid)
+    // LAPISAN INDIVIDU (HIJAU NEON): Lebar, padat, mendominasi layar
     if (activeRadar.isNotEmpty) {
       final dataPath = Path();
       final dataPaint = Paint()
         ..color = const Color(0xFF22C55E) 
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.5;
+        ..strokeWidth = 3.0; // Dipertebal agar gahar
 
       final fillPaint = Paint()
-        ..color = const Color(0xFF22C55E).withOpacity(0.18) 
+        ..color = const Color(0xFF22C55E).withOpacity(0.25) // Dipekatkan arsirannya
         ..style = PaintingStyle.fill;
 
       for (var i = 0; i < features.length; i++) {
         final angle = i * angleStep - math.pi / 2;
-        final val = (i < activeRadar.length ? activeRadar[i] : 0.0).clamp(0.0, batasMaksimumSkala);
+        double skorAman = i < activeRadar.length ? activeRadar[i] : 0.0;
+        final val = skorAman.clamp(0.0, batasMaksimumSkala);
         final r = (val / batasMaksimumSkala) * maxRadius;
         final x = center.dx + r * math.cos(angle);
         final y = center.dy + r * math.sin(angle);
@@ -1362,4 +1445,6 @@ class MetaRadarChartPainter extends CustomPainter {
     return oldDelegate.activeRadar != activeRadar || oldDelegate.teamRadar != teamRadar;
   }
 }
+
+
 
