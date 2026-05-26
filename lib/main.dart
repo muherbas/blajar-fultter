@@ -787,7 +787,12 @@ class DashboardAtletPage extends StatelessWidget {
         Padding(padding: const EdgeInsets.all(8.0), child: Text(rekomendasiText, style: const TextStyle(fontSize: 8.5, color: Color(0xFF38BDF8), fontWeight: FontWeight.w500))),
       ],
     );
+  },
+            ),
+    );
   }
+}
+
 
 
 // ==================== HALAMAN 5: HISTORY TIMELINE ====================
