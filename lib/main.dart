@@ -679,11 +679,16 @@ class DashboardAtletPage extends StatelessWidget {
     return {"pola": "$skew\n($kurtosis)", "arti": artiFisik};
   }
 
-  TableRow _buildEvaluasiRow(String namaKomponen, String tipeGrafik, int dataIdx) {
+   TableRow _buildEvaluasiRow(String namaKomponen, String tipeGrafik, int dataIdx) {
     bool diAtasRataTim = false; 
     bool belumAdaData = true; 
     String labelPola = "-"; 
     String labelArti = "-";
+
+    // Peta Kalimat Dinamis (AI Engine Alternatif)
+    String kelebihanText = "";
+    String kekuranganText = "";
+    String rekomendasiText = "";
 
     bool adaDataDiInput = activeMurid.riwayatLatihanKuantitatif.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == dataIdx) ||
                         activeMurid.riwayatLatihanDurasi.any((e) => e['klasifikasi'].toString().toUpperCase() == namaKomponen.toUpperCase() || dapatkanBoxIndexFunc(e['klasifikasi'].toString()) == dataIdx) ||
@@ -694,20 +699,83 @@ class DashboardAtletPage extends StatelessWidget {
       Map<String, String> hasilPola = _analisisKomplet40Pola(dataIdx, namaKomponen);
       labelPola = hasilPola["pola"]!; 
       labelArti = hasilPola["arti"]!;
+      
       if (adaDataDiInput && dataIdx < activeMurid.boxData.length) {
         belumAdaData = false;
         diAtasRataTim = activeMurid.boxData[dataIdx][3] >= (dataIdx < teamBoxAverages.length ? teamBoxAverages[dataIdx] : 0.0);
+        
+        // AMBIL VARIABEL UNTUK GENERATOR TEKS DINAMIS
+        String polaString = labelPola.toUpperCase();
+        
+        // A. GENERATOR KELEBIHAN (DINAMIS BERDASARKAN REAL-TIME DATA)
+        if (diAtasRataTim) {
+          kelebihanText = "Unggul di kelas. Power output melompat di atas standar tim.";
+          if (polaString.contains("SYMMETRICAL")) {
+            kelebihanText = "Dominasi mutlak. Kapasitas tinggi didukung akurasi gerak yang sangat kokoh.";
+          } else if (polaString.contains("RIGHT")) {
+            kelebihanText = "Sangat eksplosif. Grafik mendeteksi adanya bakat lonjakan biomekanik.";
+          }
+        } else {
+          kelebihanText = "Pondasi gerak terbentuk. Konsistensi teknik dasar di zona aman.";
+          if (polaString.contains("NARROW")) {
+            kelebihanText = "Sangat konsisten. Deviasi error gerakan sangat kecil saat kelelahan.";
+          }
+        }
+
+        // B. GENERATOR KEKURANGAN (DINAMIS BERDASARKAN AMBANG BATAS CRITICAL)
+        if (!diAtasRataTim) {
+          kekuranganText = "Defisit volume target. Kalah saing secara output dari rata-rata tim.";
+          if (polaString.contains("LEFT")) {
+            kekuranganText = "Drop akut akibat fatigue. Saraf motorik kewalahan menahan beban.";
+          } else if (polaString.contains("WIDE")) {
+            kekuranganText = "Performa sangat labil. Akurasi reps berantakan jika ritme dipercepat.";
+          }
+        } else {
+          kekuranganText = "Tantangan stagnasi. Risiko terjebak zona nyaman grafik plato.";
+          if (polaString.contains("RIGHT")) {
+            kekuranganText = "Otot cepat pulih namun rentan over-confidence, form gerak agak ceroboh.";
+          }
+        }
+
+        // C. GENERATOR REKOMENDASI TAKTIS (FORMULA AI COACHING)
+        if (polaString.contains("LEFT") && polaString.contains("NARROW")) {
+          rekomendasiText = "EMERGENCY REMEDIAL! Hentikan sirkuit, drill ulang teknik dasar dasar.";
+        } else if (polaString.contains("LEFT")) {
+          rekomendasiText = "DELOADING PHASE: Potong volume latihan 30% untuk pemulihan CNS.";
+        } else if (polaString.contains("RIGHT") && diAtasRataTim) {
+          rekomendasiText = "UPGRADE SPESIFIK: Berikan beban khusus untuk target akselerasi prestasi.";
+        } else if (polaString.contains("NARROW")) {
+          rekomendasiText = "BREAK THE PLATO: Ubah variasi tempo & manipulasi rest-period sirkuit.";
+        } else if (polaString.contains("WIDE")) {
+          rekomendasiText = "STABILIZATION: Perbanyak repetisi statis demi mengunci memori otot.";
+        } else {
+          rekomendasiText = "MAINTAIN: Pertahankan periodisasi latihan, siap naik kelas.";
+        }
       }
     } else {
+      // UNTUK GRAFIK RADAR (AGILITY, MOBILITY, OPEN AGILITY)
       if (adaDataDiInput && dataIdx < activeMurid.radarData.length) {
         belumAdaData = false;
         diAtasRataTim = activeMurid.radarData[dataIdx] >= (dataIdx < teamRadarAverages.length ? teamRadarAverages[dataIdx] : 0.0);
+        
+        if (diAtasRataTim) {
+          kelebihanText = "Kelincahan & Fight IQ taktis responsif, di atas rata-rata tim.";
+          kekuranganText = "Memerlukan lawan tanding (sparring) sepadan agar tidak jenuh.";
+          rekomendasiText = "OPEN DRILL: Libatkan dalam simulasi pertarungan situasi tak terduga.";
+        } else {
+          kelebihanText = "Sudah memahami pola koordinasi perubahan arah langkah.";
+          kekuranganText = "Reaksi kaki lambat, jaring koordinasi masih menguncup sempit.";
+          rekomendasiText = "AGILITY LADDER: Genjot drill kecepatan kaki & koordinasi motorik bawah.";
+        }
       }
     }
 
-    String kelebihanText = belumAdaData ? "Data rekam kosong." : (diAtasRataTim ? "Kapasitas fungsional optimal di atas target rata-rata." : "Stabilitas gerak dasar atlet konsisten.");
-    String kekuranganText = belumAdaData ? "Menunggu uji fisik." : (!diAtasRataTim ? "Defisit volume energi dibanding target rata-rata tim." : "Memerlukan variasi stimulus beban lanjutan.");
-    String rekomendasiText = belumAdaData ? "Silakan masukkan data latihan siswa di tab REPS / WAKTU." : "UPGRADE / BALANCING program sirkuit.";
+    // PROTEKSI DATA JIKA MASIH KOSONG
+    if (belumAdaData) {
+      kelebihanText = "Data rekam kosong.";
+      kekuranganText = "Menunggu uji fisik.";
+      rekomendasiText = "Silakan masukkan data latihan siswa di tab REPS / WAKTU.";
+    }
 
     return TableRow(
       children: [
@@ -716,11 +784,11 @@ class DashboardAtletPage extends StatelessWidget {
         Padding(padding: const EdgeInsets.all(8.0), child: Text(labelArti, style: TextStyle(color: belumAdaData ? const Color(0x33FFFFFF) : const Color(0xFF34D399), fontSize: 8))),
         Padding(padding: const EdgeInsets.all(8.0), child: Text(kelebihanText, style: const TextStyle(fontSize: 8.5, color: Colors.white70))),
         Padding(padding: const EdgeInsets.all(8.0), child: Text(kekuranganText, style: const TextStyle(fontSize: 8.5, color: Colors.white70))),
-        Padding(padding: const EdgeInsets.all(8.0), child: Text(rekomendasiText, style: const TextStyle(fontSize: 8.5, color: Color(0xFF38BDF8)))),
+        Padding(padding: const EdgeInsets.all(8.0), child: Text(rekomendasiText, style: const TextStyle(fontSize: 8.5, color: Color(0xFF38BDF8), fontWeight: FontWeight.w500))),
       ],
     );
   }
-}
+
 
 // ==================== HALAMAN 5: HISTORY TIMELINE ====================
 class TimelineHistoryPage extends StatelessWidget {
